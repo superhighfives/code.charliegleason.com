@@ -12,22 +12,27 @@ export type PostMeta = {
   frontmatter: Frontmatter
 }
 
+const IGNORE_LIST = new Set(['about'])
+
 export const getPosts = async (): Promise<PostMeta[]> => {
   const modules = import.meta.glob<{ frontmatter: Frontmatter }>(
     '../routes/_post.*.mdx',
     { eager: true }
   )
   const build = await import('virtual:remix/server-build')
-  const posts = Object.entries(modules).map(([file, post]) => {
-    const id = file.replace('../', '').replace(/\.mdx$/, '')
-    const slug = build.routes[id].path
-    if (slug === undefined) throw new Error(`No route for ${id}`)
+  const posts = Object.entries(modules)
+    .map(([file, post]) => {
+      const id = file.replace('../', '').replace(/\.mdx$/, '')
+      const slug = build.routes[id].path
+      if (slug === undefined) throw new Error(`No route for ${id}`)
 
-    return {
-      slug,
-      frontmatter: post.frontmatter,
-    }
-  })
+      return {
+        slug,
+        frontmatter: post.frontmatter,
+      }
+    })
+    .filter((post) => !IGNORE_LIST.has(post.slug))
+
   return sortBy(posts, (post) => post.frontmatter.published, 'desc')
 }
 

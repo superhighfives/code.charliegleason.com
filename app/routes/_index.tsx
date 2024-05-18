@@ -1,4 +1,8 @@
 import type { MetaFunction } from '@remix-run/cloudflare'
+import { useLoaderData, Link } from '@remix-run/react'
+import { json } from '@remix-run/cloudflare'
+import { getPosts } from '~/.server/posts'
+import type { PostMeta } from '~/.server/posts'
 
 export const meta: MetaFunction = () => {
   return [
@@ -10,26 +14,19 @@ export const meta: MetaFunction = () => {
   ]
 }
 
+export const loader = async () => json(await getPosts())
+
 export default function Index() {
+  const posts = useLoaderData<typeof loader>()
+  console.log(posts)
+
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', lineHeight: '1.8' }}>
-      <h1>Welcome to Remix (with Vite and Cloudflare)</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://developers.cloudflare.com/pages/framework-guides/deploy-a-remix-site/"
-            rel="noreferrer"
-          >
-            Cloudflare Pages Docs - Remix guide
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div>
+      {posts.map(({ slug, frontmatter }: PostMeta) => (
+        <Link to={slug} key={slug}>
+          <h1>{frontmatter.title}</h1>
+        </Link>
+      ))}
     </div>
   )
 }

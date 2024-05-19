@@ -1,4 +1,4 @@
-import { Outlet, useMatches } from '@remix-run/react'
+import { Outlet, useMatches, Link } from '@remix-run/react'
 import { Frontmatter } from '~/.server/posts'
 
 type MetaData = { key: string; value: string }
@@ -78,7 +78,12 @@ export default function Post() {
 
   return (
     <div className="grid gap-y-4">
-      <h1>{title}</h1>
+      <div className="flex gap-4">
+        <Link to="/" className="text-indigo-600 group-hover:text-indigo-500">
+          ❮ Back
+        </Link>
+        <h1>{title}</h1>
+      </div>
       <Metadata data={metadata} links={metalinks} />
       <div className="prose prose-headings:text-sm prose-sm">
         <Outlet />

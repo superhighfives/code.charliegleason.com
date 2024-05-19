@@ -5,6 +5,8 @@ export type Frontmatter = {
   description: string
   published: string // YYYY-MM-DD
   featured: boolean
+  data: []
+  links: []
 }
 
 export type PostMeta = {

@@ -4,10 +4,10 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  Link,
-  useRouteError,
-  isRouteErrorResponse,
 } from '@remix-run/react'
+
+import Page from './components/page'
+import ErrorView from './components/error-view'
 
 import type { LinksFunction } from '@remix-run/node'
 import stylesheet from '~/global.css?url'
@@ -35,7 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="font-mono">
+      <body className="font-mono text-sm">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -44,29 +44,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function Page({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="grid justify-between min-h-dvh p-8">
-      <div>
-        <Link to="/">Home</Link>
-        <Link to="/about">About</Link>
-      </div>
-      {children}
-    </div>
-  )
-}
-
 export function ErrorBoundary() {
-  const error = useRouteError()
   return (
     <Page>
-      <h1>
-        {isRouteErrorResponse(error)
-          ? `${error.status}: ${error.statusText}`
-          : error instanceof Error
-            ? error.message
-            : 'Unknown Error'}
-      </h1>
+      <ErrorView />
     </Page>
   )
 }

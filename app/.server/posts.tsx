@@ -1,4 +1,5 @@
 import { ServerBuild } from '@remix-run/node'
+import { parseISO } from 'date-fns'
 
 export type Frontmatter = {
   title: string
@@ -11,6 +12,7 @@ export type Frontmatter = {
 
 export type PostMeta = {
   slug: string
+  date: string
   frontmatter: Frontmatter
 }
 
@@ -25,11 +27,15 @@ export const getPosts = async (): Promise<PostMeta[]> => {
   const posts = Object.entries(modules)
     .map(([file, post]) => {
       const id = file.replace('../', '').replace(/\.mdx$/, '')
+
+      const date = /(?:|)(\d{4}-\d{2}-\d{2})/.exec(id)
+
       const slug = build.routes[id].path
       if (slug === undefined) throw new Error(`No route for ${id}`)
 
       return {
         slug,
+        date: date && parseISO(date[0]),
         frontmatter: post.frontmatter,
       }
     })

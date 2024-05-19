@@ -18,7 +18,6 @@ export const loader = async () => json(await getPosts())
 
 export default function Index() {
   const posts = useLoaderData<typeof loader>()
-  console.log(posts)
 
   return (
     <div>

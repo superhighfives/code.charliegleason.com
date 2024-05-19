@@ -5,6 +5,8 @@ import {
   Scripts,
   ScrollRestoration,
   Link,
+  useRouteError,
+  isRouteErrorResponse,
 } from '@remix-run/react'
 
 import type { LinksFunction } from '@remix-run/node'
@@ -42,15 +44,37 @@ export function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
-export default function App() {
+export function Page({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid justify-between min-h-dvh p-8">
       <div>
         <Link to="/">Home</Link>
         <Link to="/about">About</Link>
       </div>
-
-      <Outlet />
+      {children}
     </div>
+  )
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError()
+  return (
+    <Page>
+      <h1>
+        {isRouteErrorResponse(error)
+          ? `${error.status}: ${error.statusText}`
+          : error instanceof Error
+            ? error.message
+            : 'Unknown Error'}
+      </h1>
+    </Page>
+  )
+}
+
+export default function App() {
+  return (
+    <Page>
+      <Outlet />
+    </Page>
   )
 }

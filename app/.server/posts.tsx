@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ServerBuild } from '@remix-run/node'
 import { parseISO } from 'date-fns'
 
@@ -12,7 +13,7 @@ export type Frontmatter = {
 
 export type PostMeta = {
   slug: string
-  date: string
+  date?: Date
   frontmatter: Frontmatter
 }
 
@@ -23,21 +24,27 @@ export const getPosts = async (): Promise<PostMeta[]> => {
     '../routes/_post.*.mdx',
     { eager: true }
   )
+
+  // eslint-disable-next-line import/no-unresolved
   const build = await import('virtual:remix/server-build')
   const posts = Object.entries(modules)
     .map(([file, post]) => {
       const id = file.replace('../', '').replace(/\.mdx$/, '')
 
-      const date = /(?:|)(\d{4}-\d{2}-\d{2})/.exec(id)
-
       const slug = build.routes[id].path
       if (slug === undefined) throw new Error(`No route for ${id}`)
 
-      return {
+      const output: { slug: string; frontmatter: Frontmatter; date?: Date } = {
         slug,
-        date: date && parseISO(date[0]),
         frontmatter: post.frontmatter,
       }
+
+      const date = /(?:|)(\d{4}-\d{2}-\d{2})/.exec(id)
+      if (date) {
+        output.date = parseISO(date[0])
+      }
+
+      return output
     })
     .filter((post) => !IGNORE_LIST.has(post.slug))
 
@@ -46,6 +53,7 @@ export const getPosts = async (): Promise<PostMeta[]> => {
 
 function sortBy<T>(
   arr: T[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   key: (item: T) => any,
   dir: 'asc' | 'desc' = 'asc'
 ) {

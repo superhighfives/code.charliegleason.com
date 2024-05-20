@@ -7,10 +7,11 @@ import { formatDistanceToNow } from 'date-fns'
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'New Remix App' },
+    { title: '❯ ~/code.charliegleason.com' },
     {
       name: 'description',
-      content: 'Welcome to Remix! Using Vite and Cloudflare!',
+      content:
+        'Tutorials, code snippets, and resources for design and front end development',
     },
   ]
 }
@@ -21,11 +22,11 @@ export default function Index() {
   const posts = useLoaderData<typeof loader>()
 
   return (
-    <div className="py-3 sm:grid sm:grid-cols-2 sm:gap-4 max-w-[65ch]">
-      <dd className="mt-2 text-gray-900 sm:col-span-2 sm:-mt-3 relative -top-px bg-white">
+    <div className="grid sm:grid-cols-2 gap-4 max-w-[65ch]">
+      <h1 className="text-stone-400">❯ ~/code.charliegleason.com</h1>
+      <dd className="mt-2 text-gray-900 sm:col-span-2 bg-white">
         <div className="divide-y divide-gray-100 rounded-md border border-gray-200">
           {posts.map(({ slug, date, frontmatter }: PostMeta) => {
-            console.log(date)
             return (
               <a
                 key={JSON.stringify(slug)}

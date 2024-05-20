@@ -24,6 +24,11 @@ export const links: LinksFunction = () => [
     rel: 'stylesheet',
     href: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap',
   },
+  {
+    rel: 'icon',
+    href: '/favicon.png',
+    type: 'image/png',
+  },
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {

@@ -1,6 +1,7 @@
 import { Outlet, useMatches, Link } from '@remix-run/react'
 import { Frontmatter } from '~/.server/posts'
 import Metadata from '~/components/metadata'
+import Metalinks from '~/components/metalinks'
 import type { MetaData as MetaDataType } from '~/components/metadata'
 import { parseISO, format } from 'date-fns'
 
@@ -32,14 +33,16 @@ export default function Post() {
     <div className="grid gap-y-4">
       <div className="flex gap-4">
         <Link to="/" className="text-indigo-600 group-hover:text-indigo-500">
-          ❮ Back
+          ❯ ~/code<span className="hidden sm:inline">.charliegleason.com</span>
         </Link>
+        <span className="text-stone-300">/</span>
         <h1>{title}</h1>
       </div>
-      <Metadata data={metadata} links={metalinks} />
-      <div className="prose prose-headings:text-sm prose-sm">
+      <Metadata data={metadata} />
+      <div className="prose prose-headings:text-sm prose-sm py-3">
         <Outlet />
       </div>
+      <Metalinks links={metalinks} />
     </div>
   )
 }

@@ -48,7 +48,7 @@ export const getPosts = async (): Promise<PostMeta[]> => {
     })
     .filter((post) => !IGNORE_LIST.has(post.slug))
 
-  return sortBy(posts, (post) => post.frontmatter.published, 'desc')
+  return sortBy(posts, (post) => post.date, 'desc')
 }
 
 function sortBy<T>(

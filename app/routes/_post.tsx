@@ -10,10 +10,11 @@ export default function Post() {
   const { title, data, links } = params?.handle as Frontmatter
 
   const metadata: MetaDataType[] =
-    data &&
-    Object.entries(data).map(([key, value]) => {
-      return { key, value }
-    })
+    (data &&
+      Object.entries(data).map(([key, value]) => {
+        return { key, value }
+      })) ||
+    []
 
   const metalinks =
     links &&
@@ -24,10 +25,15 @@ export default function Post() {
   const rawDate = /(?:|)(\d{4}-\d{2}-\d{2})/.exec(params!.id)
   if (rawDate) {
     metadata.unshift({
-      key: 'Date',
+      key: 'Last Updated',
       value: format(parseISO(rawDate[0]), 'dd/MM/yyyy'),
     })
   }
+
+  const date = metadata.find((obj) => {
+    return obj.key === 'Last Updated'
+  })
+  console.log(date?.value)
 
   return (
     <div className="grid gap-y-4">

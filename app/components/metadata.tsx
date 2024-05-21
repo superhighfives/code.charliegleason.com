@@ -1,3 +1,5 @@
+import { parseISO, format } from 'date-fns'
+
 export type MetaData = { key: string; value: string }
 
 export default function Metadata({ data }: { data?: MetaData[] }) {
@@ -11,7 +13,9 @@ export default function Metadata({ data }: { data?: MetaData[] }) {
           >
             <dt className="font-medium text-gray-900">{item.key}</dt>
             <dd className="mt-1 text-gray-700 sm:col-span-2 sm:mt-0">
-              {item.value}
+              {item.key === 'First Published'
+                ? format(parseISO(item.value), 'dd/MM/yyyy')
+                : item.value}
             </dd>
           </div>
         )

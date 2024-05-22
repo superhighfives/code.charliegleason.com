@@ -3,7 +3,7 @@ import { Frontmatter } from '~/.server/posts'
 import Metadata from '~/components/metadata'
 import Metalinks from '~/components/metalinks'
 import type { MetaData as MetaDataType } from '~/components/metadata'
-import { parseISO, format } from 'date-fns'
+import { parseISO, format, differenceInMonths } from 'date-fns'
 
 export default function Post() {
   const params = useMatches().at(-1)
@@ -23,17 +23,16 @@ export default function Post() {
     })
 
   const rawDate = /(?:|)(\d{4}-\d{2}-\d{2})/.exec(params!.id)
+  let oldArticle = false
   if (rawDate) {
+    const dateObject = parseISO(rawDate[0])
     metadata.unshift({
       key: 'Last Updated',
-      value: format(parseISO(rawDate[0]), 'dd/MM/yyyy'),
+      value: format(dateObject, 'dd/MM/yyyy'),
     })
-  }
 
-  const date = metadata.find((obj) => {
-    return obj.key === 'Last Updated'
-  })
-  console.log(date?.value)
+    if (differenceInMonths(Date.now(), dateObject) >= 3) oldArticle = true
+  }
 
   return (
     <div className="grid gap-y-4">
@@ -49,6 +48,12 @@ export default function Post() {
         <h1 className="dark:text-gray-100">{title}</h1>
       </div>
       <Metadata data={metadata} />
+      {oldArticle ? (
+        <p className="rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-[65ch]">
+          This has not been updated in the last three months, so this
+          information miiiiiight be out of date. Here be dragons, etc.
+        </p>
+      ) : null}
       <div className="prose prose-headings:text-sm prose-sm dark:prose-invert py-3 px-4">
         <Outlet />
       </div>

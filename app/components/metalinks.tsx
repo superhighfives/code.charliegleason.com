@@ -10,7 +10,7 @@ export default function Metadata({ links }: { links?: MetaData[] }) {
           Links
         </dt>
         <dd className="mt-2 text-gray-900 bg-white dark:bg-gray-950">
-          <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-md border border-gray-200 dark:border-gray-800">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-md overflow-hidden border border-gray-200 dark:border-gray-800">
             {links.map((item: { key: string; value: string }) => {
               const url = new URL(item.value)
               return (

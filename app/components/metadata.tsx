@@ -7,7 +7,6 @@ export default function Metadata({ data }: { data?: MetaData[] }) {
     <dl className="divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 max-w-[65ch]">
       {data.map((item: { key: string; value: string }) => {
         const date = /(\d{4})-(\d{2})-(\d{2})/.exec(item.value)
-        console.log(item.value)
         return (
           <div
             key={JSON.stringify(item)}

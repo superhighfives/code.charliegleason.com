@@ -18,7 +18,7 @@ export default function Metadata({ links }: { links?: MetaData[] }) {
                   key={item.value}
                   title={item.key}
                   caption={url.hostname}
-                  action="Execute"
+                  action="Open"
                   href={item.value}
                 />
               )

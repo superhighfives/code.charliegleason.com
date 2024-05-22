@@ -38,7 +38,6 @@ export default function Index() {
                   key={slug}
                   title={frontmatter.title}
                   caption={dateCaption}
-                  action="Execute"
                   href={slug}
                 />
               )

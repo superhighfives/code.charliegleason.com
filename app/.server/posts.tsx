@@ -7,6 +7,7 @@ export type Frontmatter = {
   description: string
   published: string // YYYY-MM-DD
   featured: boolean
+  draft: boolean
   data: []
   links: []
 }
@@ -47,6 +48,7 @@ export const getPosts = async (): Promise<PostMeta[]> => {
       return output
     })
     .filter((post) => !IGNORE_LIST.has(post.slug))
+    .filter((post) => !post.frontmatter.draft)
 
   return sortBy(posts, (post) => post.date, 'desc')
 }

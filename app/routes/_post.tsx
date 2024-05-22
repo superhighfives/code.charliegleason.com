@@ -38,14 +38,18 @@ export default function Post() {
   return (
     <div className="grid gap-y-4">
       <div className="flex gap-4">
-        <Link to="/" className="text-indigo-600 group-hover:text-indigo-500">
-          ❯ ~/code<span className="hidden sm:inline">.charliegleason.com</span>
+        <Link
+          to="/"
+          className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-500 dark:hover:text-indigo-400"
+        >
+          ❯ cd ~/code
+          <span className="hidden sm:inline">.charliegleason.com</span>
         </Link>
-        <span className="text-stone-300">/</span>
-        <h1>{title}</h1>
+        <span className="text-gray-300 dark:text-gray-700">/</span>
+        <h1 className="dark:text-gray-100">{title}</h1>
       </div>
       <Metadata data={metadata} />
-      <div className="prose prose-headings:text-sm prose-sm py-3">
+      <div className="prose prose-headings:text-sm prose-sm dark:prose-invert py-3 px-4">
         <Outlet />
       </div>
       <Metalinks links={metalinks} />

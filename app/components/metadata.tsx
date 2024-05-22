@@ -3,19 +3,21 @@ import { parseISO, format } from 'date-fns'
 export type MetaData = { key: string; value: string }
 
 export default function Metadata({ data }: { data?: MetaData[] }) {
-  return data ? (
-    <dl className="divide-y divide-gray-100 border-b border-gray-100 max-w-[65ch]">
+  return data && data.length ? (
+    <dl className="divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 max-w-[65ch]">
       {data.map((item: { key: string; value: string }) => {
+        const date = /(\d{4})-(\d{2})-(\d{2})/.exec(item.value)
+        console.log(item.value)
         return (
           <div
             key={JSON.stringify(item)}
-            className="py-3 sm:grid sm:grid-cols-3 sm:gap-4"
+            className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4"
           >
-            <dt className="font-medium text-gray-900">{item.key}</dt>
-            <dd className="mt-1 text-gray-700 sm:col-span-2 sm:mt-0">
-              {item.key === 'First Published'
-                ? format(parseISO(item.value), 'dd/MM/yyyy')
-                : item.value}
+            <dt className="font-medium text-gray-900 dark:text-gray-500">
+              {item.key}
+            </dt>
+            <dd className="mt-1 text-gray-700 dark:text-gray-300 sm:col-span-2 sm:mt-0">
+              {date ? format(parseISO(item.value), 'dd/MM/yyyy') : item.value}
             </dd>
           </div>
         )

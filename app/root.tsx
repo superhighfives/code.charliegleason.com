@@ -40,7 +40,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="font-mono text-sm">
+      <body className="font-mono text-sm bg-white dark:bg-gray-950">
         {children}
         <ScrollRestoration />
         <Scripts />

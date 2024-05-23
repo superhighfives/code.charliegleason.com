@@ -54,7 +54,7 @@ export default function Post() {
           information miiiiiight be out of date. Here be dragons, etc.
         </p>
       ) : null}
-      <div className="prose prose-headings:text-sm prose-sm dark:prose-invert py-3 px-4">
+      <div className="prose prose-headings:text-sm prose-sm dark:prose-invert py-3 px-4 border border-transparent">
         <Outlet />
       </div>
       <Metalinks links={metalinks} />

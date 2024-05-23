@@ -22,7 +22,7 @@ export default function Index() {
   const posts = useLoaderData<typeof loader>()
 
   return (
-    <div className="grid sm:grid-cols-2 gap-4 max-w-[65ch]">
+    <div className="grid sm:grid-cols-2 gap-4 max-w-[65ch] content-end h-full">
       <h1 className="text-gray-400 dark:text-gray-500 col-span-full">
         ❯ cd ~/code.charliegleason.com
       </h1>

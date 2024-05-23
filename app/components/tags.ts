@@ -1,7 +1,17 @@
-export default function tags({ title }: { title?: string }) {
+export default function tags({
+  title,
+  description,
+  image,
+}: {
+  title?: string
+  description?: string
+  image?: string
+}) {
   const metaTitle = `${title ? `${title} ` : null}❯ ~/code.charliegleason.com`
-  const metaDescription =
-    'Tutorials, code snippets, and resources for design and front end development'
+  const metaDescription = description
+    ? `${description}`
+    : 'Tutorials, code snippets, and resources for design and front end development'
+  const metaImage = image ? image : '/social-default.png'
 
   return [
     { title: metaTitle },
@@ -23,7 +33,7 @@ export default function tags({ title }: { title?: string }) {
     },
     {
       property: 'og:image',
-      content: '/social-default.png',
+      content: metaImage,
     },
     {
       property: 'og:type',

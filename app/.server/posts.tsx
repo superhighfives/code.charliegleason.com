@@ -5,7 +5,7 @@ import { parseISO } from 'date-fns'
 export type Frontmatter = {
   title: string
   description: string
-  published: string // YYYY-MM-DD
+  published: string
   featured: boolean
   draft: boolean
   data: []

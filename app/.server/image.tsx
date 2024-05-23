@@ -1,6 +1,6 @@
-import { Resvg } from '@resvg/resvg-js'
+import { Resvg } from '@resvg/resvg-wasm'
 import type { SatoriOptions } from 'satori'
-import satori from 'satori'
+import satori from 'satori/wasm'
 
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '~/routes/resource.og'
 

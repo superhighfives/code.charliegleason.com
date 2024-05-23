@@ -19,7 +19,7 @@
     "@remix-run/cloudflare": "^2.8.1",
     "@remix-run/cloudflare-pages": "^2.8.1",
     "@remix-run/react": "^2.8.1",
-    "@resvg/resvg-js": "^2.6.2",
+    "@resvg/resvg-wasm": "^2.6.2",
     "isbot": "^4.1.0",
     "miniflare": "^3.20240404.0",
     "react": "^18.2.0",

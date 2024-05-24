@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "remix vite:build",
+    "build": "remix vite:build && cp -f build/client/assets/*.wasm build/server/assets",
     "deploy": "npm run build && wrangler pages deploy",
     "dev": "remix vite:dev",
     "dev-external": "remix vite:dev --host",

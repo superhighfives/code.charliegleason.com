@@ -1,8 +1,14 @@
-import { Resvg } from '@resvg/resvg-wasm'
+import { Resvg, initWasm } from '@resvg/resvg-wasm'
 import type { SatoriOptions } from 'satori'
-import satori from 'satori/wasm'
+import satori, { init } from 'satori/wasm'
+import initYoga from 'yoga-wasm-web'
 
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '~/routes/resource.og'
+
+import YOGA_WASM from 'yoga-wasm-web/dist/yoga.wasm?url'
+import RESVG_WASM from '@resvg/resvg-wasm/index_bg.wasm?url'
+
+let initialised = false
 
 // Load the font from the "public" directory
 const fontSans = (baseUrl: string) =>
@@ -11,6 +17,19 @@ const fontSans = (baseUrl: string) =>
   )
 
 export async function createOGImage(title: string, requestUrl: string) {
+  const { default: resvgwasm } = await import(
+    /* @vite-ignore */ `${RESVG_WASM}?module`
+  )
+  const { default: yogawasm } = await import(
+    /* @vite-ignore */ `${YOGA_WASM}?module`
+  )
+
+  if (!initialised) {
+    await initWasm(resvgwasm)
+    await init(await initYoga(yogawasm))
+    initialised = true
+  }
+
   const fontSansData = await fontSans(requestUrl)
   const options: SatoriOptions = {
     width: OG_IMAGE_WIDTH,

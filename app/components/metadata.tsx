@@ -10,7 +10,7 @@ export default function Metadata({ data }: { data?: MetaData[] }) {
         return (
           <div
             key={JSON.stringify(item)}
-            className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4"
+            className="sm:px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4"
           >
             <dt className="font-medium text-gray-900 dark:text-gray-500">
               {item.key}

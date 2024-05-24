@@ -36,7 +36,7 @@ export async function createOGImage(title: string, requestUrl: string) {
     height: OG_IMAGE_HEIGHT,
     fonts: [
       {
-        name: 'Inter',
+        name: 'JetBrainsMono-Semibold',
         data: fontSansData,
         style: 'normal',
       },

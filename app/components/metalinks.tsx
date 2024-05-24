@@ -6,7 +6,7 @@ export default function Metadata({ links }: { links?: MetaData[] }) {
   return links ? (
     <dl className="border-t border-gray-200 dark:border-gray-800 max-w-[65ch]">
       <div className="pt-3">
-        <dt className="px-4 font-medium leading-6 text-gray-900 dark:text-gray-500">
+        <dt className="sm:px-4 font-medium leading-6 text-gray-900 dark:text-gray-500">
           Links
         </dt>
         <dd className="mt-2 text-gray-900 bg-white dark:bg-gray-950">

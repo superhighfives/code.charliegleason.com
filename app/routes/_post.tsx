@@ -49,12 +49,12 @@ export default function Post() {
       </div>
       <Metadata data={metadata} />
       {oldArticle ? (
-        <p className="rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-[65ch]">
+        <p className="rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 sm:px-4 py-3 max-w-[65ch]">
           This has not been updated in the last three months, so this
           information miiiiiight be out of date. Here be dragons, etc.
         </p>
       ) : null}
-      <div className="prose prose-headings:text-sm prose-sm dark:prose-invert py-3 px-4 border border-transparent">
+      <div className="prose prose-headings:text-sm prose-sm dark:prose-invert py-3 sm:px-4 border border-transparent">
         <Outlet />
       </div>
       <Metalinks links={metalinks} />

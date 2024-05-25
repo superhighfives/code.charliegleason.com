@@ -11,7 +11,6 @@ export default function wasmEdgeModule() {
 
   return {
     name: 'vite:wasm-helper',
-    enforce: 'pre',
     configResolved(config: ResolvedConfig) {
       isDev = config.command === 'serve'
     },

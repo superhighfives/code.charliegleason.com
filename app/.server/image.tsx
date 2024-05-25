@@ -24,9 +24,13 @@ export async function createOGImage(title: string, requestUrl: string) {
     /* @vite-ignore */ `${YOGA_WASM}?module`
   )
 
-  if (!initialised) {
-    await initWasm(resvgwasm)
-    await init(await initYoga(yogawasm))
+  try {
+    if (!initialised) {
+      await initWasm(resvgwasm)
+      await init(await initYoga(yogawasm))
+      initialised = true
+    }
+  } catch (e) {
     initialised = true
   }
 

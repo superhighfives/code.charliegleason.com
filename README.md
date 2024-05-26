@@ -2,6 +2,10 @@
 
 📖 See the [Remix docs](https://remix.run/docs) and the [Remix Vite docs](https://remix.run/docs/en/main/guides/vite) for details on supported features.
 
+## og:image with Satori
+
+Uses [vite-plugin-wasm-module-workers](https://github.com/superhighfives/vite-plugin-wasm-module-workers/) to handle `og:image` generation on Vite and Cloudflare Workers.
+
 ## Typegen
 
 Generate types for your Cloudflare bindings in `wrangler.toml`:

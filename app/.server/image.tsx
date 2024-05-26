@@ -1,6 +1,6 @@
 import { Resvg, initWasm } from '@resvg/resvg-wasm'
 import type { SatoriOptions } from 'satori'
-import satori, { init } from 'satori/wasm'
+import satori, { init as initSatori } from 'satori/wasm'
 import initYoga from 'yoga-wasm-web'
 
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '~/routes/resource.og'
@@ -27,7 +27,7 @@ export async function createOGImage(title: string, requestUrl: string) {
   try {
     if (!initialised) {
       await initWasm(resvgwasm)
-      await init(await initYoga(yogawasm))
+      await initSatori(await initYoga(yogawasm))
       initialised = true
     }
   } catch (e) {

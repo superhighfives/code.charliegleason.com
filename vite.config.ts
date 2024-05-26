@@ -8,11 +8,11 @@ import mdx from '@mdx-js/rollup'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { rehypePrettyCode } from 'rehype-pretty-code'
-import wasmEdgeModule from './utils/vite-wasm-module-workers-plugin'
+import wasmModuleWorkers from 'vite-plugin-wasm-module-workers'
 
 export default defineConfig({
   plugins: [
-    wasmEdgeModule(),
+    wasmModuleWorkers(),
     remixCloudflareDevProxy(),
     mdx({
       remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter],

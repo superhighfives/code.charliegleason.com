@@ -23,8 +23,7 @@
     "isbot": "^4.1.0",
     "miniflare": "^3.20240404.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "satori": "^0.10.13"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240512.0",
@@ -52,9 +51,11 @@
     "rehype-pretty-code": "^0.13.2",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx-frontmatter": "^4.0.0",
+    "satori": "^0.10.13",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.1.6",
     "vite": "^5.1.0",
+    "vite-plugin-wasm-module-workers": "^0.0.0",
     "vite-tsconfig-paths": "^4.2.1",
     "wrangler": "^3.48.0"
   },

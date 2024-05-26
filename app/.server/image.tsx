@@ -1,4 +1,4 @@
-import { Resvg, initResvg } from '@resvg/resvg-wasm'
+import { Resvg, initWasm as initResvg } from '@resvg/resvg-wasm'
 import type { SatoriOptions } from 'satori'
 import satori, { init as initSatori } from 'satori/wasm'
 import initYoga from 'yoga-wasm-web'

@@ -1,17 +1,25 @@
+function generateImage(title: string, description?: string) {
+  let url = `/resource/og?title=${title}`
+  if (description) url += `&description=${description}`
+  return url
+}
+
 export default function tags({
   title,
   description,
-  image,
+  image = false,
 }: {
   title?: string
   description?: string
-  image?: string
+  image?: boolean
 }) {
   const metaTitle = `${title ? `${title} ` : null}❯ ~/code.charliegleason.com`
   const metaDescription = description
     ? `${description}`
     : 'Tutorials, code snippets, and resources for design and front end development'
-  const metaImage = image ? image : '/social-default.png'
+  const metaImage = image
+    ? generateImage(title, description)
+    : '/social-default.png'
 
   return [
     { title: metaTitle },

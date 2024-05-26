@@ -18,7 +18,7 @@ export default function tags({
     ? `${description}`
     : 'Tutorials, code snippets, and resources for design and front end development'
   const metaImage = image
-    ? generateImage(title, description)
+    ? title && generateImage(title, description)
     : '/social-default.png'
 
   return [

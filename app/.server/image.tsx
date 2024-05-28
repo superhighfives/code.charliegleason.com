@@ -16,15 +16,13 @@ const fontSans = (baseUrl: string) =>
     res.arrayBuffer()
   )
 
-export async function createOGImage(title: string, requestUrl: string) {
+export async function createOGImage(requestUrl: string, title: string) {
   const { default: resvgwasm } = await import(
     /* @vite-ignore */ `${RESVG_WASM}?module`
   )
   const { default: yogawasm } = await import(
     /* @vite-ignore */ `${YOGA_WASM}?module`
   )
-
-  console.log(title)
 
   try {
     if (!initialised) {

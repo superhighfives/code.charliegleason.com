@@ -8,7 +8,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { origin, searchParams } = new URL(request.url)
   const title = searchParams.get('title') ?? `Hello world`
 
-  const png = await createOGImage(title, origin)
+  const png = await createOGImage(origin, title)
 
   // Respond with the PNG buffer
   return new Response(png, {

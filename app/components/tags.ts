@@ -1,7 +1,9 @@
-function generateImage(title: string, description?: string) {
-  let url = `/resource/og?title=${title}`
-  if (description) url += `&description=${description}`
-  return url
+function generateImage(title: string) {
+  const url = new URL(
+    `${import.meta.env.PROD ? 'https://code.charliegleason.com' : 'http://localhost:5173'}/resource/og`
+  )
+  url.searchParams.set('title', title)
+  return url.toString()
 }
 
 export default function tags({
@@ -12,13 +14,13 @@ export default function tags({
   title?: string
   description?: string
   image?: boolean
-}) {
+} = {}) {
   const metaTitle = `${title ? `${title} ` : null}❯ ~/code.charliegleason.com`
   const metaDescription = description
     ? `${description}`
     : 'Tutorials, code snippets, and resources for design and front end development'
   const metaImage = image
-    ? title && generateImage(title, description)
+    ? title && generateImage(title)
     : '/social-default.png'
 
   return [

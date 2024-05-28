@@ -4,17 +4,9 @@ import { json } from '@remix-run/cloudflare'
 import { getPosts } from '~/.server/posts'
 import { formatDistanceToNow } from 'date-fns'
 import LinkBlock from '~/components/link-block'
+import tags from '~/components/tags'
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: '❯ ~/code.charliegleason.com' },
-    {
-      name: 'description',
-      content:
-        'Tutorials, code snippets, and resources for design and front end development',
-    },
-  ]
-}
+export const meta: MetaFunction = () => tags()
 
 export const loader = async () => json(await getPosts())
 

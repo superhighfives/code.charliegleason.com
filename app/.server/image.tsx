@@ -24,6 +24,8 @@ export async function createOGImage(title: string, requestUrl: string) {
     /* @vite-ignore */ `${YOGA_WASM}?module`
   )
 
+  console.log(title)
+
   try {
     if (!initialised) {
       await initResvg(resvgwasm)

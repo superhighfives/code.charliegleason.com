@@ -36,16 +36,18 @@ export default function Post() {
 
   return (
     <div className="grid gap-y-4">
-      <div className="flex gap-4 font-medium">
+      <div className="flex flex-wrap gap-y-4 font-medium max-w-[65ch]">
         <Link
           to="/"
-          className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+          className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-4"
         >
           ❯ cd ~/code
           <span className="hidden sm:inline">.charliegleason.com</span>
         </Link>
-        <span className="text-gray-300 dark:text-gray-700">/</span>
-        <h1 className="text-gray-900 dark:text-gray-100">{title}</h1>
+        <span className="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
+        <h1 className="text-gray-900 dark:text-gray-100 leading-relaxed sm:pl-4">
+          {title}
+        </h1>
       </div>
       <Metadata data={metadata} />
       {oldArticle ? (

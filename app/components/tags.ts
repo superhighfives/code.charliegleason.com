@@ -15,7 +15,7 @@ export default function tags({
   description?: string
   image?: boolean
 } = {}) {
-  const metaTitle = `${title ? `${title} ` : null}❯ ~/code.charliegleason.com`
+  const metaTitle = `${title ? `${title} ` : ''}❯ ~/code.charliegleason.com`
   const metaDescription = description
     ? `${description}`
     : 'Tutorials, code snippets, and resources for design and front end development'

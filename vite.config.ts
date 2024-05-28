@@ -16,7 +16,16 @@ export default defineConfig({
     remixCloudflareDevProxy(),
     mdx({
       remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter],
-      rehypePlugins: [rehypePrettyCode],
+      rehypePlugins: [
+        [
+          rehypePrettyCode,
+          {
+            theme: 'ayu-dark',
+            keepBackground: false,
+            grid: false,
+          },
+        ],
+      ],
     }),
     remix(),
     tsconfigPaths(),

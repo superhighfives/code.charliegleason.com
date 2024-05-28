@@ -2,7 +2,8 @@
 title: Satori, Vite, Remix, Cloudflare, og my!
 description: How to handle bundling Satori (Yoga) and Resvg WASM files for both Vite and Cloudflare
 image: true
-draft: true
+links:
+  vite-plugin-wasm-module-workers: https://github.com/superhighfives/vite-plugin-wasm-module-workers
 ---
 
 import tags from '../components/tags'
@@ -11,4 +12,10 @@ export const handle = frontmatter
 
 On Friday night I decided to add [Satori](https://github.com/vercel/satori) to [code.charliegleason.com](https://github.com/superhighfives/code.charliegleason.com/) to automatically generate `og:image`'s for each post.
 
-I'm hosting the site on Cloudflare Pages, which makes it super fast at the edge.
+I'm hosting the site on Cloudflare Pages, which makes it super fast at the edge™. I installed the [Satori WASM requirements](https://github.com/vercel/satori?tab=readme-ov-file#runtime-and-wasm), added [Resvg](https://github.com/RazrFalcon/resvg) to save it as a PNG, and then assumed the pose of a man awaiting success.
+
+I got a lot of errors.
+
+It turns out, [Vite handles WASM files](https://vitejs.dev/guide/features#accessing-the-webassembly-module) in a specific way, and [Cloudflare expects WASM files](https://developers.cloudflare.com/workers/runtime-apis/webassembly/javascript/) in a certain way. The result was a weekend spent [noodling on regular expressions](https://github.com/superhighfives/vite-plugin-wasm-module-workers/blob/main/src/index.ts#L21). And a library that will do it for you.
+
+👉 [vite-plugin-wasm-module-workers](https://github.com/superhighfives/vite-plugin-wasm-module-workers)

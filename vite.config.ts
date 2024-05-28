@@ -20,9 +20,11 @@ export default defineConfig({
         [
           rehypePrettyCode,
           {
-            theme: 'ayu-dark',
+            theme: {
+              dark: 'ayu-dark',
+              light: 'min-light',
+            },
             keepBackground: false,
-            grid: false,
           },
         ],
       ],

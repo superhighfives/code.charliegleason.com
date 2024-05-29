@@ -7,6 +7,7 @@ import { parseISO, format, differenceInMonths } from 'date-fns'
 
 export default function Post() {
   const params = useMatches().at(-1)
+  const id = params?.id.split('.').pop()
   const { title, data, links } = params?.handle as Frontmatter
 
   const metadata: MetaDataType[] =
@@ -36,6 +37,7 @@ export default function Post() {
 
   return (
     <div className="grid gap-y-4">
+      <img src={`/resource/og?slug=${id}`} alt="" />
       <div className="flex flex-wrap gap-y-4 font-medium max-w-[65ch]">
         <Link
           to="/"

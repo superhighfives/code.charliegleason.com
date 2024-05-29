@@ -1,4 +1,5 @@
 ---
+slug: satori-vite-remix-cloudflare
 title: Satori, Vite, Remix, Cloudflare, og my!
 description: How to handle bundling Satori (Yoga) and Resvg WASM files for both Vite and Cloudflare
 image: true
@@ -28,17 +29,17 @@ It will, in essence, take this:
   import { Resvg, initWasm as initResvg } from '@resvg/resvg-wasm'
   import initYoga from 'yoga-wasm-web'
 
-  import YOGA_WASM from 'yoga-wasm-web/dist/yoga.wasm?url'
-  import RESVG_WASM from '@resvg/resvg-wasm/index_bg.wasm?url'
-  Then, in our default function:
+import YOGA_WASM from 'yoga-wasm-web/dist/yoga.wasm?url'
+import RESVG_WASM from '@resvg/resvg-wasm/index_bg.wasm?url'
+Then, in our default function:
 
-  export async function createOGImage(title: string, requestUrl: string) {
-    const { default: resvgwasm } = await import(
-      /* @vite-ignore */ `${RESVG_WASM}?module`
-    )
-    const { default: yogawasm } = await import(
-      /* @vite-ignore */ `${YOGA_WASM}?module`
-    )
+export async function createOGImage(title: string, requestUrl: string) {
+const { default: resvgwasm } = await import(
+/_ @vite-ignore _/ `${RESVG_WASM}?module`
+)
+const { default: yogawasm } = await import(
+/_ @vite-ignore _/ `${YOGA_WASM}?module`
+)
 
     try {
       if (!initialised) {
@@ -51,30 +52,32 @@ It will, in essence, take this:
     }
 
     // more fancy code
-  ```
+
+````
 </div>
 
 And turn it into this, on build:
 
 <div className="not-prose code">
-  ```ts
-  import YOGA_WASM from './assets/yoga-CP4IUfLV.wasm'
-  import RESVG_WASM from './assets/index_bg-Blvrv-U2.wasm'
-  let initialised = false
+```ts
+import YOGA_WASM from './assets/yoga-CP4IUfLV.wasm'
+import RESVG_WASM from './assets/index_bg-Blvrv-U2.wasm'
+let initialised = false
 
-  async function createOGImage(title, requestUrl) {
-    const resvgwasm = RESVG_WASM
-    const yogawasm = YOGA_WASM
-    try {
-      if (!initialised) {
-        await initWasm(resvgwasm)
-        await init(await initYoga(yogawasm))
-        initialised = true
-      }
-    } catch (e) {
+async function createOGImage(title, requestUrl) {
+  const resvgwasm = RESVG_WASM
+  const yogawasm = YOGA_WASM
+  try {
+    if (!initialised) {
+      await initWasm(resvgwasm)
+      await init(await initYoga(yogawasm))
       initialised = true
     }
+  } catch (e) {
+    initialised = true
+  }
 
-    // more fancy build code
-  ```
+  // more fancy build code
+````
+
 </div>

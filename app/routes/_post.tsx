@@ -37,7 +37,6 @@ export default function Post() {
 
   return (
     <div className="grid gap-y-4">
-      <img src={`/resource/og?slug=${id}`} alt="" />
       <div className="flex flex-wrap gap-y-4 font-medium max-w-[65ch]">
         <Link
           to="/"

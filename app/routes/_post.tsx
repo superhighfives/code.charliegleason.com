@@ -7,7 +7,6 @@ import { parseISO, format, differenceInMonths } from 'date-fns'
 
 export default function Post() {
   const params = useMatches().at(-1)
-  const id = params?.id.split('.').pop()
   const { title, data, links } = params?.handle as Frontmatter
 
   const metadata: MetaDataType[] =

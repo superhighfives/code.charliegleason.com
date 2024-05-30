@@ -14,6 +14,7 @@ export type Frontmatter = {
 
 export type PostMeta = {
   slug: string
+  url?: string
   date?: Date
   frontmatter: Frontmatter
 }

@@ -19,7 +19,7 @@ There's a couple of gotchas with this approach, but it's relatively straightforw
 
 - Create a new project with `npm init`
 - Set up a folder structure that matches the repo you're going to be injecting these private routes into
-- Install your public Remix site's GitHub repo as an NPM dependency with `npm install git://github.com/USER_NAME/REPO_NAME.git#branch` (usually main)
+- Install your public Remix site's GitHub repo as an NPM dependency with <span className="break-all">`npm install git://github.com/USER_NAME/REPO_NAME.git#branch`</span> (usually main)
 - Create a `.dev.vars` file in your private repo to manage any environment variables if you have them
 - Use [concurrently](https://www.npmjs.com/package/concurrently) and [sync-directory](https://www.npmjs.com/package/sync-directory) to sync your files to the `node_modules/REPO_NAME`, where repo is the name of your repository
 
@@ -50,9 +50,11 @@ You can see the `package.json` I use for this below:
 ```
 </div>
 
+## Breaking it down
+
 So, what does each of these scripts actually do? Let's go through step-by-step.
 
-## dev
+### `npm run dev`
 
 Start watching files, and sync when they change. Start the dev server.
 
@@ -62,7 +64,7 @@ Start watching files, and sync when they change. Start the dev server.
   ```
 </div>
 
-## postinstall
+### `npm run postinstall`
 
 Run the initial sync, install the dependencies for the public repo, and copy your local `.dev.vars` into it.
 
@@ -72,7 +74,7 @@ Run the initial sync, install the dependencies for the public repo, and copy you
   ```
 </div>
 
-## sync
+### `npm run sync`
 
 Sync your various files.
 
@@ -82,7 +84,7 @@ Sync your various files.
   ```
 </div>
 
-## sync:watch
+### `npm run sync:watch`
 
 Sync your various files, but this time, also watch them. (There's probably a more succinct way of doing this, but it's for a personal project, so.)
 
@@ -92,7 +94,7 @@ Sync your various files, but this time, also watch them. (There's probably a mor
   ```
 </div>
 
-## sync:files:routes,data,assets
+### `npm run sync:files:routes,data,assets`
 
 For each directory you want to sync, add `syncdir PRIVATE_REPO_FOLDER PUBLIC_REPO_FOLDER`. I ran into some issues with `.DS_Store` files getting copied over on Mac and causing mayhem, so I excluded them.
 
@@ -102,7 +104,7 @@ For each directory you want to sync, add `syncdir PRIVATE_REPO_FOLDER PUBLIC_REP
   ```
 </div>
 
-## update
+### `npm run update`
 
 Force an update for the public repo if you run into any weirdness with stuff not updating. Not strictly necessary, but I came across it a couple times.
 
@@ -116,26 +118,28 @@ One of the nice little features of this setup is that you can easily work on the
 
 The only thing to watch our for here is that your private files will end up inside your public repo locally, so just make sure you don't commit anything on the public side that you don't want to.
 
+---
+
 ## Deployment
 
-When you're ready to deploy your site, you'll need to set up a new Cloudflare Pages project [on the Cloudlare dashboard](https://dash.cloudflare.com/). Navigate to **Workers & Pages** > **Create Application** > **Pages** > **Connect to Git**.
+When you're ready to deploy your site, you'll need to set up a new Cloudflare Pages project [on the Cloudlare dashboard](https://dash.cloudflare.com/).
+
+Navigate to **Workers & Pages** > **Create Application** > **Pages** > **Connect to Git**.
+
+Use the following settings:
 
 ### Build command
 
-<div className="not-prose code">
-  ```bash
-  npm --prefix node_modules/REPO_NAME run build && ln -s node_modules/REPO_NAME/functions functions
-  ```
+<div className="border px-4 rounded-lg bg-gray-100 dark:bg-gray-900 dark:border-gray-700 mt-4">
+npm --prefix node_modules/REPO_NAME run build && ln -s node_modules/REPO_NAME/functions functions
 </div>
 
 This will build your public repo on Cloudflare, and create a symbolic link of your functions directory to the root, where Cloudflare expects it.
 
 ### Build output directory
 
-<div className="not-prose code">
-  ```bash
-  node_modules/REPO_NAME/public
-  ```
+<div className="border px-4 rounded-lg bg-gray-100 dark:bg-gray-900 dark:border-gray-700 mt-4">
+node_modules/REPO_NAME/public
 </div>
 
 On deploy, Cloudflare will run the `postinstall` script inside your `package.json`, handling the syncing of assets and routes you defined earlier. It'll then build the public repo with the private assets and routes.

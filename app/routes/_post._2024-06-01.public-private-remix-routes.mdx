@@ -62,7 +62,7 @@ You can see the `package.json` I use for this below:
 
 So, what does each of these scripts actually do? Let's go through step-by-step.
 
-### `npm run dev`
+### npm run dev
 
 Start watching files, and sync when they change. Start the dev server.
 
@@ -72,7 +72,7 @@ Start watching files, and sync when they change. Start the dev server.
   ```
 </div>
 
-### `npm run postinstall`
+### npm run postinstall
 
 Run the initial sync, install the dependencies for the public repo, and copy your local `.dev.vars` into it.
 
@@ -82,7 +82,7 @@ Run the initial sync, install the dependencies for the public repo, and copy you
   ```
 </div>
 
-### `npm run sync`
+### npm run sync
 
 Sync your various files.
 
@@ -92,7 +92,7 @@ Sync your various files.
   ```
 </div>
 
-### `npm run sync:watch`
+### npm run sync:watch
 
 Sync your various files, but this time, also watch them. (There's probably a more succinct way of doing this, but it's for a personal project, so.)
 
@@ -102,7 +102,7 @@ Sync your various files, but this time, also watch them. (There's probably a mor
   ```
 </div>
 
-### `npm run sync:files:routes,data,assets`
+### npm run sync:files:routes,data,assets
 
 For each directory you want to sync, add `syncdir PRIVATE_REPO_FOLDER PUBLIC_REPO_FOLDER`. I ran into some issues with `.DS_Store` files getting copied over on Mac and causing mayhem, so I excluded them.
 
@@ -112,7 +112,7 @@ For each directory you want to sync, add `syncdir PRIVATE_REPO_FOLDER PUBLIC_REP
   ```
 </div>
 
-### `npm run update`
+### npm run update
 
 Force an update for the public repo if you run into any weirdness with stuff not updating. Not strictly necessary, but I came across it a couple times.
 

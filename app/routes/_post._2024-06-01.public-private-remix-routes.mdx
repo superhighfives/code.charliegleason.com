@@ -44,7 +44,7 @@ You can see the `package.json` I use for this below:
   "scripts": {
     "dev": "concurrently \"npm run sync:watch\" \"npm --prefix node_modules/charliegleason.com run dev\"",
     "postinstall": "npm run sync && npm --prefix node_modules/charliegleason.com install && cp .dev.vars node_modules/charliegleason.com",
-    "sync": "concurrently \"npm run sync:files:routes\" \"npm run sync:files:assets\" \"npm run sync:files:data -- -w\"",
+    "sync": "npm run sync:files:routes && npm run sync:files:assets && npm run sync:files:data",
     "sync:watch": "concurrently \"npm run sync:files:routes -- -w\" \"npm run sync:files:assets -- -w\" \"npm run sync:files:data -- -w\"",
     "sync:files:routes": "syncdir routes node_modules/charliegleason.com/app/routes --exclude .DS_Store",
     "sync:files:data": "syncdir app/data node_modules/charliegleason.com/app/data --exclude .DS_Store",
@@ -86,11 +86,11 @@ Run the initial sync, install the dependencies for the public repo, and copy you
 
 ### npm run sync
 
-Sync your various files.
+Sync your various files, but don't worry about doing it concurrently.
 
 <div className="not-prose code">
   ```bash
-  concurrently \"npm run sync:files:routes\" \"npm run sync:files:assets\" \"npm run sync:files:data -- -w\"
+  npm run sync:files:routes && npm run sync:files:assets && npm run sync:files:data
   ```
 </div>
 

@@ -7,6 +7,7 @@ links:
   GitHub Repo: https://github.com/superhighfives/charliegleason.com
 ---
 
+import Diagram from '../components/diagram'
 import tags from '../components/tags'
 export const meta = tags(frontmatter)
 export const handle = frontmatter
@@ -16,6 +17,8 @@ export const handle = frontmatter
 My site, [charliegleason.com](https://charliegleason.com) is built in [Remix](https://remix.run), and it's open-source. Which makes putting case studies about my work on enterprise software tricky.
 
 I was talking to [Glen Maddern](https://twitter.com/geelen), and he mentioned that given it's being deployed on Cloudflare Pages, I could just wrap the public site in a private repo and add the protected routes that way. Genius.
+
+<Diagram src="public-private-remix-diagram.svg" alt="Something" />
 
 There's a couple of gotchas with this approach, but it's relatively straightforward.
 

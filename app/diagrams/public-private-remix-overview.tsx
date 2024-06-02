@@ -14,7 +14,7 @@ const SvgComponent = (props: SVGProps<SVGSVGElement>) => {
       height={422}
       fill="none"
       viewBox="0 0 391 422"
-      preserveAspectRatio="xMinYMax"
+      preserveAspectRatio="xMinYMin"
       {...props}
     >
       <g clipPath="url(#a)">

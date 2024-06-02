@@ -3,7 +3,7 @@ export default function Diagram({ src, alt }: { src: string; alt: string }) {
   const darkImage = `${baseImage.split('.').join('-dark.')}`
   console.log(baseImage, darkImage)
   return (
-    <div className="my-8">
+    <div className="my-8 space-y-4">
       <picture className={`overflow-hidden rounded w-full align-top my-0`}>
         <source media="(prefers-color-scheme: dark)" srcSet={darkImage} />
         <img src={baseImage} alt={alt} className=" w-full" />

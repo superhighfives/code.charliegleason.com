@@ -7,6 +7,8 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import mdx from '@mdx-js/rollup'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
+import remarkGfm from 'remark-gfm'
+import { rehypeGithubAlerts } from 'rehype-github-alerts'
 import { rehypePrettyCode } from 'rehype-pretty-code'
 import wasmModuleWorkers from 'vite-plugin-wasm-module-workers'
 
@@ -15,7 +17,7 @@ export default defineConfig({
     wasmModuleWorkers(),
     remixCloudflareDevProxy(),
     mdx({
-      remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter],
+      remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkGfm],
       rehypePlugins: [
         [
           rehypePrettyCode,
@@ -27,6 +29,7 @@ export default defineConfig({
             keepBackground: false,
           },
         ],
+        rehypeGithubAlerts,
       ],
     }),
     remix(),

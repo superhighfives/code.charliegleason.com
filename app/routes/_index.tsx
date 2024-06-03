@@ -29,6 +29,7 @@ export default function Index() {
                 <LinkBlock
                   key={slug}
                   title={frontmatter.title}
+                  description={frontmatter.description}
                   caption={dateCaption}
                   href={slug}
                 />

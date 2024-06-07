@@ -55,7 +55,9 @@ export const getPosts = async (
   } else {
     return sortBy(
       posts
-        .filter((post) => !IGNORE_LIST.has(post.slug))
+        .filter(
+          (post) => post.slug !== undefined && !IGNORE_LIST.has(post.slug)
+        )
         .filter((post) => !post.frontmatter.draft),
       (post) => post.date,
       'desc'

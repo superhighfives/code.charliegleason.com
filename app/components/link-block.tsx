@@ -16,7 +16,7 @@ export default function LinkBlock({
   return (
     <a
       href={href}
-      className="flex flex-col group hover:bg-gray-50 dark:hover:bg-gray-900 px-4 py-3 gap-1"
+      className="flex flex-col group hover:bg-gray-50 dark:hover:bg-gray-900 relative before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 px-4 py-3 gap-1"
       rel="noreferrer"
       target={action === 'Open' ? '_blank' : '_self'}
     >

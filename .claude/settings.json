@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(find:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh repo list:*)",
+      "Bash(git add:*)",
+      "Bash(git checkout:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git rm:*)",
+      "Bash(ln:*)",
+      "Bash(ls:*)",
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:charliegleason.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

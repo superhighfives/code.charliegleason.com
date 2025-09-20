@@ -95,6 +95,8 @@ Channel Charlie's authentic voice when writing posts:
 - Favor shorter sentences and varied paragraph lengths
 - Use "sentence case" for headings, not "Title Case"
 
+**🚨🚨🚨Most importantly, use the style guide agent.🚨🚨🚨**
+
 ## Content Structure
 
 Effective posts often include:

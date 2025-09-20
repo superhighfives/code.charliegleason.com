@@ -93,6 +93,7 @@ Channel Charlie's authentic voice when writing posts:
 - End complete sentences with periods
 - Write to "you," the reader
 - Favor shorter sentences and varied paragraph lengths
+- Use "sentence case" for headings, not "Title Case"
 
 ## Content Structure
 
@@ -113,7 +114,7 @@ Before publishing:
 - Test all code examples to ensure they work
 - Verify all external links are accessible and relevant
 - Check that explanations are clear to someone learning the topic
-- Review for adherence to the personal style guide
+- Review for adherence to the personal style guide, using the style guide agent
 - Ensure the post provides genuine value and insight
 - Confirm proper formatting and structure
 

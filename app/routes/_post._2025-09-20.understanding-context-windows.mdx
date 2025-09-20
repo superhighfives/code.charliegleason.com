@@ -1,7 +1,7 @@
 ---
 slug: understanding-context-windows
 title: Understanding context windows in Claude Code
-description: A deep dive into how context windows work in AI coding assistants, what they contain, and why they matter for your development workflow.
+description: I thought I understood context windows in AI coding assistants. Turns out I was missing quite a bit about what's actually happening under the hood.
 image: true
 ---
 
@@ -9,9 +9,9 @@ import tags from '../components/tags'
 export const meta = tags(frontmatter)
 export const handle = frontmatter
 
-I've been using Claude Code for a while and had a basic understanding of context windows – I knew they were about memory limits and token usage. But when I started looking more closely at the `/context` command output, I realized there was a lot more depth to understand about what's actually happening under the hood.
+I've been using Claude Code for a while and thought I understood context windows – they're about memory limits and token usage, right? Well, turns out I was missing quite a bit. When I started actually paying attention to the `/context` command output, I realized there was a whole world of complexity I'd been glossing over.
 
-So I decided to dig deeper and document what I learned. When you're working with Claude Code, you might notice a handy `/context` command that shows you something like this:
+So I spent some time digging deeper into what's actually happening under the hood. If you're working with Claude Code, you've probably seen that handy `/context` command that shows you something like this:
 
 ```
 /context
@@ -31,16 +31,16 @@ But what does all this actually mean? Let's break it down.
 
 ## What is a context window?
 
-Think of a context window as the AI's working memory. Just like how you can only juggle so many thoughts at once, an AI model has a finite amount of information it can process at any given time. This limit is measured in **tokens** – roughly equivalent to words, though punctuation and code symbols count too.
+A context window is basically the AI's working memory. An AI model can only process a finite amount of information at any given time, and this limit is measured in **tokens** – roughly equivalent to words, though punctuation and code symbols count too.
 
 In the example above, Claude Sonnet 4 has a 200,000 token context window, and we're currently using 17,000 tokens (8% of the total capacity).
 
-## What's Taking Up Space?
+## What's taking up space?
 
 The context breakdown shows exactly where those tokens are going:
 
 ### System Prompt (3.2k tokens)
-This is Claude Code's "personality" – the instructions that tell Claude how to behave, what tools it has access to, and how to help with coding tasks. It's like the constitutional document that defines how Claude operates.
+This is Claude Code's "personality" – the instructions that tell Claude how to behave, what tools it has access to, and how to help with coding tasks. Think of it as the foundational rules that define how Claude operates.
 
 ### System Tools (11.6k tokens)
 These are all the functions Claude can use – reading files, running bash commands, searching through code, making git commits, and more. Each tool comes with detailed specifications about what it does and how to use it properly.
@@ -49,14 +49,14 @@ These are all the functions Claude can use – reading files, running bash comma
 These are specialized sub-agents that can be launched for specific tasks like code review or complex multi-step operations. In this case, there aren't many loaded, hence the small token count.
 
 ### Memory Files (743 tokens)
-This includes project-specific instructions like your `CLAUDE.md` file, which tells Claude about your project structure, development commands, and coding conventions. It's how Claude knows to run `npm run dev` instead of guessing what your dev server command might be.
+This includes project-specific instructions like your `CLAUDE.md` file, which tells Claude about your project structure, development commands, and coding conventions. It's how Claude knows to run `npm run dev` instead of trying random commands and hoping for the best.
 
 ### Messages (1.2k tokens)
 The actual conversation – your questions, Claude's responses, and any code or file contents that have been discussed.
 
-## Why Context Windows Matter
+## Why context windows matter
 
-Understanding context usage helps explain some important behaviors:
+Once you understand how context works, a lot of Claude's behavior starts making sense:
 
 ### Why Claude sometimes uses agents
 When searching through large codebases, Claude might launch a specialized search agent rather than loading dozens of files into the main context. This keeps the context window clean and efficient.
@@ -70,7 +70,7 @@ Eventually, if you have a very long conversation with lots of code, you'll appro
 ### Why project memory matters
 Files like `CLAUDE.md` stay loaded throughout the entire session, so Claude always knows your project's specific setup without having to rediscover it each time.
 
-## Making the Most of Context
+## Making the most of context
 
 Here are some tips to work effectively within context constraints:
 
@@ -79,4 +79,4 @@ Here are some tips to work effectively within context constraints:
 - **Break down large tasks** – if you're refactoring a huge feature, tackle it piece by piece
 - **Trust the agents** – when Claude launches specialized agents for complex searches or tasks, it's to keep the main conversation context focused
 
-Context windows are one of those invisible infrastructure pieces that make AI coding assistants work. Understanding how they function helps you work more effectively with tools like Claude Code.
+Context windows are one of those invisible infrastructure pieces that make AI coding assistants work. I found that understanding how they function has helped me work more effectively with Claude Code – and hopefully it'll help you too.

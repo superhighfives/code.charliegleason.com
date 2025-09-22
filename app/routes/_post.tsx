@@ -22,7 +22,7 @@ export default function Post() {
       return { key, value }
     })
 
-  const rawDate = /(?:|)(\d{4}-\d{2}-\d{2})/.exec(params!.id)
+  const rawDate = /(?:|)(\d{4}-\d{2}-\d{2})/.exec(params?.id ?? '')
   let oldArticle = false
   if (rawDate) {
     const dateObject = parseISO(rawDate[0])

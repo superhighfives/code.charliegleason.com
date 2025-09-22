@@ -103,3 +103,13 @@ Take the following steps to improve the writing:
 - Use contractions naturally ("I'd", "don't", "it's")
 - Add personality through word choice ("noodling on regular expressions", "og my!")
 - Include genuine enthusiasm without being over the top
+
+## Techincal specifications
+
+Always wrap code fences (```) in <div className="not-prose code" />. For example:
+
+<div className="not-prose code">
+```jsx
+const puppies = "are great"
+```
+</div>

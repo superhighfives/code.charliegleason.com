@@ -1,0 +1,114 @@
+---
+slug: paper-design-shaders
+title: Adding beautiful shaders to your site with paper-design/shaders
+description: I've been playing around with Paper Shaders lately, and it's honestly refreshing to find a shader library that doesn't make you jump through hoops. Here's what makes it worth checking out.
+image: true
+---
+
+import tags from '../components/tags'
+import CodePreview from '../components/code-preview'
+export const meta = tags(frontmatter)
+export const handle = frontmatter
+
+I'll be honest—I've always been a bit intimidated by shader programming. Sure, I love the visual possibilities, but the learning curve and setup complexity usually send me running back to CSS transforms and boring old `div`s. That's why [paper-design/shaders](https://github.com/paper-design/shaders) caught my attention. It promises beautiful shader effects without the usual headaches.
+
+After spending some time with it, I can say it actually delivers on that promise.
+
+## What I like about Paper Shaders
+
+This is a zero-dependency canvas shader library that brings high-quality visual effects to the web with surprisingly little setup. Here's what makes it stand out:
+
+### No dependency hell
+You know that feeling when you install a graphics library and suddenly your `node_modules` folder gains 50MB of random packages? Paper Shaders skips all that. It's completely self-contained, which means less bundle bloat and fewer things that can break.
+
+### Works with whatever you're using
+Whether you're working in React, vanilla JavaScript, or even Vue (they're open to community contributions), there are dedicated packages. I appreciate when libraries meet you where you are instead of forcing you to restructure your whole project.
+
+### Actually performs well
+I've worked with shader libraries that look amazing in demos but turn your phone into a hand warmer. Paper Shaders is built with broad browser and device compatibility in mind, so the animations stay smooth across different devices.
+
+### Designers can actually use it
+This might be my favorite part—the library includes visual design tools. You don't need to be fluent in GLSL to create custom effects. As someone who straddles the line between design and development, this approach makes a lot of sense.
+
+## Getting it running
+
+The setup is refreshingly simple. Just grab the package that matches your environment:
+
+<div className="not-prose code">
+```bash
+# For React projects
+npm i @paper-design/shaders-react
+
+# For vanilla JavaScript
+npm i @paper-design/shaders
+```
+</div>
+
+## Examples that actually work
+
+Let me show you a couple of ways I've been using Paper Shaders:
+
+### React: Animated mesh gradient
+
+This one creates a flowing, organic background effect that works great for hero sections:
+
+<div className="not-prose code">
+<CodePreview height="100%" width="300px" title="Mesh Gradient Preview">
+  
+</CodePreview>
+```jsx
+import { MeshGradient } from '@paper-design/shaders-react'
+
+function HeroSection() {
+  return (
+    <div className="hero">
+      <MeshGradient
+        colors={['#5100ff', '#00ff80', '#ffcc00', '#ea00ff']}
+        distortion={1}
+        swirl={0.8}
+        speed={0.2}
+        style={{width: '100%', height: 400}}
+      />
+      <div className="hero-content">
+        <h1>Welcome to our site</h1>
+      </div>
+    </div>
+  )
+}
+```
+</div>
+
+Here's what that looks like in action:
+
+### Vanilla JavaScript: Custom shader effect
+
+For non-React projects, the vanilla JavaScript approach is just as straightforward:
+
+<div className="not-prose code">
+```javascript
+import { createShader } from '@paper-design/shaders'
+
+const canvas = document.querySelector('#shader-canvas')
+const shader = createShader(canvas, {
+  type: 'dithering',
+  colors: ['#ff6b6b', '#4ecdc4', '#45b7d1'],
+  intensity: 0.5,
+  speed: 0.1
+})
+
+// Start the animation
+shader.start()
+```
+</div>
+
+The library comes with various shader effects—mesh gradients, dithering, dot orbit, warp effects, and more. Each one lets you tweak settings through props or configuration objects, so you can dial in exactly the look you're after.
+
+## Why I think you'll like it
+
+Paper Shaders hits that sweet spot I'm always looking for—powerful enough for client work but simple enough that I can mess around with it on a weekend without getting bogged down in setup. The zero-dependency approach means you're not taking on technical debt, and the performance focus means your effects won't turn someone's phone into a space heater.
+
+What really sold me is the visual design tools. You can experiment with different effects and dial in your settings through their interface before copying the code. It's like having a playground for shader effects, which makes the whole creative process feel less intimidating.
+
+If you want to check it out, the [documentation and examples at shaders.paper.design](https://shaders.paper.design) are pretty solid, and you can poke around the [GitHub repository](https://github.com/paper-design/shaders) to see what's under the hood.
+
+Whether you're after subtle background textures or bold hero animations, Paper Shaders makes beautiful web graphics feel approachable. And honestly, after years of wrestling with complex shader setups, that's exactly what I needed.

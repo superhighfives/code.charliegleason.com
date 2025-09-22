@@ -11,6 +11,7 @@ import remarkGfm from 'remark-gfm'
 import { rehypeGithubAlerts } from 'rehype-github-alerts'
 import { rehypePrettyCode } from 'rehype-pretty-code'
 import wasmModuleWorkers from 'vite-plugin-wasm-module-workers'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [
@@ -34,5 +35,6 @@ export default defineConfig({
     }),
     remix(),
     tsconfigPaths(),
+    tailwindcss(),
   ],
 })

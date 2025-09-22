@@ -27,13 +27,13 @@ export default function LinkBlock({
               {title}
             </span>
             {caption ? (
-              <span className="flex-shrink-0 text-gray-400 dark:text-gray-500 text-xs">
+              <span className="shrink-0 text-gray-400 dark:text-gray-500 text-xs">
                 {caption}
               </span>
             ) : null}
           </div>
         </div>
-        <div className="ml-4 flex-shrink-0">
+        <div className="ml-4 shrink-0">
           <span className="font-medium text-indigo-600 group-hover:text-indigo-700 dark:text-indigo-400 dark:group-hover:text-indigo-300 flex gap-2 items-center">
             <span className="max-sm:hidden">{action}</span>
             <span className="items-center gap-2">

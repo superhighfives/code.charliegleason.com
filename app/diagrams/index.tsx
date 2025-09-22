@@ -36,7 +36,7 @@ export default function Diagram({
     <figure className="my-10 space-y-6 [&>svg]:max-w-full [&>svg]:h-auto">
       <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
       <figcaption className="text-balance flex gap-4">
-        <ChevronUp className="px-1.5 py-1.5 flex-shrink-0 h-full box-content border rounded dark:border-gray-600" />
+        <ChevronUp className="px-1.5 py-1.5 shrink-0 h-full box-content border rounded dark:border-gray-600" />
         <div>
           <span className="leading-relaxed border-b dark:border-gray-700 inline -ml-4 pl-4">
             {alt}

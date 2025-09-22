@@ -1,0 +1,84 @@
+---
+slug: understanding-context-windows
+title: Understanding context windows in Claude Code
+description: I thought I understood context windows in AI coding assistants. Turns out I was missing quite a bit about what's actually happening under the hood.
+image: true
+---
+
+import tags from '../components/tags'
+export const meta = tags(frontmatter)
+export const handle = frontmatter
+
+I've been using Claude Code for a while and thought I understood context windows - something about memory limits, and, uh, token usage. When I started actually paying attention to the `/context` command output, I realized there was a bunch of complexity I'd been glossing over.
+
+So I spent some time digging deeper into what's actually happening under the hood. If you're working with Claude Code, you can run `/context` to get something like this:
+
+<div className="not-prose code">
+```txt
+/context
+  ⎿  ⛁ ⛀ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛀ ⛀
+     ⛀ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   Context Usage
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   claude-sonnet-4-20250514 • 17k/200k tokens (8%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ System prompt: 3.2k tokens (1.6%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ System tools: 11.6k tokens (5.8%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ Custom agents: 69 tokens (0.0%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ Memory files: 743 tokens (0.4%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ Messages: 1.2k tokens (0.6%)
+     ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛶ Free space: 183.3k (91.6%)
+```
+</div>
+
+But what does all this actually mean? Let's break it down.
+
+## What is a context window?
+
+A context window is basically the AI's working memory. An AI model can only process a finite amount of information at any given time, and this limit is measured in **tokens** - roughly equivalent to words, though punctuation and code symbols count too.
+
+In the example above, Claude Sonnet 4 has a 200,000 token context window, and we're currently using 17,000 tokens (8% of the total capacity).
+
+## What's taking up space?
+
+The context breakdown shows exactly where those tokens are going, using our example from above:
+
+### System Prompt (3.2k tokens)
+This is Claude Code's "personality" - the instructions that tell Claude how to behave, what tools it has access to, and how to help with coding tasks. Think of it as the foundational rules that define how Claude operates.
+
+### System Tools (11.6k tokens)
+These are all the functions Claude can use - reading files, running bash commands, searching through code, making git commits, and more. Each tool has a detailed internal specifications about what it does and how Claude can use it properly.
+
+### Custom Agents (69 tokens)
+These are specialized sub-agents that can be launched for specific tasks like code review or complex multi-step operations. In this case, there aren't many loaded, hence the small token count. You can [create your own custom agents](https://docs.claude.com/en/docs/claude-code/sub-agents) by adding them to (`.claude/agents/agent-name.md`).
+
+### Memory Files (743 tokens)
+This includes project-specific instructions like your `CLAUDE.md` file, which tells Claude about your project structure, development commands, and coding conventions. It's how Claude knows to run `npm run dev` instead of trying random commands and hoping for the best.
+
+### Messages (1.2k tokens)
+The actual conversation - your questions, Claude's responses, and any code or file contents that have been discussed.
+
+## Why context windows matter
+
+Once you understand how context works, a lot of Claude's behavior starts making sense:
+
+### Why Claude sometimes uses agents
+When searching through large codebases, Claude might launch a specialized search agent rather than loading dozens of files into the main context. This keeps the context window clean and efficient.
+
+### Why Claude reads files strategically
+Claude doesn't read every file in your project at once. Instead, it reads what's relevant to the current task, keeping context usage manageable.
+
+### Why conversations have limits
+Eventually, if you have a very long conversation with lots of code, you'll approach that 200k token limit. When that happens, earlier parts of the conversation might get compressed or forgotten.
+
+### Why project memory matters
+Files like `CLAUDE.md` stay loaded throughout the entire session, so Claude always knows your project's specific setup without having to rediscover it each time.
+
+## Making the most of context
+
+Here are some tips to work effectively within context constraints:
+
+- **Be specific about what you need** - instead of "fix my app," try "fix the authentication bug in UserService.ts"
+- **Use project memory** - keep important project info in `CLAUDE.md` so it's always available
+- **Break down large tasks** - if you're refactoring a huge feature, tackle it piece by piece
+- **Trust the agents** - when Claude launches specialized agents for complex searches or tasks, it's to keep the main conversation context focused
+
+Context windows are one of those invisible infrastructure pieces that make AI coding assistants work. Understanding how they function can help you work more effectively with Claude Code, and ultimately, get stuff done.

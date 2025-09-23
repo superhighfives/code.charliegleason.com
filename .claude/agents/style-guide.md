@@ -67,7 +67,7 @@ Take the following steps to improve the writing:
 - **Share your process and thinking.** Readers often learn as much from how you approached a problem as from the solution itself.
 - Inline formatting:
   - Use **bold** sparingly, mainly for UI elements or when you really need emphasis
-  - Use "—" with no spaces, instead of " – "
+  - Use " - ", instead of "–" with no spaces
   - Use `code formatting` for:
     - Code snippets when mentioned in text
     - File names (e.g. "the `index.js` file")

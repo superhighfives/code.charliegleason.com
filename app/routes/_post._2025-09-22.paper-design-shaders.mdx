@@ -3,10 +3,10 @@ slug: paper-design-shaders
 title: Adding beautiful shaders to your site with paper-design/shaders
 description: I've been playing around with Paper Shaders lately, and it's honestly refreshing to find a shader library that doesn't make you jump through hoops. Here's what makes it worth checking out.
 image: true
+draft: true
 ---
 
 import tags from '../components/tags'
-import CodePreview from '../components/code-preview'
 export const meta = tags(frontmatter)
 export const handle = frontmatter
 
@@ -53,9 +53,6 @@ Let me show you a couple of ways I've been using Paper Shaders:
 This one creates a flowing, organic background effect that works great for hero sections:
 
 <div className="not-prose code">
-<CodePreview height="100%" width="300px" title="Mesh Gradient Preview">
-  
-</CodePreview>
 ```jsx
 import { MeshGradient } from '@paper-design/shaders-react'
 

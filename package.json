@@ -17,6 +17,7 @@
 	},
 	"dependencies": {
 		"@mdx-js/react": "^3.1.1",
+		"@paper-design/shaders-react": "^0.0.54",
 		"@remix-run/cloudflare": "^2.8.1",
 		"@remix-run/cloudflare-pages": "^2.8.1",
 		"@remix-run/react": "^2.8.1",
@@ -25,7 +26,9 @@
 		"isbot": "^4.1.0",
 		"miniflare": "^3.20240404.0",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"react-live": "^4.1.8",
+		"rehype-mdx-code-props": "^3.0.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.4",

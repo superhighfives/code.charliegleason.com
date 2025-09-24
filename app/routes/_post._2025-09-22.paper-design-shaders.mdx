@@ -34,7 +34,6 @@ This might be my favorite part - the library includes visual design tools. You d
 
 The setup is refreshingly simple. Just grab the package that matches your environment:
 
-<div className="not-prose code">
 ```bash
 # For React projects
 npm i @paper-design/shaders-react
@@ -42,7 +41,6 @@ npm i @paper-design/shaders-react
 # For vanilla JavaScript
 npm i @paper-design/shaders
 ```
-</div>
 
 ## Examples that actually work
 
@@ -50,38 +48,37 @@ Let me show you a couple of ways I've been using Paper Shaders:
 
 ### React: Animated mesh gradient
 
-This one creates a flowing, organic background effect that works great for hero sections:
+This one creates a flowing, organic background effect that works great for hero sections.
 
-<div className="not-prose code">
-```jsx
+Here's what that looks like in action:
+
+```jsx live
 import { MeshGradient } from '@paper-design/shaders-react'
 
-function HeroSection() {
+function Example() {
   return (
-    <div className="hero">
+    <div className="relative h-full">
       <MeshGradient
         colors={['#5100ff', '#00ff80', '#ffcc00', '#ea00ff']}
         distortion={1}
         swirl={0.8}
         speed={0.2}
-        style={{width: '100%', height: 400}}
+        height='100%'
+        className="absolute inset-0"
       />
-      <div className="hero-content">
-        <h1>Welcome to our site</h1>
+      <div className="absolute inset-0 flex items-center justify-center">
+        👋
       </div>
     </div>
   )
 }
-```
-</div>
 
-Here's what that looks like in action:
+```
 
 ### Vanilla JavaScript: Custom shader effect
 
 For non-React projects, the vanilla JavaScript approach is just as straightforward:
 
-<div className="not-prose code">
 ```javascript
 import { createShader } from '@paper-design/shaders'
 
@@ -96,7 +93,6 @@ const shader = createShader(canvas, {
 // Start the animation
 shader.start()
 ```
-</div>
 
 The library comes with various shader effects - mesh gradients, dithering, dot orbit, warp effects, and more. Each one lets you tweak settings through props or configuration objects, so you can dial in exactly the look you're after.
 

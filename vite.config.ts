@@ -31,6 +31,7 @@ export default defineConfig({
           },
         ],
         rehypeGithubAlerts,
+        // biome-ignore lint/suspicious/noExplicitAny: type compatibility issue
         rehypeMdxCodeProps as any,
       ],
       providerImportSource: "@mdx-js/react",

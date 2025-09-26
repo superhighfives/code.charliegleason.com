@@ -9,6 +9,9 @@ import {
 import stylesheet from "~/global.css?url";
 import ErrorView from "./components/error-view";
 import Page from "./components/page";
+import { ThemeContext } from "./theme-context";
+import { useTheme } from "react-router-theme";
+export { loader, action } from "react-router-theme";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -29,21 +32,29 @@ export const links: LinksFunction = () => [
   },
 ];
 
+const defaultTheme = "system";
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const loaderData = useLoaderData() as { theme: string };
+  const fetcher = useFetcher();
+  const [theme, setTheme] = useTheme(loaderData, fetcher, defaultTheme);
+
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body className="font-mono text-sm bg-white dark:bg-gray-950">
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      <html data-theme={theme} lang="en">
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <Meta />
+          <Links />
+        </head>
+        <body className="font-mono text-sm bg-white dark:bg-gray-950">
+          {children}
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </html>
+    </ThemeContext.Provider>
   );
 }
 

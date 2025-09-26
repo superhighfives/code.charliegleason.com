@@ -62,10 +62,10 @@ export default function Post() {
         <MDXProvider
           components={{
             pre: CodeBlock,
-            figure: ({ children, ...props }: any) => (
-              <div className="not-prose code" {...props}>
+            figure: ({ children, ...props }) => (
+              <figure className="not-prose code" {...props}>
                 {children}
-              </div>
+              </figure>
             ),
           }}
         >

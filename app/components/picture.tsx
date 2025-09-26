@@ -1,28 +1,25 @@
+import { useContext } from "react";
+import { ThemeContext } from "~/theme-context";
+
 export default function Picture({
   src,
-  alt,
   themed = false,
+  alt,
 }: {
   src: string;
-  alt: string;
   themed: boolean;
+  alt: string;
 }) {
+  const { theme } = useContext(ThemeContext);
   const baseImage = `${src}`;
   const darkImage = `${baseImage.split(".").join("-dark.")}`;
 
   return (
-    <div className="my-8 space-y-4">
-      <picture
-        className={`overflow-hidden rounded shadow-xl w-full align-top my-0`}
-      >
-        {themed ? (
-          <source media="(prefers-color-scheme: dark)" srcSet={darkImage} />
-        ) : null}
-        <img src={baseImage} alt={alt} className="w-full" />
-      </picture>
-      <figcaption className="text-center leading-relaxed text-balance mb-2">
-        {alt}
-      </figcaption>
-    </div>
+    <picture
+      className={`overflow-hidden rounded shadow-xl w-full align-top my-0`}
+    >
+      {theme === "dark" && themed ? <source srcSet={darkImage} /> : null}
+      <img src={baseImage} className="w-full" alt={alt} />
+    </picture>
   );
 }

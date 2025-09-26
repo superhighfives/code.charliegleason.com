@@ -5,7 +5,7 @@ import { useMediaQuery } from "usehooks-ts";
 
 interface PlaygroundProps {
   code: string;
-  scope?: Record<string, any>;
+  scope?: Record<string, unknown>;
   className?: string;
 }
 

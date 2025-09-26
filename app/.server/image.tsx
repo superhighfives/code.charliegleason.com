@@ -46,7 +46,7 @@ export async function createOGImage(requestUrl: string, slug: string | null) {
         await initSatori(await initYoga(yogawasm));
         initialised = true;
       }
-    } catch (e) {
+    } catch (_e) {
       initialised = true;
     }
 

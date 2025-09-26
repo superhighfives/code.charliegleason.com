@@ -99,7 +99,9 @@ function CodeBlock({ children, live, ...props }: PreProps) {
 }
 
 // Type-safe wrapper for MDX usage
-const CodeBlockWrapper: React.ComponentType<DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement>> = (props) => {
+const CodeBlockWrapper: React.ComponentType<
+  DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement>
+> = (props) => {
   return <CodeBlock {...props} />;
 };
 

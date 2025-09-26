@@ -1,9 +1,9 @@
 function generateImage(slug: string) {
   const url = new URL(
-    `${import.meta.env.PROD ? 'https://code.charliegleason.com' : 'http://localhost:5173'}/resource/og`
-  )
-  url.searchParams.set('slug', slug)
-  return url.toString()
+    `${import.meta.env.PROD ? "https://code.charliegleason.com" : "http://localhost:5173"}/resource/og`,
+  );
+  url.searchParams.set("slug", slug);
+  return url.toString();
 }
 
 export default function tags({
@@ -12,42 +12,42 @@ export default function tags({
   slug,
   image = false,
 }: {
-  title?: string
-  description?: string
-  slug?: string
-  image?: boolean
+  title?: string;
+  description?: string;
+  slug?: string;
+  image?: boolean;
 } = {}) {
-  const metaTitle = `${title ? `${title} ` : ''}❯ ~/code.charliegleason.com`
+  const metaTitle = `${title ? `${title} ` : ""}❯ ~/code.charliegleason.com`;
   const metaDescription = description
     ? `${description}`
-    : 'Tutorials, code snippets, and resources for design and front end development'
-  const metaImage = image ? slug && generateImage(slug) : '/social-default.png'
+    : "Tutorials, code snippets, and resources for design and front end development";
+  const metaImage = image ? slug && generateImage(slug) : "/social-default.png";
 
   return [
     { title: metaTitle },
     {
-      name: 'title',
+      name: "title",
       content: metaTitle,
     },
     {
-      name: 'description',
+      name: "description",
       content: metaDescription,
     },
     {
-      property: 'og:title',
+      property: "og:title",
       content: title,
     },
     {
-      property: 'og:description',
+      property: "og:description",
       content: metaDescription,
     },
     {
-      property: 'og:image',
+      property: "og:image",
       content: metaImage,
     },
     {
-      property: 'og:type',
-      content: 'website',
+      property: "og:type",
+      content: "website",
     },
-  ]
+  ];
 }

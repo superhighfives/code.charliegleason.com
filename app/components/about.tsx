@@ -1,5 +1,5 @@
-import { Link } from '@remix-run/react'
-import { Hand } from 'lucide-react'
+import { Link } from "@remix-run/react";
+import { Hand } from "lucide-react";
 
 export default function About() {
   return (
@@ -13,7 +13,7 @@ export default function About() {
         </h2>
         <p className="leading-relaxed text-gray-600 dark:text-gray-400">
           I'm a designer, developer, creative coder, and sometimes musician. I
-          write about design and development.{' '}
+          write about design and development.{" "}
           <Link
             className="font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
             to="/about"
@@ -23,5 +23,5 @@ export default function About() {
         </p>
       </div>
     </div>
-  )
+  );
 }

@@ -1,18 +1,18 @@
-import type { MetaFunction } from '@remix-run/cloudflare'
-import { useLoaderData } from '@remix-run/react'
-import { json } from '@remix-run/cloudflare'
-import { getPosts } from '~/.server/posts'
-import { formatDistanceToNow } from 'date-fns'
-import LinkBlock from '~/components/link-block'
-import tags from '~/components/tags'
-import About from '~/components/about'
+import type { MetaFunction } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
+import { useLoaderData } from "@remix-run/react";
+import { formatDistanceToNow } from "date-fns";
+import { getPosts } from "~/.server/posts";
+import About from "~/components/about";
+import LinkBlock from "~/components/link-block";
+import tags from "~/components/tags";
 
-export const meta: MetaFunction = () => tags()
+export const meta: MetaFunction = () => tags();
 
-export const loader = async () => json(await getPosts())
+export const loader = async () => json(await getPosts());
 
 export default function Index() {
-  const posts = useLoaderData<typeof loader>()
+  const posts = useLoaderData<typeof loader>();
 
   return (
     <div className="grid sm:grid-cols-2 gap-8 max-w-[65ch] content-end h-full">
@@ -26,7 +26,7 @@ export default function Index() {
             posts.map(({ slug, date, frontmatter }) => {
               const dateCaption = date
                 ? `${formatDistanceToNow(date)} ago`
-                : null
+                : null;
               return (
                 <LinkBlock
                   key={slug}
@@ -35,7 +35,7 @@ export default function Index() {
                   caption={dateCaption}
                   href={slug}
                 />
-              )
+              );
             })
           ) : (
             <p className="flex items-center p-4 leading-6 text-gray-400">
@@ -45,5 +45,5 @@ export default function Index() {
         </div>
       </div>
     </div>
-  )
+  );
 }

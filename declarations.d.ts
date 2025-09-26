@@ -1,1 +1,1 @@
-declare module 'virtual:remix/server-build'
+declare module "virtual:remix/server-build";

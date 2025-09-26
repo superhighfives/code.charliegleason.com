@@ -1,24 +1,24 @@
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink } from "lucide-react";
 
 export default function LinkBlock({
   title,
   caption,
   href,
-  action = 'View',
+  action = "View",
   description,
 }: {
-  title: string
-  caption?: string | null
-  href: string
-  action?: string
-  description?: string
+  title: string;
+  caption?: string | null;
+  href: string;
+  action?: string;
+  description?: string;
 }) {
   return (
     <a
       href={href}
       className="flex flex-col group hover:bg-gray-50 dark:hover:bg-gray-900 relative before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 px-4 py-3 gap-1"
       rel="noreferrer"
-      target={action === 'Open' ? '_blank' : '_self'}
+      target={action === "Open" ? "_blank" : "_self"}
     >
       <div className="flex items-center justify-between leading-6">
         <div className="flex w-0 flex-1 items-center">
@@ -37,7 +37,7 @@ export default function LinkBlock({
           <span className="font-medium text-indigo-600 group-hover:text-indigo-700 dark:text-indigo-400 dark:group-hover:text-indigo-300 flex gap-2 items-center">
             <span className="max-sm:hidden">{action}</span>
             <span className="items-center gap-2">
-              {action === 'Open' ? <ExternalLink size={16} /> : <span>❯</span>}
+              {action === "Open" ? <ExternalLink size={16} /> : <span>❯</span>}
             </span>
           </span>
         </div>
@@ -50,5 +50,5 @@ export default function LinkBlock({
         </div>
       ) : null}
     </a>
-  )
+  );
 }

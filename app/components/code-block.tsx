@@ -1,95 +1,99 @@
-import { ReactNode } from "react";
+import { MeshGradient } from "@paper-design/shaders-react";
+import type { ReactNode } from "react";
 import * as React from "react";
 import Playground from "./playground";
-import { MeshGradient } from "@paper-design/shaders-react";
 
 interface PreProps {
-	children?: ReactNode;
-	live?: boolean;
-	[key: string]: any;
+  children?: ReactNode;
+  live?: boolean;
+  [key: string]: unknown;
 }
 
 export default function CodeBlock({ children, live, ...props }: PreProps) {
-	if (!live) {
-		// Filter out non-DOM props before passing to pre element
-		const { dataLanguage, style, dataTheme, ...domProps } = props;
-		void dataLanguage;
-		void dataTheme;
-		void style;
-		return <pre {...domProps}>{children}</pre>;
-	}
+  if (!live) {
+    // Filter out non-DOM props before passing to pre element
+    const { dataLanguage, style, dataTheme, ...domProps } = props;
+    void dataLanguage;
+    void dataTheme;
+    void style;
+    return <pre {...domProps}>{children}</pre>;
+  }
 
-	let codeString = "";
+  let codeString = "";
 
-	// Extract code string using a recursive approach that handles both arrays and single objects
-	const extractAllText = (element: any): string => {
-		if (typeof element === "string") {
-			return element;
-		}
+  // Extract code string using a recursive approach that handles both arrays and single objects
+  const extractAllText = (element: ReactNode): string => {
+    if (typeof element === "string") {
+      return element;
+    }
 
-		if (Array.isArray(element)) {
-			return element.map(extractAllText).join("");
-		}
+    if (Array.isArray(element)) {
+      return element.map(extractAllText).join("");
+    }
 
-		if (
-			element &&
-			typeof element === "object" &&
-			element.props &&
-			element.props.children
-		) {
-			return extractAllText(element.props.children);
-		}
+    if (
+      element &&
+      typeof element === "object" &&
+      "props" in element &&
+      element.props &&
+      typeof element.props === "object" &&
+      "children" in element.props
+    ) {
+      return extractAllText(element.props.children);
+    }
 
-		return "";
-	};
+    return "";
+  };
 
-	codeString = extractAllText(children).trim();
+  codeString = extractAllText(children).trim();
 
-	if (!codeString) {
-		// Filter out non-DOM props before passing to pre element
-		const { dataLanguage, dataTheme, ...domProps } = props;
-		void dataLanguage;
-		void dataTheme;
-		return <pre {...domProps}>{children}</pre>;
-	}
+  if (!codeString) {
+    // Filter out non-DOM props before passing to pre element
+    const { dataLanguage, dataTheme, ...domProps } = props;
+    void dataLanguage;
+    void dataTheme;
+    return <pre {...domProps}>{children}</pre>;
+  }
 
-	// Extract imports and build scope dynamically, then remove imports from code
-	const buildScopeAndCleanCode = (code: string) => {
-		const scope: Record<string, any> = {
-			React,
-			render: (element: React.ReactElement) => element,
-		};
+  // Extract imports and build scope dynamically, then remove imports from code
+  const buildScopeAndCleanCode = (code: string) => {
+    const scope: Record<string, any> = {
+      React,
+      render: (element: React.ReactElement) => element,
+    };
 
-		// Parse import statements
-		const importRegex =
-			/import\s+(?:{([^}]+)}|\*\s+as\s+(\w+)|(\w+))\s+from\s+['"]([^'"]+)['"];?\s*\n?/g;
-		let match;
+    // Parse import statements
+    const importRegex =
+      /import\s+(?:{([^}]+)}|\*\s+as\s+(\w+)|(\w+))\s+from\s+['"]([^'"]+)['"];?\s*\n?/g;
+    let match: RegExpExecArray | null;
 
-		while ((match = importRegex.exec(code)) !== null) {
-			const [, namedImports, , , moduleName] = match;
+    match = importRegex.exec(code);
+    while (match !== null) {
+      const [, namedImports, , , moduleName] = match;
 
-			if (moduleName === "@paper-design/shaders-react") {
-				if (namedImports) {
-					// Handle named imports: import { MeshGradient, Other } from "..."
-					const imports = namedImports.split(",").map((imp) => imp.trim());
-					imports.forEach((imp) => {
-						if (imp === "MeshGradient") {
-							scope[imp] = MeshGradient;
-						}
-						// Add other named imports as needed
-					});
-				}
-			}
-			// Add other module handlers here
-		}
+      if (moduleName === "@paper-design/shaders-react") {
+        if (namedImports) {
+          // Handle named imports: import { MeshGradient, Other } from "..."
+          const imports = namedImports.split(",").map((imp) => imp.trim());
+          imports.forEach((imp) => {
+            if (imp === "MeshGradient") {
+              scope[imp] = MeshGradient;
+            }
+            // Add other named imports as needed
+          });
+        }
+      }
+      // Add other module handlers here
+      match = importRegex.exec(code);
+    }
 
-		// Remove import statements from code
-		const cleanCode = code.replace(importRegex, "").trim();
+    // Remove import statements from code
+    const cleanCode = code.replace(importRegex, "").trim();
 
-		return { scope, cleanCode };
-	};
+    return { scope, cleanCode };
+  };
 
-	const { scope, cleanCode } = buildScopeAndCleanCode(codeString);
+  const { scope, cleanCode } = buildScopeAndCleanCode(codeString);
 
-	return <Playground code={cleanCode} scope={scope} />;
+  return <Playground code={cleanCode} scope={scope} />;
 }

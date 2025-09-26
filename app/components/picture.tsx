@@ -3,12 +3,12 @@ export default function Picture({
   alt,
   themed = false,
 }: {
-  src: string
-  alt: string
-  themed: boolean
+  src: string;
+  alt: string;
+  themed: boolean;
 }) {
-  const baseImage = `${src}`
-  const darkImage = `${baseImage.split('.').join('-dark.')}`
+  const baseImage = `${src}`;
+  const darkImage = `${baseImage.split(".").join("-dark.")}`;
 
   return (
     <div className="my-8 space-y-4">
@@ -24,5 +24,5 @@ export default function Picture({
         {alt}
       </figcaption>
     </div>
-  )
+  );
 }

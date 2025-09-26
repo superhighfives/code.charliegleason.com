@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Preview**: `npm run preview` - Builds and runs Wrangler Pages dev server
 - **Local production**: `npm run start` - Serves built app with Wrangler Pages
 - **Deploy**: `npm run deploy` - Builds and deploys to Cloudflare Pages
-- **Linting**: `npm run lint` - Runs ESLint
+- **Linting**: `npm run lint` - Runs Biome
 - **Type checking**: `npm run typecheck` - Runs TypeScript compiler
 - **Type generation**: `npm run typegen` or `npm run cf-typegen` - Generates Cloudflare bindings types from wrangler.toml
 

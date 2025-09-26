@@ -1,8 +1,9 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
-  --font-mono: 'JetBrains Mono', 'ui-monospace', 'SFMono-Regular',
-    '"Roboto Mono"', '"Courier New"', 'monospace';
+  --font-mono:
+    "JetBrains Mono", "ui-monospace", "SFMono-Regular", '"Roboto Mono"',
+    '"Courier New"', "monospace";
 
   @keyframes blink {
     0%,
@@ -15,7 +16,7 @@
   }
 
   --animation-blink: blink 1s steps(1, end) infinite;
-  --grid-template-rows-layout: '1fr auto';
+  --grid-template-rows-layout: "1fr auto";
 }
 
 @plugin "@tailwindcss/typography";
@@ -29,15 +30,15 @@ body {
   overscroll-behavior-x: none;
 }
 
-code[data-theme*=' '],
-code[data-theme*=' '] span {
+code[data-theme*=" "],
+code[data-theme*=" "] span {
   color: var(--shiki-light);
   background-color: var(--shiki-light-bg);
 }
 
 @media (prefers-color-scheme: dark) {
-  code[data-theme*=' '],
-  code[data-theme*=' '] span {
+  code[data-theme*=" "],
+  code[data-theme*=" "] span {
     color: var(--shiki-dark);
     background-color: var(--shiki-dark-bg);
   }

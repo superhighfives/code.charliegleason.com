@@ -1,6 +1,4 @@
 import { NavLink as Link } from "@remix-run/react";
-import { ThemeProvider } from "~/components/theme-provider";
-import { ThemeToggle } from "~/components/theme-toggle";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) => {
   let className =
@@ -13,23 +11,20 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) => {
 
 export default function Page({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <ThemeToggle />
-      <div className="grid grid-rows-layout gap-8 min-h-dvh p-8 pb-28 text-indigo-600 dark:text-indigo-400 overflow-x-hidden">
-        <div className="content-end">{children}</div>
-        <div className="flex gap-6 border-t dark:border-gray-800 px-8 pt-4 pb-12 fixed inset-x-0 bottom-0 bg-gray-50 dark:bg-gray-900 drop-shadow-2xl">
-          <Link to="/" className="flex gap-1 leading-tight select-none">
-            <span>{"❯"}</span>
-            <span className="animate-blink step">█</span>
-          </Link>
-          <Link to="/" className={navLinkClass}>
-            Home
-          </Link>
-          <Link to="/about" className={navLinkClass}>
-            About
-          </Link>
-        </div>
+    <div className="grid grid-rows-layout gap-8 min-h-dvh p-8 pb-28 text-indigo-600 dark:text-indigo-400 overflow-x-hidden">
+      <div className="content-end">{children}</div>
+      <div className="flex gap-6 border-t dark:border-gray-800 px-8 pt-4 pb-12 fixed inset-x-0 bottom-0 bg-gray-50 dark:bg-gray-900 drop-shadow-2xl">
+        <Link to="/" className="flex gap-1 leading-tight select-none">
+          <span>{"❯"}</span>
+          <span className="animate-blink step">█</span>
+        </Link>
+        <Link to="/" className={navLinkClass}>
+          Home
+        </Link>
+        <Link to="/about" className={navLinkClass}>
+          About
+        </Link>
       </div>
-    </ThemeProvider>
+    </div>
   );
 }

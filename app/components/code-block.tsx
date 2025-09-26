@@ -1,5 +1,5 @@
 import { MeshGradient } from "@paper-design/shaders-react";
-import type { ReactNode } from "react";
+import type { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 import * as React from "react";
 import Playground from "./playground";
 
@@ -9,7 +9,7 @@ interface PreProps {
   [key: string]: unknown;
 }
 
-export default function CodeBlock({ children, live, ...props }: PreProps) {
+function CodeBlock({ children, live, ...props }: PreProps) {
   if (!live) {
     // Filter out non-DOM props before passing to pre element
     const { dataLanguage, style, dataTheme, ...domProps } = props;
@@ -97,3 +97,10 @@ export default function CodeBlock({ children, live, ...props }: PreProps) {
 
   return <Playground code={cleanCode} scope={scope} />;
 }
+
+// Type-safe wrapper for MDX usage
+const CodeBlockWrapper: React.ComponentType<DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement>> = (props) => {
+  return <CodeBlock {...props} />;
+};
+
+export default CodeBlockWrapper;

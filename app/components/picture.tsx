@@ -1,6 +1,3 @@
-import { useContext } from "react";
-import { ThemeContext } from "~/theme-context";
-
 export default function Picture({
   src,
   themed = false,
@@ -10,7 +7,7 @@ export default function Picture({
   themed: boolean;
   alt: string;
 }) {
-  const { theme } = useContext(ThemeContext);
+  const theme = "dark";
   const baseImage = `${src}`;
   const darkImage = `${baseImage.split(".").join("-dark.")}`;
 

@@ -39,6 +39,12 @@ export const links: Route.LinksFunction = () => [
     href: "/favicon.png",
     type: "image/png",
   },
+  {
+    rel: "alternate",
+    type: "application/rss+xml",
+    title: "RSS Feed",
+    href: "/rss",
+  },
 ];
 
 const UserFingerprintContext = createContext<string>("");

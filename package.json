@@ -12,6 +12,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "cookie": "^1.0.2",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.24",
     "glob": "^11.0.3",
     "gray-matter": "^4.0.3",
     "isbot": "5.1.26",

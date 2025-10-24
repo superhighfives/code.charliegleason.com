@@ -39,6 +39,11 @@ async function ensureInitialised() {
 export async function loader({ request, params, context }: Route.LoaderArgs) {
   const { slug } = params;
 
+  // Get image index from query parameter (e.g., ?image=0)
+  const url = new URL(request.url);
+  const imageParam = url.searchParams.get("image");
+  const imageIndex = imageParam !== null ? parseInt(imageParam, 10) : null;
+
   const imageResponse = await context.assets.fetch(
     new URL(background, request.url),
   );
@@ -69,9 +74,13 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     // If image is true (boolean) or missing, fall back to text-only layout
     if (post.frontmatter.image) {
       try {
-        // Random selection (0-20)
-        const randomIndex = Math.floor(Math.random() * 21);
-        const aiImagePath = `/posts/${slug}/${randomIndex}.png`;
+        // Use query parameter if provided, otherwise random selection (0-20)
+        const selectedIndex = imageIndex !== null
+          ? imageIndex
+          : Math.floor(Math.random() * 21);
+        const aiImagePath = `/posts/${slug}/${selectedIndex}.png`;
+
+        console.log(`Loading AI image for ${slug}: index ${selectedIndex}${imageIndex !== null ? ' (from query param)' : ' (random)'}`);
 
         const aiImageResponse = await context.assets.fetch(
           new URL(aiImagePath, request.url),
@@ -92,11 +101,12 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
               `Detected edge color for ${slug}: ${edgeColors.dominant}`,
             );
 
-            // Step 2: Get dominant image color, excluding edge colors
+            // Step 2: Get dominant image color, excluding edge colors and boosting contrast
             const imageColors = await detectImageColors(aiImageBase64, {
               sampleRate: 10,
               excludeColor: edgeColors.left,
-              colorTolerance: 30, // Adjust this to be more/less strict
+              colorTolerance: 30, // How similar colors need to be to edge color to be excluded
+              contrastBoost: 4, // Boost colors that contrast with edge (0-10, higher = more contrast)
             });
             textColor = imageColors.dominant;
             backgroundColor = edgeColors.left;
@@ -146,7 +156,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
           style={{
             width: aiImageBase64 ? "600px" : "100%",
             height: "100%",
-            padding: aiImageBase64 ? "100px 0 0 100px" : "100px",
+            padding: aiImageBase64 ? "80px 0 0 80px" : "80px",
             display: "flex",
             flexDirection: "column",
             gap: "24",
@@ -158,6 +168,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
               fontSize: 48,
               lineClamp: aiImageBase64 ? 3 : 2,
               lineHeight: 1.25,
+              letterSpacing: "-0.01em",
             }}
           >
             {title}
@@ -167,8 +178,9 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
               style={{
                 display: "block",
                 fontSize: 30,
-                lineClamp: 2,
+                lineClamp: 3,
                 lineHeight: 1.5,
+                letterSpacing: "-0.01em",
               }}
             >
               {description}
@@ -205,8 +217,8 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
             gap: "-6px",
             flexDirection: "column",
             position: "absolute",
-            bottom: "64px",
-            left: "96px",
+            bottom: "54px",
+            left: "86px",
             fontSize: 24,
             color: aiImageBase64 ? textColor : "#4C4CDD",
           }}

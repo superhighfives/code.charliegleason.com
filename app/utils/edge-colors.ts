@@ -237,6 +237,7 @@ export async function detectEdgeColors(
  * @param options.sampleRate - Sample every N pixels (default: 10)
  * @param options.excludeColor - Hex color to exclude from dominant color calculation (e.g., "#ff0000")
  * @param options.colorTolerance - How similar colors need to be to the excluded color to be filtered (0-255, default: 30)
+ * @param options.contrastBoost - How much to boost colors with high contrast (0-10, default: 1). Higher values prefer more contrasting colors.
  * @returns Object containing dominant and average colors in hex format
  */
 export async function detectImageColors(
@@ -245,9 +246,10 @@ export async function detectImageColors(
     sampleRate?: number;
     excludeColor?: string;
     colorTolerance?: number;
+    contrastBoost?: number;
   } = {},
 ): Promise<ImageColors> {
-  const { sampleRate = 10, excludeColor, colorTolerance = 30 } = options;
+  const { sampleRate = 10, excludeColor, colorTolerance = 30, contrastBoost = 1 } = options;
 
   // Decode base64 to Uint8Array
   const base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
@@ -392,7 +394,7 @@ export async function detectImageColors(
   // Calculate average color
   const averageColor = calculateAverage(allPixels);
 
-  // Calculate dominant color using simple color quantization
+  // Calculate dominant color using color quantization with contrast weighting
   const colorMap = new Map<string, { color: RGB; count: number }>();
 
   for (const pixel of allPixels) {
@@ -415,23 +417,57 @@ export async function detectImageColors(
     }
   }
 
-  // Find most common color
-  let maxCount = 0;
+  // Find most common color, weighted by contrast to exclude color
+  let maxScore = 0;
   let dominantColor = { r: 0, g: 0, b: 0 };
 
   for (const { color, count } of colorMap.values()) {
-    if (count > maxCount) {
-      maxCount = count;
+    let score = count;
+
+    // If we have an exclude color, boost score for colors with higher contrast
+    if (excludeRGB) {
+      // Calculate contrast distance (Euclidean distance in RGB space)
+      const contrastDistance = Math.sqrt(
+        Math.pow(color.r - excludeRGB.r, 2) +
+        Math.pow(color.g - excludeRGB.g, 2) +
+        Math.pow(color.b - excludeRGB.b, 2)
+      );
+
+      // Boost score based on contrast distance
+      // Maximum possible distance is ~441 (sqrt(255^2 * 3))
+      // Normalize to 0-1 range, then apply user-defined boost multiplier
+      const normalizedContrast = contrastDistance / 441;
+      const boost = 1 + (normalizedContrast * contrastBoost);
+      score = count * boost;
+    }
+
+    if (score > maxScore) {
+      maxScore = score;
       dominantColor = color;
     }
+  }
+
+  // Calculate contrast distance for the selected dominant color
+  let contrastInfo = {};
+  if (excludeRGB) {
+    const finalContrastDistance = Math.sqrt(
+      Math.pow(dominantColor.r - excludeRGB.r, 2) +
+      Math.pow(dominantColor.g - excludeRGB.g, 2) +
+      Math.pow(dominantColor.b - excludeRGB.b, 2)
+    );
+    contrastInfo = {
+      contrastDistance: Math.round(finalContrastDistance),
+      maxPossibleDistance: 441,
+      contrastPercentage: Math.round((finalContrastDistance / 441) * 100) + '%',
+    };
   }
 
   console.log('Image color analysis:', {
     totalPixelsSampled: allPixels.length,
     uniqueColors: colorMap.size,
-    dominantColorCount: maxCount,
     dominantColor: rgbToHex(dominantColor.r, dominantColor.g, dominantColor.b),
     averageColor: rgbToHex(averageColor.r, averageColor.g, averageColor.b),
+    ...contrastInfo,
   });
 
   return {

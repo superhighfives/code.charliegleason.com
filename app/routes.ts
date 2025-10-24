@@ -6,6 +6,7 @@ export default [
   route("theme-switch", "routes/resources/theme-switch.tsx"),
   route("kudos", "routes/resources/kudos.tsx"),
   route("rss", "routes/resources/rss.tsx"),
+  route(":slug/social", "routes/social-grid.tsx"),
   route(":slug.png", "routes/resources/og-image.tsx"),
   route("posts.json", "routes/resources/posts.tsx"),
   ...routes("routes/post.tsx"),

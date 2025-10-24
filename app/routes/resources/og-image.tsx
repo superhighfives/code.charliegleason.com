@@ -1,8 +1,7 @@
+import { Buffer } from "node:buffer";
 import { initWasm as initResvg, Resvg } from "@resvg/resvg-wasm";
-import quantize from "quantize";
 import type { SatoriOptions } from "satori";
 import satori, { init as initSatori } from "satori/wasm";
-import UPNG from "upng-js";
 import { loadGoogleFont } from "workers-og";
 import initYoga from "yoga-wasm-web";
 import background from "~/assets/social-background.png";
@@ -36,81 +35,6 @@ async function ensureInitialised() {
   return initialisationPromise;
 }
 
-// Web API compatible base64 encoding (works in Cloudflare Workers)
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
-}
-
-async function extractBackgroundColorFromEdges(
-  base64Image: string,
-): Promise<string | null> {
-  try {
-    // Remove the data:image/png;base64, prefix
-    const base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
-
-    // Decode base64 using Web APIs (works in Cloudflare Workers)
-    const binaryString = atob(base64Data);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-
-    // Decode PNG using UPNG (WASM)
-    const img = UPNG.decode(bytes.buffer);
-    const rgba = UPNG.toRGBA8(img)[0]; // Get RGBA pixel data
-
-    const width = img.width;
-    const height = img.height;
-
-    // Sample edge pixels (corners and borders)
-    const edgePixels: Array<[number, number, number]> = [];
-    const sampleSize = 10; // How many pixels to sample from each edge
-
-    // Sample top edge
-    for (let x = 0; x < width; x += Math.floor(width / sampleSize)) {
-      const idx = x * 4;
-      edgePixels.push([rgba[idx], rgba[idx + 1], rgba[idx + 2]]);
-    }
-
-    // Sample bottom edge
-    for (let x = 0; x < width; x += Math.floor(width / sampleSize)) {
-      const idx = ((height - 1) * width + x) * 4;
-      edgePixels.push([rgba[idx], rgba[idx + 1], rgba[idx + 2]]);
-    }
-
-    // Sample left edge
-    for (let y = 0; y < height; y += Math.floor(height / sampleSize)) {
-      const idx = y * width * 4;
-      edgePixels.push([rgba[idx], rgba[idx + 1], rgba[idx + 2]]);
-    }
-
-    // Sample right edge
-    for (let y = 0; y < height; y += Math.floor(height / sampleSize)) {
-      const idx = (y * width + (width - 1)) * 4;
-      edgePixels.push([rgba[idx], rgba[idx + 1], rgba[idx + 2]]);
-    }
-
-    // Use quantize to find the dominant color from edge pixels
-    const colorMap = quantize(edgePixels, 5); // Get 5 most common colors
-    if (!colorMap) {
-      return null;
-    }
-
-    // Get the most dominant color
-    const dominantColor = colorMap.palette()[0];
-
-    return `rgb(${dominantColor[0]}, ${dominantColor[1]}, ${dominantColor[2]})`;
-  } catch (e) {
-    console.error("Error extracting background color from edges:", e);
-    return null;
-  }
-}
-
 export async function loader({ request, params, context }: Route.LoaderArgs) {
   const { slug } = params;
 
@@ -118,7 +42,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     new URL(background, request.url),
   );
   const imageBuffer = await imageResponse.arrayBuffer();
-  const imageBase64 = `data:image/png;base64,${arrayBufferToBase64(imageBuffer)}`;
+  const imageBase64 = `data:image/png;base64,${Buffer.from(imageBuffer).toString("base64")}`;
 
   try {
     await ensureInitialised();

@@ -95,11 +95,11 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
             // Step 2: Get dominant image color, excluding edge colors
             const imageColors = await detectImageColors(aiImageBase64, {
               sampleRate: 10,
-              excludeColor: edgeColors.dominant,
+              excludeColor: edgeColors.left,
               colorTolerance: 30, // Adjust this to be more/less strict
             });
             textColor = imageColors.dominant;
-            backgroundColor = edgeColors.averageAll;
+            backgroundColor = edgeColors.left;
             console.log(
               `Detected text color for ${slug}: ${textColor} (excluding edge color)`,
             );
@@ -155,8 +155,8 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
           <div
             style={{
               display: "block",
-              fontSize: 60,
-              lineClamp: aiImageBase64 ? 4 : 2,
+              fontSize: 48,
+              lineClamp: aiImageBase64 ? 3 : 2,
               lineHeight: 1.25,
             }}
           >

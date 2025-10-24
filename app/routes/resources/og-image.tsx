@@ -82,23 +82,33 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
           const aiImageBuffer = await aiImageResponse.arrayBuffer();
           aiImageBase64 = `data:image/png;base64,${Buffer.from(aiImageBuffer).toString("base64")}`;
 
-          // Detect edge colors from AI image
+          // Detect colors from AI image
           try {
+            // Step 1: Get edge colors
             const edgeColors = await detectEdgeColors(aiImageBase64, {
               sampleRate: 10,
               edgeDepth: 10,
             });
+            console.log(
+              `Detected edge color for ${slug}: ${edgeColors.dominant}`,
+            );
+
+            // Step 2: Get dominant image color, excluding edge colors
             const imageColors = await detectImageColors(aiImageBase64, {
               sampleRate: 10,
+              excludeColor: edgeColors.dominant,
+              colorTolerance: 30, // Adjust this to be more/less strict
             });
-            backgroundColor = edgeColors.dominant;
             textColor = imageColors.dominant;
-            console.log(`Detected edge color for ${slug}: ${backgroundColor}`);
-          } catch (edgeError) {
+            backgroundColor = edgeColors.averageAll;
             console.log(
-              `Edge color detection failed for ${slug}, using fallback: ${edgeError}`,
+              `Detected text color for ${slug}: ${textColor} (excluding edge color)`,
             );
-            // Falls back to url("${imageBase64}")
+          } catch (colorError) {
+            console.log(
+              `Color detection failed for ${slug}, using fallback: ${colorError}`,
+            );
+            // Falls back to white
           }
         }
       } catch (e) {
@@ -147,7 +157,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
             style={{
               display: "block",
               fontSize: 60,
-              lineClamp: 2,
+              lineClamp: aiImageBase64 ? 4 : 2,
               lineHeight: 1.25,
             }}
           >
@@ -198,18 +208,18 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
             position: "absolute",
             bottom: "64px",
             left: "96px",
-            fontSize: 32,
-            color: aiImageBase64 ? "inherit" : "#4C4CDD",
+            fontSize: 24,
+            color: aiImageBase64 ? textColor : "#4C4CDD",
           }}
         >
           {/** biome-ignore lint/a11y/noSvgWithoutTitle: output as a static image */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="48"
-            height="48"
+            width="32"
+            height="32"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="currentColor"
+            stroke={textColor}
             stroke-width="2"
             style={{ transform: "rotate(45deg)" }}
           >

@@ -235,15 +235,19 @@ export async function detectEdgeColors(
  * @param base64Image - Base64-encoded PNG image (with or without data URI prefix)
  * @param options - Configuration options
  * @param options.sampleRate - Sample every N pixels (default: 10)
+ * @param options.excludeColor - Hex color to exclude from dominant color calculation (e.g., "#ff0000")
+ * @param options.colorTolerance - How similar colors need to be to the excluded color to be filtered (0-255, default: 30)
  * @returns Object containing dominant and average colors in hex format
  */
 export async function detectImageColors(
   base64Image: string,
   options: {
     sampleRate?: number;
+    excludeColor?: string;
+    colorTolerance?: number;
   } = {},
 ): Promise<ImageColors> {
-  const { sampleRate = 10 } = options;
+  const { sampleRate = 10, excludeColor, colorTolerance = 30 } = options;
 
   // Decode base64 to Uint8Array
   const base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
@@ -270,6 +274,28 @@ export async function detectImageColors(
     dataLength: data.length,
     bytesPerPixel: data.length / (width * height),
   });
+
+  // Parse exclude color if provided
+  let excludeRGB: RGB | null = null;
+  if (excludeColor) {
+    const hex = excludeColor.replace('#', '');
+    excludeRGB = {
+      r: parseInt(hex.substring(0, 2), 16),
+      g: parseInt(hex.substring(2, 4), 16),
+      b: parseInt(hex.substring(4, 6), 16),
+    };
+    console.log('Excluding color:', excludeColor, excludeRGB);
+  }
+
+  // Helper to check if a color is similar to the exclude color
+  const isColorSimilar = (pixel: RGB, target: RGB, tolerance: number): boolean => {
+    const distance = Math.sqrt(
+      Math.pow(pixel.r - target.r, 2) +
+      Math.pow(pixel.g - target.g, 2) +
+      Math.pow(pixel.b - target.b, 2)
+    );
+    return distance <= tolerance;
+  };
 
   // Helper functions
   const getPixel = (x: number, y: number): RGB => {
@@ -343,11 +369,24 @@ export async function detectImageColors(
 
   // Sample pixels from entire image
   const allPixels: RGB[] = [];
+  let excludedPixelCount = 0;
 
   for (let y = 0; y < height; y += sampleRate) {
     for (let x = 0; x < width; x += sampleRate) {
-      allPixels.push(getPixel(x, y));
+      const pixel = getPixel(x, y);
+
+      // Skip pixels that are similar to the exclude color
+      if (excludeRGB && isColorSimilar(pixel, excludeRGB, colorTolerance)) {
+        excludedPixelCount++;
+        continue;
+      }
+
+      allPixels.push(pixel);
     }
+  }
+
+  if (excludeRGB) {
+    console.log(`Excluded ${excludedPixelCount} pixels similar to ${excludeColor}`);
   }
 
   // Calculate average color

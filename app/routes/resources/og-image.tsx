@@ -75,12 +75,13 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     if (post.frontmatter.image) {
       try {
         // Use query parameter if provided, otherwise random selection (0-20)
-        const selectedIndex = imageIndex !== null
-          ? imageIndex
-          : Math.floor(Math.random() * 21);
+        const selectedIndex =
+          imageIndex !== null ? imageIndex : Math.floor(Math.random() * 21);
         const aiImagePath = `/posts/${slug}/${selectedIndex}.png`;
 
-        console.log(`Loading AI image for ${slug}: index ${selectedIndex}${imageIndex !== null ? ' (from query param)' : ' (random)'}`);
+        console.log(
+          `Loading AI image for ${slug}: index ${selectedIndex}${imageIndex !== null ? " (from query param)" : " (random)"}`,
+        );
 
         const aiImageResponse = await context.assets.fetch(
           new URL(aiImagePath, request.url),
@@ -261,7 +262,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "cache-control": "public, immutable, no-transform, max-age=31536000",
+        "cache-control": "no-cache",
       },
     });
   }

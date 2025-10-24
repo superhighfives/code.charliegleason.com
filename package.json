@@ -76,7 +76,8 @@
     "generate:images": "npx tsx scripts/generate-images.ts",
     "generate:videos": "npx tsx scripts/generate-videos.ts",
     "validate:images": "npx tsx scripts/validate-images.ts",
-    "delete:invalid-images": "npx tsx scripts/delete-invalid-images.ts"
+    "delete:invalid-images": "npx tsx scripts/delete-invalid-images.ts",
+    "fix:image-profiles": "npx tsx scripts/fix-image-profiles.ts"
   },
   "type": "module"
 }

@@ -6,6 +6,7 @@ import { loadGoogleFont } from "workers-og";
 import initYoga from "yoga-wasm-web";
 import background from "~/assets/social-background.png";
 import { loadAllMdxRuntime } from "~/mdx/mdx-runtime";
+import { detectEdgeColors, detectImageColors } from "~/utils/edge-colors";
 // @ts-expect-error: wasm is untyped in Vite
 import RESVG_WASM from "../../vendor/resvg.wasm";
 // @ts-expect-error: wasm is untyped in Vite
@@ -62,6 +63,9 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
 
     // Check for generated AI images
     let aiImageBase64: string | null = null;
+    let backgroundColor = `#03060E`;
+    let textColor = "white";
+
     // Check if image is a string (custom prompt) - this means AI images should be generated
     // If image is true (boolean) or missing, fall back to text-only layout
     if (post.frontmatter.image) {
@@ -77,6 +81,25 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
         if (aiImageResponse.ok) {
           const aiImageBuffer = await aiImageResponse.arrayBuffer();
           aiImageBase64 = `data:image/png;base64,${Buffer.from(aiImageBuffer).toString("base64")}`;
+
+          // Detect edge colors from AI image
+          try {
+            const edgeColors = await detectEdgeColors(aiImageBase64, {
+              sampleRate: 10,
+              edgeDepth: 10,
+            });
+            const imageColors = await detectImageColors(aiImageBase64, {
+              sampleRate: 10,
+            });
+            backgroundColor = edgeColors.dominant;
+            textColor = imageColors.dominant;
+            console.log(`Detected edge color for ${slug}: ${backgroundColor}`);
+          } catch (edgeError) {
+            console.log(
+              `Edge color detection failed for ${slug}, using fallback: ${edgeError}`,
+            );
+            // Falls back to url("${imageBase64}")
+          }
         }
       } catch (e) {
         // If image doesn't exist, we'll fall back to text-only layout
@@ -102,11 +125,11 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
         style={{
           width: options.width,
           height: options.height,
-          background: `url("${imageBase64}")`,
+          background: backgroundColor,
           backgroundSize: "1200 630",
           display: "flex",
           flexDirection: "row",
-          color: "white",
+          color: textColor,
         }}
       >
         {/* Left side: Text content */}
@@ -114,11 +137,10 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
           style={{
             width: aiImageBase64 ? "600px" : "100%",
             height: "100%",
-            padding: "100px 0 0 100px",
+            padding: aiImageBase64 ? "100px 0 0 100px" : "100px",
             display: "flex",
             flexDirection: "column",
             gap: "24",
-            border: "1px solid red",
           }}
         >
           <div
@@ -177,6 +199,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
             bottom: "64px",
             left: "96px",
             fontSize: 32,
+            color: aiImageBase64 ? "inherit" : "#4C4CDD",
           }}
         >
           {/** biome-ignore lint/a11y/noSvgWithoutTitle: output as a static image */}

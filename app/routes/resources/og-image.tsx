@@ -60,6 +60,31 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
 
     const { title, description } = post.frontmatter;
 
+    // Check for generated AI images
+    let aiImageBase64: string | null = null;
+    // Check if image is a string (custom prompt) - this means AI images should be generated
+    // If image is true (boolean) or missing, fall back to text-only layout
+    if (post.frontmatter.image) {
+      try {
+        // Random selection (0-20)
+        const randomIndex = Math.floor(Math.random() * 21);
+        const aiImagePath = `/posts/${slug}/${randomIndex}.png`;
+
+        const aiImageResponse = await context.assets.fetch(
+          new URL(aiImagePath, request.url),
+        );
+
+        if (aiImageResponse.ok) {
+          const aiImageBuffer = await aiImageResponse.arrayBuffer();
+          aiImageBase64 = `data:image/png;base64,${Buffer.from(aiImageBuffer).toString("base64")}`;
+        }
+      } catch (e) {
+        // If image doesn't exist, we'll fall back to text-only layout
+        console.log(`No AI image found for ${slug}, using fallback: ${e}`);
+      }
+    }
+    // If image is true or missing, aiImageBase64 stays null and we use text-only layout
+
     const options: SatoriOptions = {
       width: OG_IMAGE_WIDTH,
       height: OG_IMAGE_HEIGHT,
@@ -79,33 +104,67 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
           height: options.height,
           background: `url("${imageBase64}")`,
           backgroundSize: "1200 630",
-          padding: "100px",
-          color: "white",
-          gap: "24",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
+          color: "white",
         }}
       >
+        {/* Left side: Text content */}
         <div
           style={{
-            display: "block",
-            fontSize: 60,
-            lineClamp: 2,
-            lineHeight: 1.25,
+            width: aiImageBase64 ? "600px" : "100%",
+            height: "100%",
+            padding: "100px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "24",
           }}
         >
-          {title}
-        </div>
-        {description ? (
           <div
             style={{
               display: "block",
-              fontSize: 30,
+              fontSize: 60,
               lineClamp: 2,
-              lineHeight: 1.5,
+              lineHeight: 1.25,
             }}
           >
-            {description}
+            {title}
+          </div>
+          {description ? (
+            <div
+              style={{
+                display: "block",
+                fontSize: 30,
+                lineClamp: 2,
+                lineHeight: 1.5,
+              }}
+            >
+              {description}
+            </div>
+          ) : null}
+        </div>
+
+        {/* Right side: AI image (if available) */}
+        {aiImageBase64 ? (
+          <div
+            style={{
+              width: "600px",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "100px",
+            }}
+          >
+            <img
+              src={aiImageBase64}
+              style={{
+                width: "400px",
+                height: "400px",
+                objectFit: "contain",
+              }}
+              alt="AI generated image"
+            />
           </div>
         ) : null}
       </div>,

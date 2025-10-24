@@ -1,41 +1,141 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { glob } from "glob";
-import matter from "gray-matter";
+import { decode } from "fast-png";
 import Replicate from "replicate";
-
-// Load environment variables from .dev.vars
-async function loadEnvVars() {
-  try {
-    const envContent = await readFile(".dev.vars", "utf-8");
-    for (const line of envContent.split("\n")) {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith("#")) {
-        const [key, ...valueParts] = trimmed.split("=");
-        if (key && valueParts.length > 0) {
-          process.env[key.trim()] = valueParts.join("=").trim();
-        }
-      }
-    }
-  } catch {
-    console.warn("⚠️  Could not load .dev.vars file");
-  }
-}
+import sharp from "sharp";
+import { IMAGES_PER_POST, OUTPUT_DIR, getPosts, loadEnvVars } from "./utils.js";
 
 // Load env vars before accessing them
 await loadEnvVars();
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
-const IMAGES_PER_POST = 21; // 0-20
-const OUTPUT_DIR = "public/posts";
-const POSTS_DIR = "posts";
+const MAX_RETRIES = 3;
+const COLOR_THRESHOLD = 15; // RGB units tolerance for "very close" colors
+const LEFT_EDGE_WIDTH = 5; // Number of pixels from left edge to sample
 
-interface PostData {
-  slug: string;
-  title: string;
-  description?: string;
-  image: string;
+/**
+ * Validates that the leftmost edge of an image has a consistent solid color
+ * @param buffer - The image buffer to validate
+ * @returns true if the left edge is a solid color, false otherwise
+ */
+async function hasValidSolidLeftEdge(buffer: Buffer): Promise<boolean> {
+  try {
+    // Decode PNG using fast-png
+    const png = decode(buffer);
+    const { width, height, data, depth, channels } = png;
+
+    if (!width || !height || !data || data.length === 0) {
+      console.log("   ⚠️  Could not read image dimensions");
+      return false;
+    }
+
+    // Helper to normalize color values based on bit depth
+    const normalizeValue = (value: number): number => {
+      if (depth === 16) {
+        return Math.round(value / 257); // 16-bit to 8-bit
+      }
+      return value;
+    };
+
+    // Helper to get pixel at specific coordinates
+    const getPixel = (x: number, y: number) => {
+      const bytesPerPixel = channels || 4;
+      const idx = (y * width + x) * bytesPerPixel;
+
+      if (channels === 1 || channels === 2) {
+        // Grayscale
+        const gray = normalizeValue(data[idx] ?? 0);
+        return { r: gray, g: gray, b: gray };
+      } else {
+        // RGB or RGBA
+        return {
+          r: normalizeValue(data[idx] ?? 0),
+          g: normalizeValue(data[idx + 1] ?? 0),
+          b: normalizeValue(data[idx + 2] ?? 0),
+        };
+      }
+    };
+
+    // Get all pixels from leftmost 5 columns
+    const leftEdgePixels: Array<{ r: number; g: number; b: number }> = [];
+    const edgeWidth = Math.min(LEFT_EDGE_WIDTH, width);
+    for (let x = 0; x < edgeWidth; x++) {
+      for (let y = 0; y < height; y++) {
+        leftEdgePixels.push(getPixel(x, y));
+      }
+    }
+
+    // Calculate average color of left edge
+    const avgColor = {
+      r: leftEdgePixels.reduce((sum, p) => sum + p.r, 0) / leftEdgePixels.length,
+      g: leftEdgePixels.reduce((sum, p) => sum + p.g, 0) / leftEdgePixels.length,
+      b: leftEdgePixels.reduce((sum, p) => sum + p.b, 0) / leftEdgePixels.length,
+    };
+
+    // Check if all pixels are within threshold of average
+    const allPixelsClose = leftEdgePixels.every((pixel) => {
+      const rDiff = Math.abs(pixel.r - avgColor.r);
+      const gDiff = Math.abs(pixel.g - avgColor.g);
+      const bDiff = Math.abs(pixel.b - avgColor.b);
+      return (
+        rDiff <= COLOR_THRESHOLD &&
+        gDiff <= COLOR_THRESHOLD &&
+        bDiff <= COLOR_THRESHOLD
+      );
+    });
+
+    if (!allPixelsClose) {
+      // Calculate max variance for logging
+      const variances = leftEdgePixels.map((pixel) => ({
+        r: Math.abs(pixel.r - avgColor.r),
+        g: Math.abs(pixel.g - avgColor.g),
+        b: Math.abs(pixel.b - avgColor.b),
+      }));
+      const maxVariance = Math.max(
+        ...variances.map((v) => Math.max(v.r, v.g, v.b)),
+      );
+      console.log(
+        `   ⚠️  Left edge (${edgeWidth}px) not solid: max color variance ${maxVariance.toFixed(1)} (threshold: ${COLOR_THRESHOLD})`,
+      );
+    }
+
+    return allPixelsClose;
+  } catch (error) {
+    console.error("   ❌ Error validating image:", error);
+    return false;
+  }
+}
+
+/**
+ * Optimizes a PNG image to reduce file size
+ * @param imagePath - Path to the PNG file to optimize
+ */
+async function optimizePng(imagePath: string): Promise<void> {
+  try {
+    const originalBuffer = await readFile(imagePath);
+    const originalSize = originalBuffer.length;
+
+    // Optimize the PNG with sharp
+    const optimizedBuffer = await sharp(originalBuffer)
+      .png({
+        compressionLevel: 9, // Maximum compression
+        quality: 90, // Good quality with compression
+        effort: 10, // Maximum effort for smaller file size
+      })
+      .toBuffer();
+
+    const optimizedSize = optimizedBuffer.length;
+    const savings = ((1 - optimizedSize / originalSize) * 100).toFixed(1);
+
+    await writeFile(imagePath, optimizedBuffer);
+    console.log(
+      `   📦 Optimized: ${(originalSize / 1024).toFixed(1)}KB → ${(optimizedSize / 1024).toFixed(1)}KB (${savings}% smaller)`,
+    );
+  } catch (error) {
+    console.error("   ⚠️  Failed to optimize PNG:", error);
+    // Don't fail the whole process if optimization fails
+  }
 }
 
 async function main() {
@@ -50,25 +150,7 @@ async function main() {
     auth: REPLICATE_API_TOKEN,
   });
 
-  // Find all MDX files in posts directory
-  const mdxFiles = await glob(`${POSTS_DIR}/**/*.mdx`);
-
-  // Parse frontmatter from each MDX file
-  const posts: PostData[] = [];
-  for (const filePath of mdxFiles) {
-    const fileContent = await readFile(filePath, "utf-8");
-    const { data } = matter(fileContent);
-
-    // Only include posts with image as a string (the prompt description)
-    if (typeof data.image === "string" && data.image.trim()) {
-      posts.push({
-        slug: data.slug || filePath.split("/").pop()?.replace(".mdx", "") || "",
-        title: data.title || "Untitled",
-        description: data.description,
-        image: data.image,
-      });
-    }
-  }
+  const posts = await getPosts();
 
   console.log(`📚 Found ${posts.length} posts with image generation enabled\n`);
 
@@ -90,7 +172,7 @@ async function main() {
     const existingIndices = new Set(
       existingImages
         .filter((file) => file.match(/^\d+\.png$/))
-        .map((file) => Number.parseInt(file.replace(".png", ""))),
+        .map((file) => Number.parseInt(file.replace(".png", ""), 10)),
     );
 
     const missingIndices = Array.from(
@@ -110,47 +192,84 @@ async function main() {
     // Generate missing images
     for (const index of missingIndices) {
       const imagePath = join(postDir, `${index}.png`);
+      let attempt = 0;
+      let success = false;
 
-      try {
-        console.log(`   🎨 Generating image ${index}...`);
+      while (attempt < MAX_RETRIES && !success) {
+        attempt++;
+        const attemptPrefix = attempt > 1 ? ` (attempt ${attempt}/${MAX_RETRIES})` : "";
 
-        // Use the image field as the prompt description
-        const prompt = `${post.image}, solid background, LTNP style`;
+        try {
+          console.log(`   🎨 Generating image ${index}${attemptPrefix}...`);
 
-        console.log(`   📝 Prompt: ${prompt}`);
+          // Use the image field as the prompt description
+          const prompt = `${post.image}, solid background, LTNP style`;
 
-        const output = (await replicate.run(
-          "jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc",
-          {
-            input: {
-              prompt,
-              output_format: "png",
-              aspect_ratio: "1:1", // 1024x1024
+          if (attempt === 1) {
+            console.log(`   📝 Prompt: ${prompt}`);
+          }
+
+          const output = (await replicate.run(
+            "jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc",
+            {
+              input: {
+                prompt,
+                output_format: "png",
+                aspect_ratio: "1:1", // 1024x1024
+              },
             },
-          },
-        )) as string | string[];
+          )) as string | string[];
 
-        // Handle output - it might be a URL string or array of URLs
-        const imageUrl = Array.isArray(output) ? output[0] : output;
+          // Handle output - it might be a URL string or array of URLs
+          const imageUrl = Array.isArray(output) ? output[0] : output;
 
-        if (!imageUrl) {
-          throw new Error("No image URL returned from Replicate");
+          if (!imageUrl) {
+            throw new Error("No image URL returned from Replicate");
+          }
+
+          // Download the image
+          console.log(`   📥 Downloading from: ${imageUrl}`);
+          const response = await fetch(imageUrl);
+
+          if (!response.ok) {
+            throw new Error(`Failed to download image: ${response.statusText}`);
+          }
+
+          const buffer = Buffer.from(await response.arrayBuffer());
+
+          // Validate solid left edge
+          console.log(`   🔍 Validating solid left edge...`);
+          const isValid = await hasValidSolidLeftEdge(buffer);
+
+          if (!isValid) {
+            if (attempt < MAX_RETRIES) {
+              console.log(`   🔄 Retrying generation...`);
+              continue;
+            } else {
+              console.log(
+                `   ⚠️  Max retries reached. Skipping image ${index}.`,
+              );
+              break;
+            }
+          }
+
+          // Save the valid image
+          await writeFile(imagePath, buffer);
+          console.log(`   ✅ Saved: ${imagePath}`);
+
+          // Optimize the PNG to reduce file size
+          await optimizePng(imagePath);
+
+          success = true;
+        } catch (error) {
+          console.error(
+            `   ❌ Failed to generate image ${index} (attempt ${attempt}):`,
+            error,
+          );
+          if (attempt >= MAX_RETRIES) {
+            console.log(`   ⚠️  Max retries reached. Skipping image ${index}.`);
+          }
         }
-
-        // Download the image
-        console.log(`   📥 Downloading from: ${imageUrl}`);
-        const response = await fetch(imageUrl);
-
-        if (!response.ok) {
-          throw new Error(`Failed to download image: ${response.statusText}`);
-        }
-
-        const buffer = Buffer.from(await response.arrayBuffer());
-        await writeFile(imagePath, buffer);
-
-        console.log(`   ✅ Saved: ${imagePath}`);
-      } catch (error) {
-        console.error(`   ❌ Failed to generate image ${index}:`, error);
       }
     }
   }

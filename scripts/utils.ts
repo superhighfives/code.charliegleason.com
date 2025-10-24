@@ -31,6 +31,12 @@ export const IMAGES_PER_POST = 21; // 0-20
 export const OUTPUT_DIR = "public/posts";
 export const POSTS_DIR = "posts";
 
+// Image validation constants
+export const COLOR_THRESHOLD = 15; // RGB units tolerance for "very close" colors (per-channel, legacy)
+export const PERCEPTUAL_COLOR_THRESHOLD = 30; // Euclidean distance threshold in RGB space for perceptual color difference
+export const LEFT_EDGE_WIDTH = 5; // Number of pixels from left edge to sample
+export const SOLID_EDGE_PERCENTAGE = 0.95; // 95% of pixels must be within threshold for a solid edge
+
 // Parse all MDX posts and extract metadata
 export async function getPosts(): Promise<PostData[]> {
   const mdxFiles = await glob(`${POSTS_DIR}/**/*.mdx`);

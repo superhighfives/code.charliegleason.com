@@ -1,10 +1,10 @@
 import { decode } from "fast-png";
-
-interface RGB {
-  r: number;
-  g: number;
-  b: number;
-}
+import type { PngData, RGB } from "./png-utils.js";
+import {
+  calculateAverageColor,
+  getPixelFromPngData,
+  rgbToHex,
+} from "./png-utils.js";
 
 export interface EdgeColors {
   top: string;
@@ -67,75 +67,8 @@ export async function detectEdgeColors(
     samplePixels: Array.from(data.slice(0, 20))
   });
 
-  // Helper functions
-  const getPixel = (x: number, y: number): RGB => {
-    const bytesPerPixel = channels || 4;
-    const idx = (y * width + x) * bytesPerPixel;
-
-    // Helper to normalize color values based on bit depth
-    const normalizeValue = (value: number): number => {
-      if (depth === 16) {
-        // 16-bit values need to be scaled down to 8-bit (0-255)
-        return Math.round(value / 257); // 65535 / 255 ≈ 257
-      }
-      return value;
-    };
-
-    // Handle different channel configurations
-    if (channels === 1) {
-      // Grayscale - use same value for R, G, B
-      const gray = normalizeValue(data[idx] ?? 0);
-      return { r: gray, g: gray, b: gray };
-    } else if (channels === 2) {
-      // Grayscale + Alpha - use grayscale value for R, G, B
-      const gray = normalizeValue(data[idx] ?? 0);
-      return { r: gray, g: gray, b: gray };
-    } else if (channels === 3) {
-      // RGB (no alpha)
-      return {
-        r: normalizeValue(data[idx] ?? 0),
-        g: normalizeValue(data[idx + 1] ?? 0),
-        b: normalizeValue(data[idx + 2] ?? 0),
-      };
-    } else {
-      // RGBA (4 channels) - default
-      return {
-        r: normalizeValue(data[idx] ?? 0),
-        g: normalizeValue(data[idx + 1] ?? 0),
-        b: normalizeValue(data[idx + 2] ?? 0),
-      };
-    }
-  };
-
-  const rgbToHex = (r: number, g: number, b: number): string => {
-    // Handle NaN or invalid values by defaulting to 0
-    const safeR = Number.isFinite(r) ? Math.max(0, Math.min(255, Math.round(r))) : 0;
-    const safeG = Number.isFinite(g) ? Math.max(0, Math.min(255, Math.round(g))) : 0;
-    const safeB = Number.isFinite(b) ? Math.max(0, Math.min(255, Math.round(b))) : 0;
-
-    return `#${[safeR, safeG, safeB]
-      .map((x) => x.toString(16).padStart(2, "0"))
-      .join("")}`;
-  };
-
-  const calculateAverage = (pixels: RGB[]): RGB => {
-    if (pixels.length === 0) return { r: 0, g: 0, b: 0 };
-
-    const sum = pixels.reduce(
-      (acc, p) => ({
-        r: acc.r + p.r,
-        g: acc.g + p.g,
-        b: acc.b + p.b,
-      }),
-      { r: 0, g: 0, b: 0 },
-    );
-
-    return {
-      r: sum.r / pixels.length,
-      g: sum.g / pixels.length,
-      b: sum.b / pixels.length,
-    };
-  };
+  // Use shared PNG utilities
+  const pngData: PngData = { width, height, data: data as Uint8Array, depth, channels, palette };
 
   // Collect edge pixels
   const edgePixels = {
@@ -148,36 +81,36 @@ export async function detectEdgeColors(
   // Sample top edge (first edgeDepth rows)
   for (let y = 0; y < Math.min(edgeDepth, height); y++) {
     for (let x = 0; x < width; x += sampleRate) {
-      edgePixels.top.push(getPixel(x, y));
+      edgePixels.top.push(getPixelFromPngData(pngData, x, y));
     }
   }
 
   // Sample bottom edge (last edgeDepth rows)
   for (let y = Math.max(height - edgeDepth, 0); y < height; y++) {
     for (let x = 0; x < width; x += sampleRate) {
-      edgePixels.bottom.push(getPixel(x, y));
+      edgePixels.bottom.push(getPixelFromPngData(pngData, x, y));
     }
   }
 
   // Sample left edge (first edgeDepth columns)
   for (let x = 0; x < Math.min(edgeDepth, width); x++) {
     for (let y = 0; y < height; y += sampleRate) {
-      edgePixels.left.push(getPixel(x, y));
+      edgePixels.left.push(getPixelFromPngData(pngData, x, y));
     }
   }
 
   // Sample right edge (last edgeDepth columns)
   for (let x = Math.max(width - edgeDepth, 0); x < width; x++) {
     for (let y = 0; y < height; y += sampleRate) {
-      edgePixels.right.push(getPixel(x, y));
+      edgePixels.right.push(getPixelFromPngData(pngData, x, y));
     }
   }
 
   // Calculate averages for each edge
-  const topAvg = calculateAverage(edgePixels.top);
-  const bottomAvg = calculateAverage(edgePixels.bottom);
-  const leftAvg = calculateAverage(edgePixels.left);
-  const rightAvg = calculateAverage(edgePixels.right);
+  const topAvg = calculateAverageColor(edgePixels.top);
+  const bottomAvg = calculateAverageColor(edgePixels.bottom);
+  const leftAvg = calculateAverageColor(edgePixels.left);
+  const rightAvg = calculateAverageColor(edgePixels.right);
 
   // Calculate dominant color from all edges
   const allEdgePixels = [
@@ -186,7 +119,7 @@ export async function detectEdgeColors(
     ...edgePixels.left,
     ...edgePixels.right,
   ];
-  const dominantAvg = calculateAverage(allEdgePixels);
+  const dominantAvg = calculateAverageColor(allEdgePixels);
 
   // Debug: Log if we're getting invalid values
   if (!Number.isFinite(dominantAvg.r) || !Number.isFinite(dominantAvg.g) || !Number.isFinite(dominantAvg.b)) {
@@ -261,7 +194,7 @@ export async function detectImageColors(
 
   // Decode PNG
   const png = decode(bytes);
-  const { width, height, data, depth, channels } = png;
+  const { width, height, data, depth, channels, palette } = png;
 
   // Validate decoded PNG data
   if (!width || !height || !data || data.length === 0) {
@@ -299,75 +232,8 @@ export async function detectImageColors(
     return distance <= tolerance;
   };
 
-  // Helper functions
-  const getPixel = (x: number, y: number): RGB => {
-    const bytesPerPixel = channels || 4;
-    const idx = (y * width + x) * bytesPerPixel;
-
-    // Helper to normalize color values based on bit depth
-    const normalizeValue = (value: number): number => {
-      if (depth === 16) {
-        // 16-bit values need to be scaled down to 8-bit (0-255)
-        return Math.round(value / 257); // 65535 / 255 ≈ 257
-      }
-      return value;
-    };
-
-    // Handle different channel configurations
-    if (channels === 1) {
-      // Grayscale - use same value for R, G, B
-      const gray = normalizeValue(data[idx] ?? 0);
-      return { r: gray, g: gray, b: gray };
-    } else if (channels === 2) {
-      // Grayscale + Alpha - use grayscale value for R, G, B
-      const gray = normalizeValue(data[idx] ?? 0);
-      return { r: gray, g: gray, b: gray };
-    } else if (channels === 3) {
-      // RGB (no alpha)
-      return {
-        r: normalizeValue(data[idx] ?? 0),
-        g: normalizeValue(data[idx + 1] ?? 0),
-        b: normalizeValue(data[idx + 2] ?? 0),
-      };
-    } else {
-      // RGBA (4 channels) - default
-      return {
-        r: normalizeValue(data[idx] ?? 0),
-        g: normalizeValue(data[idx + 1] ?? 0),
-        b: normalizeValue(data[idx + 2] ?? 0),
-      };
-    }
-  };
-
-  const rgbToHex = (r: number, g: number, b: number): string => {
-    // Handle NaN or invalid values by defaulting to 0
-    const safeR = Number.isFinite(r) ? Math.max(0, Math.min(255, Math.round(r))) : 0;
-    const safeG = Number.isFinite(g) ? Math.max(0, Math.min(255, Math.round(g))) : 0;
-    const safeB = Number.isFinite(b) ? Math.max(0, Math.min(255, Math.round(b))) : 0;
-
-    return `#${[safeR, safeG, safeB]
-      .map((x) => x.toString(16).padStart(2, "0"))
-      .join("")}`;
-  };
-
-  const calculateAverage = (pixels: RGB[]): RGB => {
-    if (pixels.length === 0) return { r: 0, g: 0, b: 0 };
-
-    const sum = pixels.reduce(
-      (acc, p) => ({
-        r: acc.r + p.r,
-        g: acc.g + p.g,
-        b: acc.b + p.b,
-      }),
-      { r: 0, g: 0, b: 0 },
-    );
-
-    return {
-      r: sum.r / pixels.length,
-      g: sum.g / pixels.length,
-      b: sum.b / pixels.length,
-    };
-  };
+  // Use shared PNG utilities
+  const pngData: PngData = { width, height, data: data as Uint8Array, depth, channels, palette };
 
   // Sample pixels from entire image
   const allPixels: RGB[] = [];
@@ -375,7 +241,7 @@ export async function detectImageColors(
 
   for (let y = 0; y < height; y += sampleRate) {
     for (let x = 0; x < width; x += sampleRate) {
-      const pixel = getPixel(x, y);
+      const pixel = getPixelFromPngData(pngData, x, y);
 
       // Skip pixels that are similar to the exclude color
       if (excludeRGB && isColorSimilar(pixel, excludeRGB, colorTolerance)) {
@@ -392,7 +258,7 @@ export async function detectImageColors(
   }
 
   // Calculate average color
-  const averageColor = calculateAverage(allPixels);
+  const averageColor = calculateAverageColor(allPixels);
 
   // Calculate dominant color using color quantization with contrast weighting
   const colorMap = new Map<string, { color: RGB; count: number }>();

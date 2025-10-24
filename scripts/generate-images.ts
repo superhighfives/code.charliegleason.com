@@ -1,111 +1,22 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { decode } from "fast-png";
 import Replicate from "replicate";
 import sharp from "sharp";
-import { IMAGES_PER_POST, OUTPUT_DIR, getPosts, loadEnvVars } from "./utils.js";
+import { hasValidSolidLeftEdge } from "./image-validation.js";
+import {
+  getPosts,
+  IMAGES_PER_POST,
+  loadEnvVars,
+  OUTPUT_DIR,
+  PERCEPTUAL_COLOR_THRESHOLD,
+} from "./utils.js";
 
 // Load env vars before accessing them
 await loadEnvVars();
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 const MAX_RETRIES = 3;
-const COLOR_THRESHOLD = 15; // RGB units tolerance for "very close" colors
-const LEFT_EDGE_WIDTH = 5; // Number of pixels from left edge to sample
-
-/**
- * Validates that the leftmost edge of an image has a consistent solid color
- * @param buffer - The image buffer to validate
- * @returns true if the left edge is a solid color, false otherwise
- */
-async function hasValidSolidLeftEdge(buffer: Buffer): Promise<boolean> {
-  try {
-    // Decode PNG using fast-png
-    const png = decode(buffer);
-    const { width, height, data, depth, channels } = png;
-
-    if (!width || !height || !data || data.length === 0) {
-      console.log("   ⚠️  Could not read image dimensions");
-      return false;
-    }
-
-    // Helper to normalize color values based on bit depth
-    const normalizeValue = (value: number): number => {
-      if (depth === 16) {
-        return Math.round(value / 257); // 16-bit to 8-bit
-      }
-      return value;
-    };
-
-    // Helper to get pixel at specific coordinates
-    const getPixel = (x: number, y: number) => {
-      const bytesPerPixel = channels || 4;
-      const idx = (y * width + x) * bytesPerPixel;
-
-      if (channels === 1 || channels === 2) {
-        // Grayscale
-        const gray = normalizeValue(data[idx] ?? 0);
-        return { r: gray, g: gray, b: gray };
-      } else {
-        // RGB or RGBA
-        return {
-          r: normalizeValue(data[idx] ?? 0),
-          g: normalizeValue(data[idx + 1] ?? 0),
-          b: normalizeValue(data[idx + 2] ?? 0),
-        };
-      }
-    };
-
-    // Get all pixels from leftmost 5 columns
-    const leftEdgePixels: Array<{ r: number; g: number; b: number }> = [];
-    const edgeWidth = Math.min(LEFT_EDGE_WIDTH, width);
-    for (let x = 0; x < edgeWidth; x++) {
-      for (let y = 0; y < height; y++) {
-        leftEdgePixels.push(getPixel(x, y));
-      }
-    }
-
-    // Calculate average color of left edge
-    const avgColor = {
-      r: leftEdgePixels.reduce((sum, p) => sum + p.r, 0) / leftEdgePixels.length,
-      g: leftEdgePixels.reduce((sum, p) => sum + p.g, 0) / leftEdgePixels.length,
-      b: leftEdgePixels.reduce((sum, p) => sum + p.b, 0) / leftEdgePixels.length,
-    };
-
-    // Check if all pixels are within threshold of average
-    const allPixelsClose = leftEdgePixels.every((pixel) => {
-      const rDiff = Math.abs(pixel.r - avgColor.r);
-      const gDiff = Math.abs(pixel.g - avgColor.g);
-      const bDiff = Math.abs(pixel.b - avgColor.b);
-      return (
-        rDiff <= COLOR_THRESHOLD &&
-        gDiff <= COLOR_THRESHOLD &&
-        bDiff <= COLOR_THRESHOLD
-      );
-    });
-
-    if (!allPixelsClose) {
-      // Calculate max variance for logging
-      const variances = leftEdgePixels.map((pixel) => ({
-        r: Math.abs(pixel.r - avgColor.r),
-        g: Math.abs(pixel.g - avgColor.g),
-        b: Math.abs(pixel.b - avgColor.b),
-      }));
-      const maxVariance = Math.max(
-        ...variances.map((v) => Math.max(v.r, v.g, v.b)),
-      );
-      console.log(
-        `   ⚠️  Left edge (${edgeWidth}px) not solid: max color variance ${maxVariance.toFixed(1)} (threshold: ${COLOR_THRESHOLD})`,
-      );
-    }
-
-    return allPixelsClose;
-  } catch (error) {
-    console.error("   ❌ Error validating image:", error);
-    return false;
-  }
-}
 
 /**
  * Optimizes a PNG image to reduce file size
@@ -117,11 +28,13 @@ async function optimizePng(imagePath: string): Promise<void> {
     const originalSize = originalBuffer.length;
 
     // Optimize the PNG with sharp
+    // Force RGB output (not palette) so fast-png can read colors correctly in edge-colors
     const optimizedBuffer = await sharp(originalBuffer)
+      .toColorspace("srgb") // Ensure RGB color space
+      .withMetadata() // Preserve color profile and metadata
       .png({
         compressionLevel: 9, // Maximum compression
-        quality: 90, // Good quality with compression
-        effort: 10, // Maximum effort for smaller file size
+        palette: false, // Force RGB output, disable palette compression
       })
       .toBuffer();
 
@@ -197,7 +110,8 @@ async function main() {
 
       while (attempt < MAX_RETRIES && !success) {
         attempt++;
-        const attemptPrefix = attempt > 1 ? ` (attempt ${attempt}/${MAX_RETRIES})` : "";
+        const attemptPrefix =
+          attempt > 1 ? ` (attempt ${attempt}/${MAX_RETRIES})` : "";
 
         try {
           console.log(`   🎨 Generating image ${index}${attemptPrefix}...`);
@@ -237,13 +151,15 @@ async function main() {
 
           const buffer = Buffer.from(await response.arrayBuffer());
 
-          // Validate solid left edge
+          // Validate solid left edge using Euclidean distance
           console.log(`   🔍 Validating solid left edge...`);
-          const isValid = await hasValidSolidLeftEdge(buffer);
+          const validation = await hasValidSolidLeftEdge(buffer);
 
-          if (!isValid) {
+          if (!validation.isValid) {
             if (attempt < MAX_RETRIES) {
-              console.log(`   🔄 Retrying generation...`);
+              console.log(
+                `   🔄 Left edge not solid (distance: ${validation.maxDistance.toFixed(1)}, threshold: ${PERCEPTUAL_COLOR_THRESHOLD}). Retrying...`,
+              );
               continue;
             } else {
               console.log(

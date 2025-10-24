@@ -74,7 +74,8 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "generate:images": "npx tsx scripts/generate-images.ts",
-    "generate:videos": "npx tsx scripts/generate-videos.ts"
+    "generate:videos": "npx tsx scripts/generate-videos.ts",
+    "validate:images": "npx tsx scripts/validate-images.ts"
   },
   "type": "module"
 }

@@ -75,7 +75,8 @@
     "test:coverage": "vitest run --coverage",
     "generate:images": "npx tsx scripts/generate-images.ts",
     "generate:videos": "npx tsx scripts/generate-videos.ts",
-    "validate:images": "npx tsx scripts/validate-images.ts"
+    "validate:images": "npx tsx scripts/validate-images.ts",
+    "delete:invalid-images": "npx tsx scripts/delete-invalid-images.ts"
   },
   "type": "module"
 }

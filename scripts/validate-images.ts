@@ -62,8 +62,8 @@ async function main() {
           });
         }
       }
-    } catch (error) {
-      console.log(`   ⚠️  Could not process directory: ${postDir}`);
+    } catch (e) {
+      console.log(`   ⚠️  Could not process directory: ${postDir}: ${e}`);
     }
   }
 

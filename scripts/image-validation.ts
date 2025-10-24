@@ -47,7 +47,14 @@ export async function hasValidSolidLeftEdge(
       };
     }
 
-    const pngData: PngData = { width, height, data, depth, channels, palette };
+    const pngData: PngData = {
+      width,
+      height,
+      data: data as Uint8Array,
+      depth,
+      channels,
+      palette,
+    };
 
     // Get all pixels from leftmost edge
     const leftEdgePixels: RGB[] = [];

@@ -80,8 +80,8 @@ async function main() {
         totalOptimizedSize += afterBuffer.length;
         totalProcessed++;
       }
-    } catch (error) {
-      console.log(`   ⚠️  Could not process directory: ${postDir}`);
+    } catch (e) {
+      console.log(`   ⚠️  Could not process directory: ${postDir}: ${e}`);
     }
   }
 

@@ -27,7 +27,7 @@ async function loadEnvVars() {
 await loadEnvVars();
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
-const IMAGES_PER_POST = 4; // 0-20
+const IMAGES_PER_POST = 21; // 0-20
 const OUTPUT_DIR = "public/posts";
 const POSTS_DIR = "posts";
 
@@ -115,7 +115,7 @@ async function main() {
         console.log(`   🎨 Generating image ${index}...`);
 
         // Use the image field as the prompt description
-        const prompt = `${post.image}, LTNP style`;
+        const prompt = `${post.image}, solid background, LTNP style`;
 
         console.log(`   📝 Prompt: ${prompt}`);
 

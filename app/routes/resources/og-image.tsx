@@ -43,7 +43,6 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     new URL(background, request.url),
   );
   const imageBuffer = await imageResponse.arrayBuffer();
-  const imageBase64 = `data:image/png;base64,${Buffer.from(imageBuffer).toString("base64")}`;
 
   try {
     await ensureInitialised();
@@ -71,7 +70,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     if (post.frontmatter.image) {
       try {
         // Random selection (0-20)
-        const randomIndex = Math.floor(Math.random() * 4);
+        const randomIndex = Math.floor(Math.random() * 21);
         const aiImagePath = `/posts/${slug}/${randomIndex}.png`;
 
         const aiImageResponse = await context.assets.fetch(
@@ -219,7 +218,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
             height="32"
             viewBox="0 0 24 24"
             fill="none"
-            stroke={textColor}
+            stroke={aiImageBase64 ? textColor : "#4C4CDD"}
             stroke-width="2"
             style={{ transform: "rotate(45deg)" }}
           >

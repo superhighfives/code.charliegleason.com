@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { RefreshCw } from "lucide-react";
+import { Check, RefreshCw, Share2 } from "lucide-react";
 import { useState } from "react";
 
 export default function VideoMasthead({
@@ -14,11 +14,21 @@ export default function VideoMasthead({
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
   const [rotationCount, setRotationCount] = useState(0);
   const [hasChanged, setHasChanged] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const changeVideo = () => {
     setCurrentVideo(Math.floor(Math.random() * 21));
     setRotationCount((prev: number) => prev + 1);
     setHasChanged(true);
+  };
+
+  const shareUrl = () => {
+    const url = new URL(window.location.href);
+    // Convert internal index (0-20) to user-facing (1-21)
+    url.searchParams.set("image", (currentVideo + 1).toString());
+    navigator.clipboard.writeText(url.toString());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -62,26 +72,61 @@ export default function VideoMasthead({
             .
           </p>
         </div>
-        <button
-          type="button"
-          onClick={changeVideo}
-          className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        >
-          <motion.div
-            animate={{ rotate: rotationCount * 180 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={changeVideo}
+            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
-            <RefreshCw
-              className="text-gray-500 dark:text-gray-400"
-              size={12}
-              fontWeight="light"
-            />
-          </motion.div>
+            <motion.div
+              animate={{ rotate: rotationCount * 180 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+            >
+              <RefreshCw
+                className="text-gray-500 dark:text-gray-400"
+                size={12}
+                fontWeight="light"
+              />
+            </motion.div>
 
-          <span className="text-gray-400 dark:text-gray-500">
-            {String(currentVideo).padStart(2, "0")}/{21}
-          </span>
-        </button>
+            <span className="text-gray-400 dark:text-gray-500">
+              {String(currentVideo + 1).padStart(2, "0")}/21
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={shareUrl}
+            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={copied ? "check" : "share"}
+                initial={hasChanged ? { scale: 0.8, opacity: 0 } : false}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {copied ? (
+                  <Check
+                    className="text-gray-500 dark:text-gray-400"
+                    size={12}
+                    fontWeight="light"
+                  />
+                ) : (
+                  <Share2
+                    className="text-gray-500 dark:text-gray-400"
+                    size={12}
+                    fontWeight="light"
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            <span className="text-gray-400 dark:text-gray-500">
+              {copied ? "Copied!" : "Share"}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );

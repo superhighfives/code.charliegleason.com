@@ -39,10 +39,20 @@ async function ensureInitialised() {
 export async function loader({ request, params, context }: Route.LoaderArgs) {
   const { slug } = params;
 
-  // Get image index from query parameter (e.g., ?image=0)
+  // Get image index from query parameter (e.g., ?image=1)
+  // Convert from user-facing (1-21) to internal (0-20)
   const url = new URL(request.url);
   const imageParam = url.searchParams.get("image");
-  const imageIndex = imageParam !== null ? parseInt(imageParam, 10) : null;
+  let imageIndex: number | null = null;
+
+  if (imageParam !== null) {
+    const parsed = parseInt(imageParam, 10);
+    // Validate: must be a valid number between 1-21
+    if (!Number.isNaN(parsed) && parsed >= 1 && parsed <= 21) {
+      imageIndex = parsed - 1;
+    }
+    // If invalid, imageIndex stays null and we'll use random selection
+  }
 
   const imageResponse = await context.assets.fetch(
     new URL(background, request.url),

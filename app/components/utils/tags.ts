@@ -1,16 +1,18 @@
 import type { PostFrontmatter } from "~/mdx/types";
 
-function generateImage(slug: string) {
-  return `${import.meta.env.PROD ? "https://code.charliegleason.com" : "http://localhost:8080"}/${slug}.png`;
+function generateImage(slug: string, index?: number) {
+  return `${import.meta.env.PROD ? "https://code.charliegleason.com" : "http://localhost:8080"}/${slug}.png${index ? `?image=${index}` : ""}`;
 }
 
-export default function tags(attributes?: PostFrontmatter) {
+export default function tags(attributes?: PostFrontmatter, index?: number) {
   const { title, description, slug, image } = attributes || {};
   const metaTitle = `${title ? `${title} ` : ""}❯ ~/code.charliegleason.com`;
   const metaDescription = description
     ? `${description}`
     : "Tutorials, code snippets, and resources for design and front end development";
-  const metaImage = image ? slug && generateImage(slug) : "/social-default.png";
+  const metaImage = image
+    ? slug && generateImage(slug, index)
+    : "/social-default.png";
 
   return [
     { title: metaTitle },

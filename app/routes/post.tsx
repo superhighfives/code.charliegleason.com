@@ -52,10 +52,27 @@ export async function loader({
     ? getKudosCookie(request, frontmatter.slug)
     : 0;
 
-  // Select random video (0-15) if post has image enabled
-  const randomVideo = frontmatter.image
-    ? Math.floor(Math.random() * 21)
-    : undefined;
+  // Get image from search params
+  const url = new URL(request.url);
+  const image = url.searchParams.get("image");
+
+  // Select random video (0-20) if post has image enabled
+  // Convert from user-facing (1-21) to internal (0-20)
+  let randomVideo: number | undefined;
+
+  if (image !== null) {
+    const parsed = parseInt(image, 10);
+    // Validate: must be a valid number between 1-21
+    if (!Number.isNaN(parsed) && parsed >= 1 && parsed <= 21) {
+      randomVideo = parsed - 1;
+    } else if (frontmatter.image) {
+      // Invalid parameter, fall back to random
+      randomVideo = Math.floor(Math.random() * 21);
+    }
+  } else if (frontmatter.image) {
+    // No parameter, use random
+    randomVideo = Math.floor(Math.random() * 21);
+  }
 
   return {
     __raw: rawContent,
@@ -67,10 +84,12 @@ export async function loader({
   };
 }
 
-export function meta({ data }: Route.MetaArgs) {
+export function meta({ data, location }: Route.MetaArgs) {
   if (!data) return tags();
   const { attributes } = data;
-  return tags(attributes);
+  const searchParams = new URLSearchParams(location.search);
+  const image = searchParams.get("image");
+  return tags(attributes, image ? parseInt(image, 10) : undefined);
 }
 
 export function shouldRevalidate() {
@@ -91,7 +110,7 @@ export default function Post() {
 
   return (
     <div className="grid gap-y-4 relative">
-      {slug && initialVideo && image && (
+      {slug && initialVideo !== undefined && image && (
         <VideoMasthead slug={slug} initialVideo={initialVideo} image={image} />
       )}
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">

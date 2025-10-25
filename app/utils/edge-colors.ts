@@ -51,11 +51,13 @@ export async function detectEdgeColors(
 
   // Validate decoded PNG data
   if (!width || !height || !data || data.length === 0) {
-    throw new Error(`Invalid PNG data: width=${width}, height=${height}, dataLength=${data?.length || 0}`);
+    throw new Error(
+      `Invalid PNG data: width=${width}, height=${height}, dataLength=${data?.length || 0}`,
+    );
   }
 
   // Debug: Log PNG metadata to understand the format
-  console.log('PNG metadata:', {
+  console.log("PNG metadata:", {
     width,
     height,
     depth,
@@ -64,11 +66,18 @@ export async function detectEdgeColors(
     dataLength: data.length,
     expectedLength: width * height * (channels || 4),
     bytesPerPixel: data.length / (width * height),
-    samplePixels: Array.from(data.slice(0, 20))
+    samplePixels: Array.from(data.slice(0, 20)),
   });
 
   // Use shared PNG utilities
-  const pngData: PngData = { width, height, data: data as Uint8Array, depth, channels, palette };
+  const pngData: PngData = {
+    width,
+    height,
+    data: data as Uint8Array,
+    depth,
+    channels,
+    palette,
+  };
 
   // Collect edge pixels
   const edgePixels = {
@@ -122,12 +131,16 @@ export async function detectEdgeColors(
   const dominantAvg = calculateAverageColor(allEdgePixels);
 
   // Debug: Log if we're getting invalid values
-  if (!Number.isFinite(dominantAvg.r) || !Number.isFinite(dominantAvg.g) || !Number.isFinite(dominantAvg.b)) {
-    console.warn('Invalid dominant color values:', {
+  if (
+    !Number.isFinite(dominantAvg.r) ||
+    !Number.isFinite(dominantAvg.g) ||
+    !Number.isFinite(dominantAvg.b)
+  ) {
+    console.warn("Invalid dominant color values:", {
       dominantAvg,
       pixelCount: allEdgePixels.length,
       samplePixels: allEdgePixels.slice(0, 5),
-      imageSize: { width, height }
+      imageSize: { width, height },
     });
   }
 
@@ -182,7 +195,12 @@ export async function detectImageColors(
     contrastBoost?: number;
   } = {},
 ): Promise<ImageColors> {
-  const { sampleRate = 10, excludeColor, colorTolerance = 30, contrastBoost = 1 } = options;
+  const {
+    sampleRate = 10,
+    excludeColor,
+    colorTolerance = 30,
+    contrastBoost = 1,
+  } = options;
 
   // Decode base64 to Uint8Array
   const base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
@@ -198,10 +216,12 @@ export async function detectImageColors(
 
   // Validate decoded PNG data
   if (!width || !height || !data || data.length === 0) {
-    throw new Error(`Invalid PNG data: width=${width}, height=${height}, dataLength=${data?.length || 0}`);
+    throw new Error(
+      `Invalid PNG data: width=${width}, height=${height}, dataLength=${data?.length || 0}`,
+    );
   }
 
-  console.log('PNG metadata (full image):', {
+  console.log("PNG metadata (full image):", {
     width,
     height,
     depth,
@@ -213,27 +233,63 @@ export async function detectImageColors(
   // Parse exclude color if provided
   let excludeRGB: RGB | null = null;
   if (excludeColor) {
-    const hex = excludeColor.replace('#', '');
+    const hex = excludeColor.replace("#", "");
     excludeRGB = {
       r: parseInt(hex.substring(0, 2), 16),
       g: parseInt(hex.substring(2, 4), 16),
       b: parseInt(hex.substring(4, 6), 16),
     };
-    console.log('Excluding color:', excludeColor, excludeRGB);
+    console.log("Excluding color:", excludeColor, excludeRGB);
   }
 
   // Helper to check if a color is similar to the exclude color
-  const isColorSimilar = (pixel: RGB, target: RGB, tolerance: number): boolean => {
+  const isColorSimilar = (
+    pixel: RGB,
+    target: RGB,
+    tolerance: number,
+  ): boolean => {
     const distance = Math.sqrt(
-      Math.pow(pixel.r - target.r, 2) +
-      Math.pow(pixel.g - target.g, 2) +
-      Math.pow(pixel.b - target.b, 2)
+      (pixel.r - target.r) ** 2 +
+        (pixel.g - target.g) ** 2 +
+        (pixel.b - target.b) ** 2,
     );
     return distance <= tolerance;
   };
 
+  // Calculate relative luminance (WCAG formula)
+  const getLuminance = (color: RGB): number => {
+    const rsRGB = color.r / 255;
+    const gsRGB = color.g / 255;
+    const bsRGB = color.b / 255;
+
+    const r =
+      rsRGB <= 0.03928 ? rsRGB / 12.92 : ((rsRGB + 0.055) / 1.055) ** 2.4;
+    const g =
+      gsRGB <= 0.03928 ? gsRGB / 12.92 : ((gsRGB + 0.055) / 1.055) ** 2.4;
+    const b =
+      bsRGB <= 0.03928 ? bsRGB / 12.92 : ((bsRGB + 0.055) / 1.055) ** 2.4;
+
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+
+  // Calculate contrast ratio between two colors (WCAG formula)
+  const getContrastRatio = (color1: RGB, color2: RGB): number => {
+    const lum1 = getLuminance(color1);
+    const lum2 = getLuminance(color2);
+    const lighter = Math.max(lum1, lum2);
+    const darker = Math.min(lum1, lum2);
+    return (lighter + 0.05) / (darker + 0.05);
+  };
+
   // Use shared PNG utilities
-  const pngData: PngData = { width, height, data: data as Uint8Array, depth, channels, palette };
+  const pngData: PngData = {
+    width,
+    height,
+    data: data as Uint8Array,
+    depth,
+    channels,
+    palette,
+  };
 
   // Sample pixels from entire image
   const allPixels: RGB[] = [];
@@ -254,7 +310,9 @@ export async function detectImageColors(
   }
 
   if (excludeRGB) {
-    console.log(`Excluded ${excludedPixelCount} pixels similar to ${excludeColor}`);
+    console.log(
+      `Excluded ${excludedPixelCount} pixels similar to ${excludeColor}`,
+    );
   }
 
   // Calculate average color
@@ -283,28 +341,49 @@ export async function detectImageColors(
     }
   }
 
-  // Find most common color, weighted by contrast to exclude color
+  // Find most common color with sufficient contrast for text readability
+  const MIN_CONTRAST_RATIO = 3; // WCAG AA standard for normal text
   let maxScore = 0;
   let dominantColor = { r: 0, g: 0, b: 0 };
+  let bestContrastRatio = 0;
+
+  // If we have an exclude color (background), check if we need light or dark text
+  const backgroundLuminance = excludeRGB ? getLuminance(excludeRGB) : 0;
+  const needsDarkText = backgroundLuminance > 0.5; // Light background needs dark text
 
   for (const { color, count } of colorMap.values()) {
     let score = count;
 
-    // If we have an exclude color, boost score for colors with higher contrast
+    // If we have an exclude color (background), prioritize readable text colors
     if (excludeRGB) {
-      // Calculate contrast distance (Euclidean distance in RGB space)
-      const contrastDistance = Math.sqrt(
-        Math.pow(color.r - excludeRGB.r, 2) +
-        Math.pow(color.g - excludeRGB.g, 2) +
-        Math.pow(color.b - excludeRGB.b, 2)
-      );
+      const contrastRatio = getContrastRatio(color, excludeRGB);
 
-      // Boost score based on contrast distance
-      // Maximum possible distance is ~441 (sqrt(255^2 * 3))
-      // Normalize to 0-1 range, then apply user-defined boost multiplier
-      const normalizedContrast = contrastDistance / 441;
-      const boost = 1 + (normalizedContrast * contrastBoost);
-      score = count * boost;
+      // Filter out colors with insufficient contrast for readability
+      if (contrastRatio < MIN_CONTRAST_RATIO) {
+        continue; // Skip this color entirely
+      }
+
+      // Check if this color has the right luminance direction for the background
+      const colorLuminance = getLuminance(color);
+      const isDarkColor = colorLuminance < 0.5;
+
+      // Penalize colors that don't match the luminance direction we need
+      if (needsDarkText && !isDarkColor) {
+        score *= 0.1; // Heavy penalty for light text on light background
+      } else if (!needsDarkText && isDarkColor) {
+        score *= 0.1; // Heavy penalty for dark text on dark background
+      }
+
+      // Boost score based on contrast ratio
+      // Higher contrast ratios are better for readability
+      const contrastMultiplier =
+        (contrastRatio / MIN_CONTRAST_RATIO) ** contrastBoost;
+      score = count * contrastMultiplier;
+
+      // Track the best contrast ratio for debugging
+      if (contrastRatio > bestContrastRatio) {
+        bestContrastRatio = contrastRatio;
+      }
     }
 
     if (score > maxScore) {
@@ -313,22 +392,35 @@ export async function detectImageColors(
     }
   }
 
-  // Calculate contrast distance for the selected dominant color
+  // Fallback: If no suitable color found, use black or white based on background
+  if (maxScore === 0 && excludeRGB) {
+    dominantColor = needsDarkText
+      ? { r: 0, g: 0, b: 0 }
+      : { r: 255, g: 255, b: 255 };
+    console.log(
+      `No suitable color found, falling back to ${needsDarkText ? "black" : "white"}`,
+    );
+  }
+
+  // Calculate final metrics for the selected dominant color
   let contrastInfo = {};
   if (excludeRGB) {
-    const finalContrastDistance = Math.sqrt(
-      Math.pow(dominantColor.r - excludeRGB.r, 2) +
-      Math.pow(dominantColor.g - excludeRGB.g, 2) +
-      Math.pow(dominantColor.b - excludeRGB.b, 2)
-    );
+    const finalContrastRatio = getContrastRatio(dominantColor, excludeRGB);
+    const backgroundLum = getLuminance(excludeRGB);
+    const textLum = getLuminance(dominantColor);
+
     contrastInfo = {
-      contrastDistance: Math.round(finalContrastDistance),
-      maxPossibleDistance: 441,
-      contrastPercentage: Math.round((finalContrastDistance / 441) * 100) + '%',
+      contrastRatio: `${finalContrastRatio.toFixed(2)}:1`,
+      meetsWCAG_AA: finalContrastRatio >= 4.5,
+      meetsWCAG_AAA: finalContrastRatio >= 7,
+      backgroundLuminance: backgroundLum.toFixed(3),
+      textLuminance: textLum.toFixed(3),
+      backgroundType: backgroundLum > 0.5 ? "light" : "dark",
+      textType: textLum > 0.5 ? "light" : "dark",
     };
   }
 
-  console.log('Image color analysis:', {
+  console.log("Image color analysis:", {
     totalPixelsSampled: allPixels.length,
     uniqueColors: colorMap.size,
     dominantColor: rgbToHex(dominantColor.r, dominantColor.g, dominantColor.b),

@@ -6,9 +6,9 @@ export async function getRuntimeMdxManifest(): Promise<{ files: MdxFile[] }> {
 }
 
 export async function loadMdxRuntime(
-  request: Request,
+  requestUrl: string,
 ): Promise<MdxRuntimeData> {
-  const url = new URL(request.url);
+  const url = new URL(requestUrl);
   const pathname = url.pathname;
 
   const { files } = await getRuntimeMdxManifest();

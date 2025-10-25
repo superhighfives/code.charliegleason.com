@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -7,13 +8,9 @@ import { hasValidSolidLeftEdge } from "./image-validation.js";
 import {
   getPosts,
   IMAGES_PER_POST,
-  loadEnvVars,
   OUTPUT_DIR,
   PERCEPTUAL_COLOR_THRESHOLD,
 } from "./utils.js";
-
-// Load env vars before accessing them
-await loadEnvVars();
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 const MAX_RETRIES = 3;

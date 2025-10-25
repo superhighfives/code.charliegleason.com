@@ -1,15 +1,13 @@
+import "dotenv/config";
 import { exec } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import Replicate from "replicate";
-import { getPosts, IMAGES_PER_POST, loadEnvVars, OUTPUT_DIR } from "./utils.js";
+import { getPosts, IMAGES_PER_POST, OUTPUT_DIR } from "./utils.js";
 
 const execAsync = promisify(exec);
-
-// Load env vars before accessing them
-await loadEnvVars();
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 

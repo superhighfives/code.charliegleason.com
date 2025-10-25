@@ -10,6 +10,7 @@
   --font-mono:
     "JetBrains Mono", "ui-monospace", "SFMono-Regular", '"Roboto Mono"',
     '"Courier New"', "monospace";
+  --text-2xs: 0.625rem; 
 
   @keyframes blink {
     0%,

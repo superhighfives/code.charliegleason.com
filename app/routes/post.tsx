@@ -1,3 +1,6 @@
+import { motion } from "framer-motion";
+import { RefreshCw } from "lucide-react";
+import { useState } from "react";
 import { Link, useLoaderData } from "react-router";
 import EditOnGitHub from "~/components/edit-on-github";
 import { KudosButton } from "~/components/kudos-button";
@@ -18,7 +21,7 @@ export async function loader({
   request,
   context,
 }: Route.LoaderArgs): Promise<PostLoaderData> {
-  const { content, frontmatter } = await loadMdxRuntime(request);
+  const { content, frontmatter } = await loadMdxRuntime(request.url);
   const rawContent = content as string;
 
   // Pre-process code blocks
@@ -78,13 +81,73 @@ export function shouldRevalidate() {
 }
 
 export default function Post() {
-  const { kudosTotal, kudosYou, randomVideo } = useLoaderData<typeof loader>();
+  const {
+    kudosTotal,
+    kudosYou,
+    randomVideo: initialVideo,
+  } = useLoaderData<typeof loader>();
+  const [currentVideo, setCurrentVideo] = useState(initialVideo);
+  const [rotationCount, setRotationCount] = useState(0);
   const Component = useMdxComponent(components);
-  const { title, data, links, date, slug } = useMdxAttributes();
+  const { title, data, links, date, slug, image } = useMdxAttributes();
   const { metadata, isOldArticle } = processArticleDate(data, date);
+
+  const changeVideo = () => {
+    setCurrentVideo(Math.floor(Math.random() * 21));
+    setRotationCount((prev) => prev + 1);
+  };
 
   return (
     <div className="grid gap-y-4 relative">
+      <div className="relative -top-12 -mb-6 flex items-end gap-4 max-w-[65ch]">
+        <div className="size-96 shrink-0">
+          <video
+            key={currentVideo}
+            src={`/posts/${slug}/${currentVideo}.mp4`}
+            autoPlay
+            muted
+            playsInline
+            className="size-full shadow-lg rounded-lg -rotate-1"
+          />
+        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-gray-500 dark:text-gray-400 text-xs">
+              "{image}"
+            </p>
+            <p className="text-gray-400 dark:text-gray-500 text-[10px]">
+              Generated with{" "}
+              <a
+                href="https://replicate.com/jakedahn/flux-latentpop"
+                className="underline underline-offset-2"
+              >
+                flux-latentpop
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://replicate.com/bytedance/seedance-1-pro-fast"
+                className="underline underline-offset-2"
+              >
+                seedance-1-pro-fast
+              </a>
+              .
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={changeVideo}
+            className="flex hover:cursor-pointer items-center gap-2 text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 text-[10px] px-2 py-1 rounded-full border border-indigo-200 dark:border-indigo-800 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
+          >
+            <motion.div
+              animate={{ rotate: rotationCount * 180 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+            >
+              <RefreshCw size={14} fontWeight="light" />
+            </motion.div>
+            <span>Change video</span>
+          </button>
+        </div>
+      </div>
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
         <Link
           to="/"
@@ -121,16 +184,6 @@ export default function Post() {
         </div>
       )}
       <Metalinks links={links} />
-
-      <div className="-mx-8">
-        <video
-          src={`/posts/${slug}/${randomVideo}.mp4`}
-          autoPlay
-          muted
-          playsInline
-          className="size-96 shadow-lg fixed right-8 bottom-16 rounded-lg rotate-3"
-        />
-      </div>
     </div>
   );
 }

@@ -12,6 +12,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "cookie": "^1.0.2",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "fast-png": "^7.0.1",
     "framer-motion": "^12.23.24",
     "glob": "^11.0.3",

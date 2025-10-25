@@ -2,24 +2,6 @@ import { readFile } from "node:fs/promises";
 import { glob } from "glob";
 import matter from "gray-matter";
 
-// Load environment variables from .dev.vars
-export async function loadEnvVars() {
-  try {
-    const envContent = await readFile(".dev.vars", "utf-8");
-    for (const line of envContent.split("\n")) {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith("#")) {
-        const [key, ...valueParts] = trimmed.split("=");
-        if (key && valueParts.length > 0) {
-          process.env[key.trim()] = valueParts.join("=").trim();
-        }
-      }
-    }
-  } catch {
-    console.warn("⚠️  Could not load .dev.vars file");
-  }
-}
-
 export interface PostData {
   slug: string;
   title: string;

@@ -249,11 +249,18 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     // Convert the SVG to PNG with "resvg"
     const resvg = new Resvg(svg);
     const pngData = resvg.render();
+
+    // Only cache if a specific image index was requested via query parameter
+    // If random, don't cache so each request gets a fresh random image
+    const cacheControl = imageIndex !== null
+      ? "public, max-age=31536000, immutable"
+      : "no-cache, no-store, must-revalidate";
+
     return new Response(pngData.asPng() as BodyInit, {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "cache-control": "public, max-age=31536000, immutable",
+        "cache-control": cacheControl,
       },
     });
   } catch (e) {
@@ -262,7 +269,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "cache-control": "public, max-age=31536000, immutable",
+        "cache-control": "no-cache, no-store, must-revalidate",
       },
     });
   }

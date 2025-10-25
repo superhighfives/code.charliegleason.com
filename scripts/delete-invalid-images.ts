@@ -1,7 +1,7 @@
 import { readdir, readFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
-import { OUTPUT_DIR, getPosts } from "./utils.js";
 import { hasValidSolidLeftEdge } from "./image-validation.js";
+import { getPosts, OUTPUT_DIR } from "./utils.js";
 
 async function main() {
   console.log("🗑️  Finding and deleting invalid PNG images...\n");
@@ -10,7 +10,11 @@ async function main() {
 
   let totalImages = 0;
   let deletedImages = 0;
-  const deletedImagesList: Array<{ post: string; file: string; reason: string }> = [];
+  const deletedImagesList: Array<{
+    post: string;
+    file: string;
+    reason: string;
+  }> = [];
 
   for (const post of posts) {
     console.log(`\n📝 Processing: ${post.title}`);
@@ -18,11 +22,13 @@ async function main() {
 
     try {
       const files = await readdir(postDir);
-      const pngFiles = files.filter((file) => file.match(/^\d+\.png$/)).sort((a, b) => {
-        const numA = Number.parseInt(a.replace('.png', ''), 10);
-        const numB = Number.parseInt(b.replace('.png', ''), 10);
-        return numA - numB;
-      });
+      const pngFiles = files
+        .filter((file) => file.match(/^\d+\.png$/))
+        .sort((a, b) => {
+          const numA = Number.parseInt(a.replace(".png", ""), 10);
+          const numB = Number.parseInt(b.replace(".png", ""), 10);
+          return numA - numB;
+        });
 
       if (pngFiles.length === 0) {
         console.log("   ℹ️  No PNG files found");

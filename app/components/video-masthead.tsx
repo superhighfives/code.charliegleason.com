@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 
@@ -11,25 +11,33 @@ export default function VideoMasthead({
   initialVideo: number;
   image: string;
 }) {
+  const [currentVideo, setCurrentVideo] = useState(initialVideo);
+  const [rotationCount, setRotationCount] = useState(0);
+  const [hasChanged, setHasChanged] = useState(false);
+
   const changeVideo = () => {
     setCurrentVideo(Math.floor(Math.random() * 21));
     setRotationCount((prev: number) => prev + 1);
+    setHasChanged(true);
   };
-
-  const [currentVideo, setCurrentVideo] = useState(initialVideo);
-  const [rotationCount, setRotationCount] = useState(0);
 
   return (
     <div className="relative -top-12 -mb-6 flex items-end flex-wrap xs:flex-nowrap gap-4 max-w-[65ch]">
-      <div className="w-full aspect-square xs:size-72 sm:size-96 shrink-0">
-        <video
-          key={currentVideo}
-          src={`/posts/${slug}/${currentVideo}.mp4`}
-          autoPlay
-          muted
-          playsInline
-          className="size-full shadow-lg rounded-lg -rotate-1"
-        />
+      <div className="bg-gray-100 dark:bg-gray-900 w-full aspect-square xs:size-72 sm:size-96 shrink-0 relative overflow-hidden shadow-lg rounded-lg -rotate-1">
+        <AnimatePresence mode="popLayout">
+          <motion.video
+            key={currentVideo}
+            src={`/posts/${slug}/${currentVideo}.mp4`}
+            autoPlay
+            muted
+            playsInline
+            className="size-full"
+            initial={hasChanged ? { x: "100%" } : false}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.1 }}
+          />
+        </AnimatePresence>
       </div>
       <div className="space-y-3">
         <div className="space-y-2">

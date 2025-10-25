@@ -32,7 +32,7 @@ export interface PostFrontmatter {
   title?: string;
   description?: string;
   tags?: string[];
-  image?: boolean | string;
+  image?: string;
   data?: MetaData[];
   slug?: string;
   date?: string;

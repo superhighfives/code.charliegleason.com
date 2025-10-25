@@ -21,7 +21,9 @@ export default function LinkBlock({
       target={action === "Open" ? "_blank" : "_self"}
     >
       <div className="flex justify-between leading-6">
-        <div className="flex w-0 flex-1 flex-col @md:flex-row items-start @md:justify-between flex-wrap @lg:flex-nowrap gap-x-2">
+        <div
+          className={`flex w-0 flex-1 flex-col @md:flex-row items-start @md:justify-between flex-wrap @lg:flex-nowrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
+        >
           <span className="font-medium dark:text-gray-200 leading-5 text-pretty">
             {title}
           </span>

@@ -1,6 +1,3 @@
-import { motion } from "framer-motion";
-import { RefreshCw } from "lucide-react";
-import { useState } from "react";
 import { Link, useLoaderData } from "react-router";
 import EditOnGitHub from "~/components/edit-on-github";
 import { KudosButton } from "~/components/kudos-button";
@@ -100,7 +97,7 @@ export default function Post() {
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
         <Link
           to="/"
-          className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-4"
+          className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2"
         >
           ❯ cd ~/code
           <span className="hidden sm:inline">.charliegleason.com</span>

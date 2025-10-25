@@ -155,7 +155,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
         {/* Left side: Text content */}
         <div
           style={{
-            width: aiImageBase64 ? "600px" : "100%",
+            width: aiImageBase64 ? "600px" : "1000px",
             height: "100%",
             padding: aiImageBase64 ? "80px 0 0 80px" : "80px",
             display: "flex",
@@ -252,9 +252,10 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
 
     // Only cache if a specific image index was requested via query parameter
     // If random, don't cache so each request gets a fresh random image
-    const cacheControl = imageIndex !== null
-      ? "public, max-age=31536000, immutable"
-      : "no-cache, no-store, must-revalidate";
+    const cacheControl =
+      imageIndex !== null
+        ? "public, max-age=31536000, immutable"
+        : "no-cache, no-store, must-revalidate";
 
     return new Response(pngData.asPng() as BodyInit, {
       status: 200,

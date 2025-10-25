@@ -8,6 +8,7 @@ import Metadata from "~/components/metadata";
 import Metalinks from "~/components/metalinks";
 import { components } from "~/components/utils/components";
 import tags from "~/components/utils/tags";
+import VideoMasthead from "~/components/video-masthead";
 import { customMdxParse } from "~/mdx/custom-mdx-parser";
 import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import type { PostLoaderData } from "~/mdx/types";
@@ -86,68 +87,16 @@ export default function Post() {
     kudosYou,
     randomVideo: initialVideo,
   } = useLoaderData<typeof loader>();
-  const [currentVideo, setCurrentVideo] = useState(initialVideo);
-  const [rotationCount, setRotationCount] = useState(0);
+
   const Component = useMdxComponent(components);
   const { title, data, links, date, slug, image } = useMdxAttributes();
   const { metadata, isOldArticle } = processArticleDate(data, date);
 
-  const changeVideo = () => {
-    setCurrentVideo(Math.floor(Math.random() * 21));
-    setRotationCount((prev) => prev + 1);
-  };
-
   return (
     <div className="grid gap-y-4 relative">
-      <div className="relative -top-12 -mb-6 flex items-end gap-4 max-w-[65ch]">
-        <div className="size-96 shrink-0">
-          <video
-            key={currentVideo}
-            src={`/posts/${slug}/${currentVideo}.mp4`}
-            autoPlay
-            muted
-            playsInline
-            className="size-full shadow-lg rounded-lg -rotate-1"
-          />
-        </div>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <p className="text-gray-500 dark:text-gray-400 text-xs">
-              "{image}"
-            </p>
-            <p className="text-gray-400 dark:text-gray-500 text-[10px]">
-              Generated with{" "}
-              <a
-                href="https://replicate.com/jakedahn/flux-latentpop"
-                className="underline underline-offset-2"
-              >
-                flux-latentpop
-              </a>{" "}
-              and{" "}
-              <a
-                href="https://replicate.com/bytedance/seedance-1-pro-fast"
-                className="underline underline-offset-2"
-              >
-                seedance-1-pro-fast
-              </a>
-              .
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={changeVideo}
-            className="flex hover:cursor-pointer items-center gap-2 text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 text-[10px] px-2 py-1 rounded-full border border-indigo-200 dark:border-indigo-800 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
-          >
-            <motion.div
-              animate={{ rotate: rotationCount * 180 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-            >
-              <RefreshCw size={14} fontWeight="light" />
-            </motion.div>
-            <span>Change video</span>
-          </button>
-        </div>
-      </div>
+      {slug && initialVideo && image && (
+        <VideoMasthead slug={slug} initialVideo={initialVideo} image={image} />
+      )}
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
         <Link
           to="/"

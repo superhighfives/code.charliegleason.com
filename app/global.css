@@ -11,6 +11,7 @@
     "JetBrains Mono", "ui-monospace", "SFMono-Regular", '"Roboto Mono"',
     '"Courier New"', "monospace";
   --text-2xs: 0.625rem; 
+  --breakpoint-xs: 30rem;
 
   @keyframes blink {
     0%,

@@ -54,6 +54,7 @@ export interface PostLoaderData {
   highlightedBlocks?: Record<string, string>;
   kudosTotal?: number;
   kudosYou?: number;
+  randomVideo?: number;
 }
 
 export type MdxAttributes = {

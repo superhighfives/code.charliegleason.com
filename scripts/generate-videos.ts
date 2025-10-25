@@ -1,6 +1,6 @@
 import { exec } from "node:child_process";
 import { existsSync } from "node:fs";
-import { readdir, rename, stat, writeFile } from "node:fs/promises";
+import { readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import Replicate from "replicate";
@@ -28,17 +28,20 @@ async function optimizeVideo(videoPath: string): Promise<void> {
     const tempPath = videoPath.replace(".mp4", ".temp.mp4");
 
     // Use ffmpeg to optimize the video:
-    // -filter_complex: Create ping-pong loop (forward then reverse)
-    //   [0:v]reverse[r]: Reverse the video
-    //   [0:v][r]concat=n=2:v=1[v]: Concatenate original and reversed
-    // -map "[v]": Use the filtered video stream
+    // -filter_complex: Apply reverse, interpolation, and smooth ease-in at the end
+    //   [0:v]reverse: Reverse the video
+    //   minterpolate: First interpolate to high fps (60) for smooth frames
+    //   setpts with smooth ease-in in last 0.5s:
+    //     Before 2.5s: Normal speed (PTS unchanged)
+    //     Last 0.5s: Ease-in cubic formula that starts fast and decelerates smoothly
+    //     Formula inverts the cubic curve: heavy slowdown that feels smooth and natural
     // -an: Remove audio
     // -c:v libx264: Use H.264 codec
     // -crf 28: Constant Rate Factor (18-28 is good, higher = smaller file, lower quality)
     // -preset medium: Balance between encoding speed and compression
     // -movflags +faststart: Move moov atom to beginning for fast streaming
     // -pix_fmt yuv420p: Ensure compatibility
-    const ffmpegCommand = `ffmpeg -i "${videoPath}" -filter_complex "[0:v]reverse[r];[0:v][r]concat=n=2:v=1[v]" -map "[v]" -an -c:v libx264 -crf 28 -preset medium -movflags +faststart -pix_fmt yuv420p "${tempPath}" -y`;
+    const ffmpegCommand = `ffmpeg -i "${videoPath}" -filter_complex "[0:v]reverse,minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,setpts='if(lt(T\\,2.5)\\,PTS\\,2.5/TB+(T-2.5)/TB+pow((T-2.5)*2\\,3)/TB)'[v]" -map "[v]" -an -c:v libx264 -crf 28 -preset medium -movflags +faststart -pix_fmt yuv420p "${tempPath}" -y`;
 
     await execAsync(ffmpegCommand, { maxBuffer: 50 * 1024 * 1024 }); // 50MB buffer
 
@@ -133,8 +136,8 @@ async function main() {
 
         const input = {
           fps: 24,
-          image: imagePath,
-          prompt: post.image,
+          image: await readFile(imagePath),
+          prompt: `${post.image}`,
           duration: 3,
           resolution: "480p",
           aspect_ratio: "1:1",
@@ -143,12 +146,23 @@ async function main() {
 
         const output = (await replicate.run("bytedance/seedance-1-pro-fast", {
           input,
-        })) as { url?: string } | string;
+        })) as { url?: string | (() => URL) } | string;
 
-        // Handle output - it might be an object with url property or a direct URL string
-        const videoUrl = typeof output === "string" ? output : output.url;
-
-        if (!videoUrl) {
+        // Handle output - it might be:
+        // - A FileOutput object with .url() method
+        // - An object with url property (string or function)
+        // - A direct URL string
+        let videoUrl: string;
+        if (typeof output === "string") {
+          videoUrl = output;
+        } else if (output.url) {
+          // Check if url is a function (FileOutput.url())
+          if (typeof output.url === "function") {
+            videoUrl = output.url().toString();
+          } else {
+            videoUrl = output.url;
+          }
+        } else {
           throw new Error("No video URL returned from Replicate");
         }
 

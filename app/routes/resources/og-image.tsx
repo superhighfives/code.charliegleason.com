@@ -253,7 +253,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "cache-control": "no-cache",
+        "cache-control": "public, max-age=31536000, immutable",
       },
     });
   } catch (e) {
@@ -262,7 +262,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "cache-control": "no-cache",
+        "cache-control": "public, max-age=31536000, immutable",
       },
     });
   }

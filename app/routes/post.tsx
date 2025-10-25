@@ -51,12 +51,18 @@ export async function loader({
     ? getKudosCookie(request, frontmatter.slug)
     : 0;
 
+  // Select random video (0-15) if post has image enabled
+  const randomVideo = frontmatter.image
+    ? Math.floor(Math.random() * 21)
+    : undefined;
+
   return {
     __raw: rawContent,
     attributes: frontmatter,
     highlightedBlocks,
     kudosTotal,
     kudosYou,
+    randomVideo,
   };
 }
 
@@ -72,13 +78,13 @@ export function shouldRevalidate() {
 }
 
 export default function Post() {
-  const loaderData = useLoaderData<typeof loader>();
+  const { kudosTotal, kudosYou, randomVideo } = useLoaderData<typeof loader>();
   const Component = useMdxComponent(components);
   const { title, data, links, date, slug } = useMdxAttributes();
   const { metadata, isOldArticle } = processArticleDate(data, date);
 
   return (
-    <div className="grid gap-y-4">
+    <div className="grid gap-y-4 relative">
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
         <Link
           to="/"
@@ -92,6 +98,7 @@ export default function Post() {
           {title}
         </h1>
       </div>
+
       <Metadata data={metadata} />
 
       {isOldArticle ? (
@@ -107,13 +114,23 @@ export default function Post() {
         <div className="flex flex-wrap justify-start sm:px-4 items-center gap-4">
           <KudosButton
             slug={slug}
-            initialTotal={loaderData.kudosTotal}
-            initialYou={loaderData.kudosYou}
+            initialTotal={kudosTotal}
+            initialYou={kudosYou}
           />
           {date && <EditOnGitHub date={date} slug={slug} />}
         </div>
       )}
       <Metalinks links={links} />
+
+      <div className="-mx-8">
+        <video
+          src={`/posts/${slug}/${randomVideo}.mp4`}
+          autoPlay
+          muted
+          playsInline
+          className="size-96 shadow-lg fixed right-8 bottom-16 rounded-lg rotate-3"
+        />
+      </div>
     </div>
   );
 }

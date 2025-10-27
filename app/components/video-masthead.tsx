@@ -1,23 +1,34 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, RefreshCw, Share2 } from "lucide-react";
 import { useState } from "react";
-import type { Model } from "~/mdx/types";
+import type { VisualConfig } from "~/mdx/types";
 import {
   randomVideoIndex,
   toUserIndex,
   VIDEO_COUNT,
 } from "~/utils/video-index";
 
+/**
+ * Extracts the model name from a Replicate URL
+ * @param url - Replicate model URL (e.g. "https://replicate.com/jakedahn/flux-latentpop")
+ * @returns Model name (e.g. "flux-latentpop")
+ */
+function extractModelName(url: string): string {
+  const match = url.match(/replicate\.com\/[^/]+\/([^/?#]+)/);
+  if (!match) {
+    throw new Error(`Invalid Replicate URL format: ${url}`);
+  }
+  return match[1];
+}
+
 export default function VideoMasthead({
   slug,
   initialVideo,
-  image,
-  models,
+  visual,
 }: {
   slug: string;
   initialVideo: number;
-  image: string;
-  models: Model[];
+  visual: VisualConfig;
 }) {
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
   const [rotationCount, setRotationCount] = useState(0);
@@ -60,21 +71,23 @@ export default function VideoMasthead({
       <div className="space-y-3">
         <div className="space-y-2">
           <p className="text-gray-500 dark:text-gray-400 text-xs text-pretty">
-            "{image}"
+            "{visual.prompt}"
           </p>
           <p className="text-gray-400 dark:text-gray-500 text-2xs max-w-48">
             Generated with{" "}
-            {models.map((model, index) => (
-              <span key={model.name}>
-                <a
-                  href={model.url}
-                  className="underline underline-offset-2"
-                >
-                  {model.name}
-                </a>
-                {index < models.length - 1 && " and "}
-              </span>
-            ))}
+            <a
+              href={visual.image.url}
+              className="underline underline-offset-2"
+            >
+              {extractModelName(visual.image.url)}
+            </a>
+            {" and "}
+            <a
+              href={visual.video.url}
+              className="underline underline-offset-2"
+            >
+              {extractModelName(visual.video.url)}
+            </a>
             .
           </p>
         </div>

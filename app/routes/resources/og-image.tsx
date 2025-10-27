@@ -72,9 +72,9 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     let backgroundColor = `#03060E`;
     let textColor = "white";
 
-    // Check if image is a string (custom prompt) - this means AI images should be generated
-    // If image is true (boolean) or missing, fall back to text-only layout
-    if (post.frontmatter.image) {
+    // Check if visual config exists - this means AI images should be generated
+    // If visual is missing, fall back to text-only layout
+    if (post.frontmatter.visual) {
       try {
         // Use query parameter if provided, otherwise random selection (0-20)
         const selectedIndex =

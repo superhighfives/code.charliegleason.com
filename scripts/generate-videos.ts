@@ -5,7 +5,12 @@ import { readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import Replicate from "replicate";
-import { getPosts, IMAGES_PER_POST, OUTPUT_DIR } from "./utils.js";
+import {
+  extractModelName,
+  getPosts,
+  IMAGES_PER_POST,
+  OUTPUT_DIR,
+} from "./utils.js";
 
 const execAsync = promisify(exec);
 
@@ -122,12 +127,7 @@ async function main() {
       `   📊 Missing ${missingIndices.length} videos: [${missingIndices.join(", ")}]`,
     );
 
-    // Get the video model from frontmatter
-    const videoModel = post.models.find((m) => m.type === "video");
-    if (!videoModel) {
-      console.log(`   ⚠️  No video model found in frontmatter. Skipping...`);
-      continue;
-    }
+    const videoModelName = extractModelName(post.visual.video.url);
 
     // Generate missing videos
     for (const index of missingIndices) {
@@ -137,13 +137,13 @@ async function main() {
       try {
         console.log(`   🎬 Generating video ${index}...`);
         console.log(`   📝 Using image: ${imagePath}`);
-        console.log(`   📝 Prompt: ${post.image}`);
-        console.log(`   📝 Model: ${videoModel.version}`);
+        console.log(`   📝 Prompt: ${post.visual.prompt}`);
+        console.log(`   📝 Model: ${videoModelName} (${post.visual.video.version})`);
 
         const input = {
           fps: 24,
           image: await readFile(imagePath),
-          prompt: `${post.image}`,
+          prompt: `${post.visual.prompt}`,
           duration: 3,
           resolution: "480p",
           aspect_ratio: "1:1",
@@ -151,7 +151,7 @@ async function main() {
         };
 
         const output = (await replicate.run(
-          videoModel.version as
+          post.visual.video.version as
             | `${string}/${string}:${string}`
             | `${string}/${string}`,
           {

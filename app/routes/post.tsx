@@ -64,10 +64,10 @@ export async function loader({
   if (parsedIndex !== null) {
     // Valid parameter provided
     randomVideo = parsedIndex;
-  } else if (imageParam !== null && frontmatter.image) {
+  } else if (imageParam !== null && frontmatter.visual) {
     // Invalid parameter, fall back to random
     randomVideo = randomVideoIndex();
-  } else if (frontmatter.image) {
+  } else if (frontmatter.visual) {
     // No parameter, use random
     randomVideo = randomVideoIndex();
   }
@@ -103,13 +103,13 @@ export default function Post() {
   } = useLoaderData<typeof loader>();
 
   const Component = useMdxComponent(components);
-  const { title, data, links, date, slug, image, models } = useMdxAttributes();
+  const { title, data, links, date, slug, visual } = useMdxAttributes();
   const { metadata, isOldArticle } = processArticleDate(data, date);
 
   return (
     <div className="grid gap-y-4 relative">
-      {slug && initialVideo !== undefined && image && models && (
-        <VideoMasthead slug={slug} initialVideo={initialVideo} image={image} models={models} />
+      {slug && initialVideo !== undefined && visual && (
+        <VideoMasthead slug={slug} initialVideo={initialVideo} visual={visual} />
       )}
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
         <Link

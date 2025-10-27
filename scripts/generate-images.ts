@@ -6,6 +6,7 @@ import Replicate from "replicate";
 import sharp from "sharp";
 import { hasValidSolidLeftEdge } from "./image-validation.js";
 import {
+  extractModelName,
   getPosts,
   IMAGES_PER_POST,
   OUTPUT_DIR,
@@ -99,12 +100,7 @@ async function main() {
       `   📊 Missing ${missingIndices.length} images: [${missingIndices.join(", ")}]`,
     );
 
-    // Get the image model from frontmatter
-    const imageModel = post.models.find((m) => m.type === "image");
-    if (!imageModel) {
-      console.log(`   ⚠️  No image model found in frontmatter. Skipping...`);
-      continue;
-    }
+    const imageModelName = extractModelName(post.visual.image.url);
 
     // Generate missing images
     for (const index of missingIndices) {
@@ -120,16 +116,16 @@ async function main() {
         try {
           console.log(`   🎨 Generating image ${index}${attemptPrefix}...`);
 
-          // Use the image field as the prompt description
-          const prompt = `${post.image}, solid background, LTNP style`;
+          // Use the visual.prompt field as the prompt description
+          const prompt = `${post.visual.prompt}, solid background, LTNP style`;
 
           if (attempt === 1) {
             console.log(`   📝 Prompt: ${prompt}`);
-            console.log(`   📝 Model: ${imageModel.version}`);
+            console.log(`   📝 Model: ${imageModelName} (${post.visual.image.version})`);
           }
 
           const output = (await replicate.run(
-            imageModel.version as
+            post.visual.image.version as
               | `${string}/${string}:${string}`
               | `${string}/${string}`,
             {

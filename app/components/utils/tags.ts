@@ -5,12 +5,12 @@ function generateImage(slug: string, index?: number) {
 }
 
 export default function tags(attributes?: PostFrontmatter, index?: number) {
-  const { title, description, slug, image } = attributes || {};
+  const { title, description, slug, visual } = attributes || {};
   const metaTitle = `${title ? `${title} ` : ""}❯ ~/code.charliegleason.com`;
   const metaDescription = description
     ? `${description}`
     : "Tutorials, code snippets, and resources for design and front end development";
-  const metaImage = image
+  const metaImage = visual
     ? slug && generateImage(slug, index)
     : "/social-default.png";
 

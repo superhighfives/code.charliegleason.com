@@ -28,19 +28,22 @@ export interface Post {
   frontmatter: PostFrontmatter;
 }
 
-export interface Model {
-  name: string;
-  type: "image" | "video";
+export interface ModelConfig {
   url: string;
   version: string;
+}
+
+export interface VisualConfig {
+  prompt: string;
+  image: ModelConfig;
+  video: ModelConfig;
 }
 
 export interface PostFrontmatter {
   title?: string;
   description?: string;
   tags?: string[];
-  image?: string;
-  models?: Model[];
+  visual?: VisualConfig;
   data?: MetaData[];
   slug?: string;
   date?: string;

@@ -2,19 +2,35 @@ import { readFile } from "node:fs/promises";
 import { glob } from "glob";
 import matter from "gray-matter";
 
-export interface Model {
-  name: string;
-  type: "image" | "video";
+/**
+ * Extracts the model name from a Replicate URL
+ * @param url - Replicate model URL (e.g. "https://replicate.com/jakedahn/flux-latentpop")
+ * @returns Model name (e.g. "flux-latentpop")
+ */
+export function extractModelName(url: string): string {
+  const match = url.match(/replicate\.com\/[^/]+\/([^/?#]+)/);
+  if (!match) {
+    throw new Error(`Invalid Replicate URL format: ${url}`);
+  }
+  return match[1];
+}
+
+export interface ModelConfig {
   url: string;
   version: string;
+}
+
+export interface VisualConfig {
+  prompt: string;
+  image: ModelConfig;
+  video: ModelConfig;
 }
 
 export interface PostData {
   slug: string;
   title: string;
   description?: string;
-  image: string;
-  models: Model[];
+  visual: VisualConfig;
 }
 
 export const IMAGES_PER_POST = 21; // 0-20
@@ -36,35 +52,58 @@ export async function getPosts(): Promise<PostData[]> {
     const fileContent = await readFile(filePath, "utf-8");
     const { data } = matter(fileContent);
 
-    // Only include posts with image as a string (the prompt description)
-    if (typeof data.image === "string" && data.image.trim()) {
-      // Validate that models array exists and is valid
-      if (!Array.isArray(data.models) || data.models.length === 0) {
+    // Only include posts with visual config (prompt + image + video models)
+    if (data.visual && typeof data.visual === "object") {
+      const visual = data.visual;
+
+      // Validate required fields exist
+      if (!visual.prompt || typeof visual.prompt !== "string" || !visual.prompt.trim()) {
         throw new Error(
-          `Post ${filePath} has an image field but missing or invalid models array in frontmatter`
+          `Post ${filePath} has a visual field but missing or invalid prompt`
         );
       }
 
-      // Validate each model has required fields
-      for (const model of data.models) {
-        if (!model.name || !model.type || !model.url || !model.version) {
-          throw new Error(
-            `Post ${filePath} has a model missing required fields (name, type, url, version)`
-          );
-        }
-        if (model.type !== "image" && model.type !== "video") {
-          throw new Error(
-            `Post ${filePath} has a model with invalid type "${model.type}". Must be "image" or "video"`
-          );
-        }
+      if (!visual.image || typeof visual.image !== "object") {
+        throw new Error(
+          `Post ${filePath} has a visual field but missing or invalid image config`
+        );
+      }
+
+      if (!visual.video || typeof visual.video !== "object") {
+        throw new Error(
+          `Post ${filePath} has a visual field but missing or invalid video config`
+        );
+      }
+
+      // Validate image model config
+      if (!visual.image.url || !visual.image.version) {
+        throw new Error(
+          `Post ${filePath} has invalid image config (missing url or version)`
+        );
+      }
+
+      // Validate video model config
+      if (!visual.video.url || !visual.video.version) {
+        throw new Error(
+          `Post ${filePath} has invalid video config (missing url or version)`
+        );
       }
 
       posts.push({
         slug: data.slug || filePath.split("/").pop()?.replace(".mdx", "") || "",
         title: data.title || "Untitled",
         description: data.description,
-        image: data.image,
-        models: data.models,
+        visual: {
+          prompt: visual.prompt,
+          image: {
+            url: visual.image.url,
+            version: visual.image.version,
+          },
+          video: {
+            url: visual.video.url,
+            version: visual.video.version,
+          },
+        },
       });
     }
   }

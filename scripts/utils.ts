@@ -2,11 +2,19 @@ import { readFile } from "node:fs/promises";
 import { glob } from "glob";
 import matter from "gray-matter";
 
+export interface Model {
+  name: string;
+  type: "image" | "video";
+  url: string;
+  version: string;
+}
+
 export interface PostData {
   slug: string;
   title: string;
   description?: string;
   image: string;
+  models: Model[];
 }
 
 export const IMAGES_PER_POST = 21; // 0-20
@@ -30,11 +38,33 @@ export async function getPosts(): Promise<PostData[]> {
 
     // Only include posts with image as a string (the prompt description)
     if (typeof data.image === "string" && data.image.trim()) {
+      // Validate that models array exists and is valid
+      if (!Array.isArray(data.models) || data.models.length === 0) {
+        throw new Error(
+          `Post ${filePath} has an image field but missing or invalid models array in frontmatter`
+        );
+      }
+
+      // Validate each model has required fields
+      for (const model of data.models) {
+        if (!model.name || !model.type || !model.url || !model.version) {
+          throw new Error(
+            `Post ${filePath} has a model missing required fields (name, type, url, version)`
+          );
+        }
+        if (model.type !== "image" && model.type !== "video") {
+          throw new Error(
+            `Post ${filePath} has a model with invalid type "${model.type}". Must be "image" or "video"`
+          );
+        }
+      }
+
       posts.push({
         slug: data.slug || filePath.split("/").pop()?.replace(".mdx", "") || "",
         title: data.title || "Untitled",
         description: data.description,
         image: data.image,
+        models: data.models,
       });
     }
   }

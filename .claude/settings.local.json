@@ -13,7 +13,11 @@
       "Bash(pkill:*)",
       "Bash(cat:*)",
       "Bash(npm uninstall:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(for file in /Users/superhighfives/Development/superhighfives/code/posts/*.mdx)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(head:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

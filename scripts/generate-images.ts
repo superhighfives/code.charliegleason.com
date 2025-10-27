@@ -99,6 +99,13 @@ async function main() {
       `   📊 Missing ${missingIndices.length} images: [${missingIndices.join(", ")}]`,
     );
 
+    // Get the image model from frontmatter
+    const imageModel = post.models.find((m) => m.type === "image");
+    if (!imageModel) {
+      console.log(`   ⚠️  No image model found in frontmatter. Skipping...`);
+      continue;
+    }
+
     // Generate missing images
     for (const index of missingIndices) {
       const imagePath = join(postDir, `${index}.png`);
@@ -118,10 +125,13 @@ async function main() {
 
           if (attempt === 1) {
             console.log(`   📝 Prompt: ${prompt}`);
+            console.log(`   📝 Model: ${imageModel.version}`);
           }
 
           const output = (await replicate.run(
-            "jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc",
+            imageModel.version as
+              | `${string}/${string}:${string}`
+              | `${string}/${string}`,
             {
               input: {
                 prompt,

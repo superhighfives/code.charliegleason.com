@@ -122,6 +122,13 @@ async function main() {
       `   📊 Missing ${missingIndices.length} videos: [${missingIndices.join(", ")}]`,
     );
 
+    // Get the video model from frontmatter
+    const videoModel = post.models.find((m) => m.type === "video");
+    if (!videoModel) {
+      console.log(`   ⚠️  No video model found in frontmatter. Skipping...`);
+      continue;
+    }
+
     // Generate missing videos
     for (const index of missingIndices) {
       const imagePath = join(postDir, `${index}.png`);
@@ -131,6 +138,7 @@ async function main() {
         console.log(`   🎬 Generating video ${index}...`);
         console.log(`   📝 Using image: ${imagePath}`);
         console.log(`   📝 Prompt: ${post.image}`);
+        console.log(`   📝 Model: ${videoModel.version}`);
 
         const input = {
           fps: 24,
@@ -142,9 +150,14 @@ async function main() {
           camera_fixed: true,
         };
 
-        const output = (await replicate.run("bytedance/seedance-1-pro-fast", {
-          input,
-        })) as { url?: string | (() => URL) } | string;
+        const output = (await replicate.run(
+          videoModel.version as
+            | `${string}/${string}:${string}`
+            | `${string}/${string}`,
+          {
+            input,
+          },
+        )) as { url?: string | (() => URL) } | string;
 
         // Handle output - it might be:
         // - A FileOutput object with .url() method

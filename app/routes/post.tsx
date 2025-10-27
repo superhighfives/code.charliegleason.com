@@ -103,13 +103,13 @@ export default function Post() {
   } = useLoaderData<typeof loader>();
 
   const Component = useMdxComponent(components);
-  const { title, data, links, date, slug, image } = useMdxAttributes();
+  const { title, data, links, date, slug, image, models } = useMdxAttributes();
   const { metadata, isOldArticle } = processArticleDate(data, date);
 
   return (
     <div className="grid gap-y-4 relative">
-      {slug && initialVideo !== undefined && image && (
-        <VideoMasthead slug={slug} initialVideo={initialVideo} image={image} />
+      {slug && initialVideo !== undefined && image && models && (
+        <VideoMasthead slug={slug} initialVideo={initialVideo} image={image} models={models} />
       )}
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
         <Link

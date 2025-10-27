@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, RefreshCw, Share2 } from "lucide-react";
 import { useState } from "react";
+import type { Model } from "~/mdx/types";
 import {
   randomVideoIndex,
   toUserIndex,
@@ -11,10 +12,12 @@ export default function VideoMasthead({
   slug,
   initialVideo,
   image,
+  models,
 }: {
   slug: string;
   initialVideo: number;
   image: string;
+  models: Model[];
 }) {
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
   const [rotationCount, setRotationCount] = useState(0);
@@ -61,19 +64,17 @@ export default function VideoMasthead({
           </p>
           <p className="text-gray-400 dark:text-gray-500 text-2xs max-w-48">
             Generated with{" "}
-            <a
-              href="https://replicate.com/jakedahn/flux-latentpop"
-              className="underline underline-offset-2"
-            >
-              flux-latentpop
-            </a>{" "}
-            and{" "}
-            <a
-              href="https://replicate.com/bytedance/seedance-1-pro-fast"
-              className="underline underline-offset-2"
-            >
-              seedance-1-pro-fast
-            </a>
+            {models.map((model, index) => (
+              <span key={model.name}>
+                <a
+                  href={model.url}
+                  className="underline underline-offset-2"
+                >
+                  {model.name}
+                </a>
+                {index < models.length - 1 && " and "}
+              </span>
+            ))}
             .
           </p>
         </div>

@@ -1,6 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, RefreshCw, Share2 } from "lucide-react";
 import { useState } from "react";
+import {
+  randomVideoIndex,
+  toUserIndex,
+  VIDEO_COUNT,
+} from "~/utils/video-index";
 
 export default function VideoMasthead({
   slug,
@@ -17,7 +22,7 @@ export default function VideoMasthead({
   const [copied, setCopied] = useState(false);
 
   const changeVideo = () => {
-    setCurrentVideo(Math.floor(Math.random() * 21));
+    setCurrentVideo(randomVideoIndex());
     setRotationCount((prev: number) => prev + 1);
     setHasChanged(true);
   };
@@ -25,7 +30,7 @@ export default function VideoMasthead({
   const shareUrl = () => {
     const url = new URL(window.location.href);
     // Convert internal index (0-20) to user-facing (1-21)
-    url.searchParams.set("image", (currentVideo + 1).toString());
+    url.searchParams.set("image", toUserIndex(currentVideo).toString());
     navigator.clipboard.writeText(url.toString());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -90,7 +95,7 @@ export default function VideoMasthead({
             </motion.div>
 
             <span className="text-gray-400 dark:text-gray-500">
-              {String(currentVideo + 1).padStart(2, "0")}/21
+              {String(toUserIndex(currentVideo)).padStart(2, "0")}/{VIDEO_COUNT}
             </span>
           </button>
           <button

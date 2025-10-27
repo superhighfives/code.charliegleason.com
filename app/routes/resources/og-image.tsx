@@ -7,6 +7,7 @@ import initYoga from "yoga-wasm-web";
 import background from "~/assets/social-background.png";
 import { loadAllMdxRuntime } from "~/mdx/mdx-runtime";
 import { detectEdgeColors, detectImageColors } from "~/utils/edge-colors";
+import { parseImageIndex, randomVideoIndex } from "~/utils/video-index";
 // @ts-expect-error: wasm is untyped in Vite
 import RESVG_WASM from "../../vendor/resvg.wasm";
 // @ts-expect-error: wasm is untyped in Vite
@@ -43,16 +44,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
   // Convert from user-facing (1-21) to internal (0-20)
   const url = new URL(request.url);
   const imageParam = url.searchParams.get("image");
-  let imageIndex: number | null = null;
-
-  if (imageParam !== null) {
-    const parsed = parseInt(imageParam, 10);
-    // Validate: must be a valid number between 1-21
-    if (!Number.isNaN(parsed) && parsed >= 1 && parsed <= 21) {
-      imageIndex = parsed - 1;
-    }
-    // If invalid, imageIndex stays null and we'll use random selection
-  }
+  const imageIndex = parseImageIndex(imageParam);
 
   const imageResponse = await context.assets.fetch(
     new URL(background, request.url),
@@ -86,7 +78,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
       try {
         // Use query parameter if provided, otherwise random selection (0-20)
         const selectedIndex =
-          imageIndex !== null ? imageIndex : Math.floor(Math.random() * 21);
+          imageIndex !== null ? imageIndex : randomVideoIndex();
         const aiImagePath = `/posts/${slug}/${selectedIndex}.png`;
 
         console.log(

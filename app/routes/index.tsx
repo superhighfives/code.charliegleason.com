@@ -2,7 +2,7 @@ import { differenceInMonths, formatDistanceToNow } from "date-fns";
 import type { MetaFunction } from "react-router";
 import { useLoaderData } from "react-router";
 import { About } from "~/components/about";
-import LinkBlock from "~/components/link-block";
+import NavBlock from "~/components/nav-block";
 import tags from "~/components/utils/tags";
 import { loadAllMdxRuntime } from "~/mdx/mdx-runtime";
 import type { Post } from "~/mdx/types";
@@ -41,12 +41,13 @@ export default function Index() {
                   ? `${formatDistanceToNow(post.date)} ago`
                   : null;
               return (
-                <LinkBlock
+                <NavBlock
                   key={post.slug}
                   title={post.title}
                   description={post.description}
                   caption={dateCaption}
                   href={post.url}
+                  slug={post.slug}
                 />
               );
             })

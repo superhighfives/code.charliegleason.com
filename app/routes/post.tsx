@@ -12,6 +12,7 @@ import type { PostLoaderData } from "~/mdx/types";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
 import { processArticleDate } from "~/utils/posts";
 import { highlightCode } from "~/utils/shiki.server";
+import { parseImageIndex, randomVideoIndex } from "~/utils/video-index";
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
 
@@ -52,26 +53,23 @@ export async function loader({
     ? getKudosCookie(request, frontmatter.slug)
     : 0;
 
-  // Get image from search params
+  // Get image from search params and validate
   const url = new URL(request.url);
-  const image = url.searchParams.get("image");
+  const imageParam = url.searchParams.get("image");
+  const parsedIndex = parseImageIndex(imageParam);
 
-  // Select random video (0-20) if post has image enabled
-  // Convert from user-facing (1-21) to internal (0-20)
+  // Determine which video to show (0-20 internal index)
   let randomVideo: number | undefined;
 
-  if (image !== null) {
-    const parsed = parseInt(image, 10);
-    // Validate: must be a valid number between 1-21
-    if (!Number.isNaN(parsed) && parsed >= 1 && parsed <= 21) {
-      randomVideo = parsed - 1;
-    } else if (frontmatter.image) {
-      // Invalid parameter, fall back to random
-      randomVideo = Math.floor(Math.random() * 21);
-    }
+  if (parsedIndex !== null) {
+    // Valid parameter provided
+    randomVideo = parsedIndex;
+  } else if (imageParam !== null && frontmatter.image) {
+    // Invalid parameter, fall back to random
+    randomVideo = randomVideoIndex();
   } else if (frontmatter.image) {
     // No parameter, use random
-    randomVideo = Math.floor(Math.random() * 21);
+    randomVideo = randomVideoIndex();
   }
 
   return {

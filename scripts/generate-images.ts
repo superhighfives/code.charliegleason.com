@@ -14,7 +14,7 @@ import {
 } from "./utils.js";
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 10;
 
 /**
  * Optimizes a PNG image to reduce file size
@@ -121,7 +121,9 @@ async function main() {
 
           if (attempt === 1) {
             console.log(`   📝 Prompt: ${prompt}`);
-            console.log(`   📝 Model: ${imageModelName} (${post.visual.image.version})`);
+            console.log(
+              `   📝 Model: ${imageModelName} (${post.visual.image.version})`,
+            );
           }
 
           const output = (await replicate.run(

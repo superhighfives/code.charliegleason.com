@@ -1,7 +1,7 @@
 import type { PostFrontmatter } from "~/mdx/types";
 
 function generateImage(slug: string, index?: number) {
-  return `${import.meta.env.PROD ? "https://code.charliegleason.com" : "http://localhost:8080"}/${slug}.png${index ? `?image=${index}` : ""}`;
+  return `${import.meta.env.PROD ? "https://code.charliegleason.com" : "http://localhost:8080"}/${slug}${index ? `/${index}` : ""}.png`;
 }
 
 export default function tags(attributes?: PostFrontmatter, index?: number) {

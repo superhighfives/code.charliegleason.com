@@ -9,7 +9,11 @@ export async function loadMdxRuntime(
   requestUrl: string,
 ): Promise<MdxRuntimeData> {
   const url = new URL(requestUrl);
-  const pathname = url.pathname;
+  let pathname = url.pathname;
+
+  // Strip image index from pathname if present (e.g., /hello-world/15 -> /hello-world)
+  // Image indices are numbers 1-21
+  pathname = pathname.replace(/\/\d+$/, "");
 
   const { files } = await getRuntimeMdxManifest();
   const mdxFile = files.find(

@@ -1,15 +1,17 @@
 import { differenceInMonths, formatDistanceToNow } from "date-fns";
 import type { MetaFunction } from "react-router";
-import { useLoaderData } from "react-router";
+import { data, useLoaderData } from "react-router";
 import { About } from "~/components/about";
 import NavBlock from "~/components/nav-block";
 import tags from "~/components/utils/tags";
 import { loadAllMdxRuntime } from "~/mdx/mdx-runtime";
 import type { Post } from "~/mdx/types";
+import { randomVideoIndex } from "~/utils/video-index";
+import type { Route } from "./+types/index";
 
 export const meta: MetaFunction = () => tags();
 
-export async function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
   const posts = await loadAllMdxRuntime();
 
   // Sort posts by published date (newest first)
@@ -20,11 +22,52 @@ export async function loader() {
       return b.date.getTime() - a.date.getTime();
     });
 
-  return { posts: sortedPosts };
+  // Read existing cookies
+  const cookieHeader = request.headers.get("Cookie");
+  const initialVideos: Record<string, number> = {};
+  const newCookies: string[] = [];
+
+  // For each post, check if cookie exists, otherwise generate random
+  for (const post of sortedPosts) {
+    const cookieName = `visual-index-${post.slug}`;
+    let videoIndex: number | null = null;
+
+    // Try to read from cookie
+    if (cookieHeader) {
+      const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]+)`));
+      if (match) {
+        const value = Number.parseInt(match[1], 10);
+        if (!Number.isNaN(value) && value >= 0 && value <= 20) {
+          videoIndex = value;
+        }
+      }
+    }
+
+    // If no cookie exists, generate random and prepare cookie header
+    if (videoIndex === null) {
+      videoIndex = randomVideoIndex();
+      newCookies.push(
+        `${cookieName}=${videoIndex}; path=/; samesite=lax`,
+      );
+    }
+
+    initialVideos[post.slug] = videoIndex;
+  }
+
+  // Return data with Set-Cookie headers for new cookies
+  const headers = new Headers();
+  for (const cookie of newCookies) {
+    headers.append("Set-Cookie", cookie);
+  }
+
+  return data(
+    { posts: sortedPosts, initialVideos },
+    { headers: newCookies.length > 0 ? headers : undefined },
+  );
 }
 
 export default function Index() {
-  const { posts } = useLoaderData<typeof loader>();
+  const { posts, initialVideos } = useLoaderData<typeof loader>();
 
   return (
     <div className="grid gap-4 sm:gap-8 max-w-[65ch] content-end h-full">
@@ -48,6 +91,7 @@ export default function Index() {
                   caption={dateCaption}
                   href={post.url}
                   slug={post.slug}
+                  initialVideo={initialVideos[post.slug]}
                 />
               );
             })

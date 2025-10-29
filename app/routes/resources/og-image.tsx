@@ -40,11 +40,10 @@ async function ensureInitialised() {
 export async function loader({ request, params, context }: Route.LoaderArgs) {
   const { slug } = params;
 
-  // Get image index from query parameter (e.g., ?image=1)
+  // Get image index from path parameter (e.g., /slug/1.png)
   // Convert from user-facing (1-21) to internal (0-20)
-  const url = new URL(request.url);
-  const imageParam = url.searchParams.get("image");
-  const imageIndex = parseImageIndex(imageParam);
+  const imageParam = (params as { slug: string; index?: string }).index;
+  const imageIndex = parseImageIndex(imageParam ?? null);
 
   const imageResponse = await context.assets.fetch(
     new URL(background, request.url),

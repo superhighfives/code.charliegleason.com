@@ -19,6 +19,7 @@ import type { Route } from "./+types/post";
 export async function loader({
   request,
   context,
+  params,
 }: Route.LoaderArgs): Promise<PostLoaderData> {
   const { content, frontmatter } = await loadMdxRuntime(request.url);
   const rawContent = content as string;
@@ -53,22 +54,60 @@ export async function loader({
     ? getKudosCookie(request, frontmatter.slug)
     : 0;
 
-  // Get image from search params and validate
-  const url = new URL(request.url);
-  const imageParam = url.searchParams.get("image");
-  const parsedIndex = parseImageIndex(imageParam);
+  // Get image from path params and validate
+  const imageParam = (params as { index?: string }).index;
+  const parsedIndex = parseImageIndex(imageParam ?? null);
+
+  // Get image index from cookie (set by video-masthead on post page)
+  const cookieHeader = request.headers.get("Cookie");
+  let cookieIndex: number | null = null;
+  if (frontmatter.slug && cookieHeader) {
+    const cookieName = `visual-index-${frontmatter.slug}`;
+    const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]+)`));
+    if (match) {
+      const value = Number.parseInt(match[1], 10);
+      if (!Number.isNaN(value) && value >= 0 && value <= 20) {
+        cookieIndex = value;
+      }
+    }
+  }
+
+  // Check if navigation came from index page
+  // Note: In client-side navigation, request.headers may not have Referer
+  // We rely on the cookie timestamp to determine if this is a fresh navigation from index
+  const referrer = request.headers.get("Referer") || "";
+  let isFromIndex = false;
+
+  if (referrer) {
+    try {
+      const refUrl = new URL(referrer);
+      // Index page is when pathname is "/" or empty
+      isFromIndex = refUrl.pathname === "/" || refUrl.pathname === "";
+    } catch {
+      // Invalid URL, not from index
+      isFromIndex = false;
+    }
+  }
+
+  // Check for navigation cookie set by index page (expires in 1 second)
+  const navCookieName = `nav-from-index-${frontmatter.slug}`;
+  const navCookie = cookieHeader?.match(new RegExp(`${navCookieName}=1`));
+  if (navCookie) {
+    isFromIndex = true;
+  }
 
   // Determine which video to show (0-20 internal index)
+  // Priority: URL param > Cookie (only if from index) > Random
   let randomVideo: number | undefined;
 
   if (parsedIndex !== null) {
-    // Valid parameter provided
+    // Valid URL parameter provided (share link)
     randomVideo = parsedIndex;
-  } else if (imageParam !== null && frontmatter.visual) {
-    // Invalid parameter, fall back to random
-    randomVideo = randomVideoIndex();
+  } else if (cookieIndex !== null && isFromIndex && frontmatter.visual) {
+    // Use cookie value ONLY if navigating from index page (first click)
+    randomVideo = cookieIndex;
   } else if (frontmatter.visual) {
-    // No parameter, use random
+    // No parameter or not from index - generate random (refresh scenario)
     randomVideo = randomVideoIndex();
   }
 
@@ -82,12 +121,13 @@ export async function loader({
   };
 }
 
-export function meta({ data, location }: Route.MetaArgs) {
+export function meta({ data, params }: Route.MetaArgs) {
   if (!data) return tags();
   const { attributes } = data;
-  const searchParams = new URLSearchParams(location.search);
-  const image = searchParams.get("image");
-  return tags(attributes, image ? parseInt(image, 10) : undefined);
+  const imageParam = (params as { imageIndex?: string }).imageIndex;
+  const parsedIndex = parseImageIndex(imageParam ?? null);
+  // Convert internal index (0-20) back to user-facing (1-21) for meta tags
+  return tags(attributes, parsedIndex !== null ? parsedIndex + 1 : undefined);
 }
 
 export function shouldRevalidate() {

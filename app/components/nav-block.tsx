@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { toUserIndex } from "~/utils/video-index";
+import { useEffect, useRef, useState } from "react";
 
 export default function NavBlock({
   title,
@@ -8,12 +7,14 @@ export default function NavBlock({
   href,
   description,
   slug,
+  initialVideo,
 }: {
   title: string;
   caption?: string | null;
   href: string;
   description?: string;
   slug: string;
+  initialVideo: number;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [videoKey, setVideoKey] = useState(0);
@@ -22,17 +23,6 @@ export default function NavBlock({
   const readyVideoRef = useRef<HTMLVideoElement | null>(null);
   const isHoveredRef = useRef(false);
   const hasEnteredRef = useRef(false);
-
-  // Generate stable random video index based on slug (same on server and client)
-  const initialVideo = useMemo(() => {
-    // Simple hash function to convert slug to a number
-    let hash = 0;
-    for (let i = 0; i < slug.length; i++) {
-      hash = (hash << 5) - hash + slug.charCodeAt(i);
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return Math.abs(hash) % 21;
-  }, [slug]);
 
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
 
@@ -64,6 +54,10 @@ export default function NavBlock({
       const randomVideo = Math.floor(Math.random() * 21);
       setCurrentVideo(randomVideo);
       setVideoKey((prev) => prev + 1);
+
+      // Update cookie when video changes (on mouse leave only)
+      // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
+      document.cookie = `visual-index-${slug}=${randomVideo}; path=/; samesite=lax`;
     }
 
     setIsHovered(false);
@@ -123,8 +117,15 @@ export default function NavBlock({
     // No need to do anything here
   };
 
-  // Update href to include the current video as a query param
-  const linkHref = `${href}?image=${toUserIndex(currentVideo)}`;
+  const handleClick = () => {
+    // Set a short-lived navigation cookie to indicate we're navigating from index
+    // This cookie expires in 2 seconds (just enough time for navigation)
+    // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for navigation tracking
+    document.cookie = `nav-from-index-${slug}=1; path=/; max-age=2; samesite=lax`;
+  };
+
+  // Link to post without image index (cookie will handle persistence)
+  const linkHref = href;
 
   return (
     <a
@@ -134,6 +135,7 @@ export default function NavBlock({
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
     >
       {/* Video container */}
       <div className="relative w-full xs:size-32 aspect-square shrink-0 overflow-hidden rounded-md ml-[3px]">

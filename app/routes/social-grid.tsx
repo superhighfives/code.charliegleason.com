@@ -29,7 +29,9 @@ export default function SocialGrid() {
   return (
     <div className="grid grid-cols-3 gap-4">
       {imageIndices.map((index) => {
-        const imageUrl = `/${slug}.png?image=${index}`;
+        // Convert internal index (0-20) to user-facing (1-21) for URLs
+        const userIndex = index + 1;
+        const imageUrl = `/${slug}/${userIndex}.png`;
 
         return (
           <div key={index} className="card">

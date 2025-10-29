@@ -36,16 +36,25 @@ export default function VideoMasthead({
   const [copied, setCopied] = useState(false);
 
   const changeVideo = () => {
-    setCurrentVideo(randomVideoIndex());
+    const newVideo = randomVideoIndex();
+    setCurrentVideo(newVideo);
     setRotationCount((prev: number) => prev + 1);
     setHasChanged(true);
+
+    // Update URL with pushState (creates history entry)
+    const newPath = `/${slug}/${toUserIndex(newVideo)}`;
+    window.history.pushState({}, "", newPath);
+
+    // Update cookie so it persists (session cookie, deleted when browser closes)
+    // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
+    document.cookie = `visual-index-${slug}=${newVideo}; path=/; samesite=lax`;
   };
 
   const shareUrl = () => {
-    const url = new URL(window.location.href);
-    // Convert internal index (0-20) to user-facing (1-21)
-    url.searchParams.set("image", toUserIndex(currentVideo).toString());
-    navigator.clipboard.writeText(url.toString());
+    // Build URL with current video index
+    const origin = window.location.origin;
+    const url = `${origin}/${slug}/${toUserIndex(currentVideo)}`;
+    navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

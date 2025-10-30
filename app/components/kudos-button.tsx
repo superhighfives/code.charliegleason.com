@@ -20,11 +20,10 @@ export function KudosButton({
   initialTotal = 0,
   initialYou = 0,
 }: KudosButtonProps) {
-  const { fetcher, fingerprint, total, remaining, disabled, pending } =
-    useKudos({
-      initialTotal,
-      initialYou,
-    });
+  const { fetcher, fingerprint, total, remaining, disabled } = useKudos({
+    initialTotal,
+    initialYou,
+  });
 
   const [confettiBursts, setConfettiBursts] = useState<ConfettiBurst[]>([]);
 

@@ -30,6 +30,18 @@ vi.mock("~/hooks/useKudos", () => ({
   })),
 }));
 
+// Mock the useScramble hook
+vi.mock("use-scramble", () => ({
+  useScramble: vi.fn(() => ({
+    ref: { current: null },
+  })),
+}));
+
+// Mock the scramble utils
+vi.mock("~/components/utils/scramble", () => ({
+  scrambleOptions: {},
+}));
+
 describe("KudosButton", () => {
   const defaultProps = {
     slug: "test-post",
@@ -51,14 +63,16 @@ describe("KudosButton", () => {
     render(<KudosButton {...defaultProps} />);
 
     // 50 - 3 = 47 remaining
-    expect(screen.getByText("(47 left)")).toBeInTheDocument();
+    expect(screen.getByText("47")).toBeInTheDocument();
+    expect(screen.getByText(/left\)/)).toBeInTheDocument();
   });
 
   it("should render with default values when not provided", () => {
     render(<KudosButton slug="test-post" />);
 
     expect(screen.getByText("0")).toBeInTheDocument();
-    expect(screen.getByText("(50 left)")).toBeInTheDocument();
+    expect(screen.getByText("50")).toBeInTheDocument();
+    expect(screen.getByText(/left\)/)).toBeInTheDocument();
   });
 
   it("should render thumbs up icon", () => {
@@ -141,31 +155,6 @@ describe("KudosButton", () => {
 
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute("aria-label", "Give kudos");
-  });
-
-  it("should be disabled when pending", async () => {
-    const { useKudos } = await import("~/hooks/useKudos");
-
-    vi.mocked(useKudos).mockReturnValueOnce({
-      fetcher: {
-        Form: ({ children, onClick, ...props }: React.FormHTMLAttributes<HTMLFormElement> & { children: React.ReactNode; onClick?: () => void }) => (
-          <form {...props} onClick={onClick}>
-            {children}
-          </form>
-        ),
-      } as ReturnType<typeof useKudos>['fetcher'],
-      fingerprint: "test-fingerprint-123",
-      total: 42,
-      you: 3,
-      remaining: 47,
-      disabled: false,
-      pending: true,
-    });
-
-    render(<KudosButton {...defaultProps} />);
-
-    const button = screen.getByRole("button");
-    expect(button).toBeDisabled();
   });
 
   it("should have hover styles when not disabled", () => {

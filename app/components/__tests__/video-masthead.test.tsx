@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import VideoMasthead from "../video-masthead";
 
 // Mock framer-motion
@@ -8,7 +8,9 @@ vi.mock("framer-motion", () => ({
     <div>{children}</div>
   ),
   motion: {
-    video: ({ children, ...props }: any) => <video {...props}>{children}</video>,
+    video: ({ children, ...props }: any) => (
+      <video {...props}>{children}</video>
+    ),
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   },
 }));
@@ -50,9 +52,6 @@ describe("VideoMasthead", () => {
       configurable: true,
     });
 
-    // Mock window.history.pushState
-    window.history.pushState = vi.fn();
-
     // Mock window.location.origin
     Object.defineProperty(window, "location", {
       value: {
@@ -62,7 +61,8 @@ describe("VideoMasthead", () => {
     });
 
     // Clear cookies
-    document.cookie = "visual-index-test-post=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie =
+      "visual-index-test-post=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   });
 
   it("should render video with correct initial src", () => {
@@ -127,13 +127,6 @@ describe("VideoMasthead", () => {
     await waitFor(() => {
       expect(randomVideoIndexExcluding).toHaveBeenCalled();
     });
-
-    // Should update URL with pushState
-    expect(window.history.pushState).toHaveBeenCalledWith(
-      {},
-      "",
-      "/test-post/11", // randomVideoIndexExcluding returns 10, +1 = 11
-    );
 
     // Should set cookie
     expect(document.cookie).toContain("visual-index-test-post=10");

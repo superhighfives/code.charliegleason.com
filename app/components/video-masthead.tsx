@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, RefreshCw, Share2 } from "lucide-react";
 import { useState } from "react";
 import type { VisualConfig } from "~/mdx/types";
+import { setVisualIndexCookie } from "~/utils/cookies";
 import { extractModelName } from "~/utils/replicate";
 import {
   randomVideoIndexExcluding,
@@ -30,8 +31,7 @@ export default function VideoMasthead({
     setHasChanged(true);
 
     // Update cookie so it persists (session cookie, deleted when browser closes)
-    // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
-    document.cookie = `visual-index-${slug}=${newVideo}; path=/; samesite=lax`;
+    setVisualIndexCookie(slug, newVideo);
   };
 
   const shareUrl = () => {

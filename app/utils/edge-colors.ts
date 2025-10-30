@@ -258,7 +258,6 @@ export async function detectImageColors(
 
   // Sample pixels from entire image
   const allPixels: RGB[] = [];
-  let excludedPixelCount = 0;
 
   for (let y = 0; y < height; y += sampleRate) {
     for (let x = 0; x < width; x += sampleRate) {
@@ -266,7 +265,6 @@ export async function detectImageColors(
 
       // Skip pixels that are similar to the exclude color
       if (excludeRGB && isColorSimilar(pixel, excludeRGB, colorTolerance)) {
-        excludedPixelCount++;
         continue;
       }
 
@@ -305,7 +303,6 @@ export async function detectImageColors(
   const MIN_CONTRAST_RATIO = 3; // WCAG AA standard for normal text
   let maxScore = 0;
   let dominantColor = { r: 0, g: 0, b: 0 };
-  let bestContrastRatio = 0;
 
   // If we have an exclude color (background), check if we need light or dark text
   const backgroundLuminance = excludeRGB ? getLuminance(excludeRGB) : 0;
@@ -339,11 +336,6 @@ export async function detectImageColors(
       const contrastMultiplier =
         (contrastRatio / MIN_CONTRAST_RATIO) ** contrastBoost;
       score = count * contrastMultiplier;
-
-      // Track the best contrast ratio for debugging
-      if (contrastRatio > bestContrastRatio) {
-        bestContrastRatio = contrastRatio;
-      }
     }
 
     if (score > maxScore) {
@@ -357,24 +349,6 @@ export async function detectImageColors(
     dominantColor = needsDarkText
       ? { r: 0, g: 0, b: 0 }
       : { r: 255, g: 255, b: 255 };
-  }
-
-  // Calculate final metrics for the selected dominant color
-  let contrastInfo = {};
-  if (excludeRGB) {
-    const finalContrastRatio = getContrastRatio(dominantColor, excludeRGB);
-    const backgroundLum = getLuminance(excludeRGB);
-    const textLum = getLuminance(dominantColor);
-
-    contrastInfo = {
-      contrastRatio: `${finalContrastRatio.toFixed(2)}:1`,
-      meetsWCAG_AA: finalContrastRatio >= 4.5,
-      meetsWCAG_AAA: finalContrastRatio >= 7,
-      backgroundLuminance: backgroundLum.toFixed(3),
-      textLuminance: textLum.toFixed(3),
-      backgroundType: backgroundLum > 0.5 ? "light" : "dark",
-      textType: textLum > 0.5 ? "light" : "dark",
-    };
   }
 
   return {

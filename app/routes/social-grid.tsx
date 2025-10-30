@@ -13,7 +13,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data) return tags();
-  console.log(data);
   const { frontmatter } = data;
   return tags({
     ...frontmatter,

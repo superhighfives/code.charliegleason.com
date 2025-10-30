@@ -12,6 +12,7 @@ import VideoMasthead from "~/components/video-masthead";
 import { customMdxParse } from "~/mdx/custom-mdx-parser";
 import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import type { PostLoaderData } from "~/mdx/types";
+import { setVisualIndexCookie } from "~/utils/cookies";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
 import { processArticleDate } from "~/utils/posts";
 import { highlightCode } from "~/utils/shiki.server";
@@ -162,8 +163,7 @@ export default function Post() {
   useEffect(() => {
     if (initialVideo !== undefined && slug) {
       // Update cookie so it persists (session cookie, deleted when browser closes)
-      // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
-      document.cookie = `visual-index-${slug}=${initialVideo}; path=/; samesite=lax`;
+      setVisualIndexCookie(slug, initialVideo);
     }
   }, [initialVideo, slug]);
 

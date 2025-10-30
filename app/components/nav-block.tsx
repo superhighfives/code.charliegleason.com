@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { setNavigationCookie, setVisualIndexCookie } from "~/utils/cookies";
 import { randomVideoIndexExcluding } from "~/utils/video-index";
 
 export default function NavBlock({
@@ -10,7 +11,6 @@ export default function NavBlock({
   slug,
   initialVideo,
   index = 0,
-  isFirst = false,
 }: {
   title: string;
   caption?: string | null;
@@ -19,7 +19,6 @@ export default function NavBlock({
   slug: string;
   initialVideo: number;
   index?: number;
-  isFirst?: boolean;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -42,11 +41,6 @@ export default function NavBlock({
 
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
   const [nextVideo, setNextVideo] = useState<number | null>(null);
-
-  // Derived active state - element is active if hovered OR focused (NOT viewport)
-  const isActive = isHovered || isFocused;
-  const isActiveRef = useRef(false);
-  isActiveRef.current = isActive;
 
   // Separate video active state - includes viewport for touch devices
   const isVideoActive =
@@ -96,8 +90,7 @@ export default function NavBlock({
       setVideoKey((prev) => prev + 1);
 
       // Update cookie when video changes (on mouse leave only)
-      // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
-      document.cookie = `visual-index-${slug}=${nextVideo}; path=/; samesite=lax`;
+      setVisualIndexCookie(slug, nextVideo);
 
       // Clean up preload video element
       const preloadVideo = document.getElementById(
@@ -148,8 +141,7 @@ export default function NavBlock({
       setVideoKey((prev) => prev + 1);
 
       // Update cookie when video changes (on blur only if not hovered)
-      // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
-      document.cookie = `visual-index-${slug}=${nextVideo}; path=/; samesite=lax`;
+      setVisualIndexCookie(slug, nextVideo);
 
       // Clean up preload video element
       const preloadVideo = document.getElementById(
@@ -261,8 +253,7 @@ export default function NavBlock({
   const handleClick = () => {
     // Set a short-lived navigation cookie to indicate we're navigating from index
     // This cookie expires in 2 seconds (just enough time for navigation)
-    // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for navigation tracking
-    document.cookie = `nav-from-index-${slug}=1; path=/; max-age=2; samesite=lax`;
+    setNavigationCookie(slug);
   };
 
   return (

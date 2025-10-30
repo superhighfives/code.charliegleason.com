@@ -158,6 +158,15 @@ export default function Post() {
     text: "charliegleason",
   });
 
+  // Update cookie when video index changes (including random generation on refresh)
+  useEffect(() => {
+    if (initialVideo !== undefined && slug) {
+      // Update cookie so it persists (session cookie, deleted when browser closes)
+      // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
+      document.cookie = `visual-index-${slug}=${initialVideo}; path=/; samesite=lax`;
+    }
+  }, [initialVideo, slug]);
+
   // Preload all 21 videos on mount for instant transitions on refresh button
   useEffect(() => {
     if (!slug || !visual) return;

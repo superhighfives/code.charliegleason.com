@@ -24,7 +24,6 @@
     "react-live": "^4.1.8",
     "react-router": "7.6.3",
     "rehype-stringify": "^10.0.1",
-    "remark-github-alerts": "^0.1.1",
     "remark-github-blockquote-alert": "^2.0.0",
     "remark-mdx": "^3.1.1",
     "remark-rehype": "^11.1.2",

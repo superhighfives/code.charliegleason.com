@@ -22,6 +22,10 @@ export default function Command({
 
   return (
     <div className="relative border border-b-4 p-4 pr-16 rounded-xs bg-gray-50 dark:bg-gray-950 border-gray-200 dark:border-gray-700 mt-4 break-words [&_pre_code]:whitespace-pre-wrap">
+      <div
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: required by shiki
+        dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+      />
       <button
         type="button"
         onClick={handleCopy}
@@ -44,10 +48,6 @@ export default function Command({
           </motion.div>
         </AnimatePresence>
       </button>
-      <div
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: required by shiki
-        dangerouslySetInnerHTML={{ __html: highlightedHtml }}
-      />
     </div>
   );
 }

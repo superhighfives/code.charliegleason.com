@@ -56,18 +56,6 @@ export async function detectEdgeColors(
     );
   }
 
-  // Debug: Log PNG metadata to understand the format
-  console.log("PNG metadata:", {
-    width,
-    height,
-    depth,
-    channels,
-    hasPalette: !!palette,
-    dataLength: data.length,
-    expectedLength: width * height * (channels || 4),
-    bytesPerPixel: data.length / (width * height),
-    samplePixels: Array.from(data.slice(0, 20)),
-  });
 
   // Use shared PNG utilities
   const pngData: PngData = {
@@ -129,20 +117,6 @@ export async function detectEdgeColors(
     ...edgePixels.right,
   ];
   const dominantAvg = calculateAverageColor(allEdgePixels);
-
-  // Debug: Log if we're getting invalid values
-  if (
-    !Number.isFinite(dominantAvg.r) ||
-    !Number.isFinite(dominantAvg.g) ||
-    !Number.isFinite(dominantAvg.b)
-  ) {
-    console.warn("Invalid dominant color values:", {
-      dominantAvg,
-      pixelCount: allEdgePixels.length,
-      samplePixels: allEdgePixels.slice(0, 5),
-      imageSize: { width, height },
-    });
-  }
 
   // Calculate weighted average (giving more weight to larger edges)
   const weightedAvg = {
@@ -221,14 +195,6 @@ export async function detectImageColors(
     );
   }
 
-  console.log("PNG metadata (full image):", {
-    width,
-    height,
-    depth,
-    channels,
-    dataLength: data.length,
-    bytesPerPixel: data.length / (width * height),
-  });
 
   // Parse exclude color if provided
   let excludeRGB: RGB | null = null;
@@ -239,7 +205,6 @@ export async function detectImageColors(
       g: parseInt(hex.substring(2, 4), 16),
       b: parseInt(hex.substring(4, 6), 16),
     };
-    console.log("Excluding color:", excludeColor, excludeRGB);
   }
 
   // Helper to check if a color is similar to the exclude color
@@ -309,11 +274,6 @@ export async function detectImageColors(
     }
   }
 
-  if (excludeRGB) {
-    console.log(
-      `Excluded ${excludedPixelCount} pixels similar to ${excludeColor}`,
-    );
-  }
 
   // Calculate average color
   const averageColor = calculateAverageColor(allPixels);
@@ -397,9 +357,6 @@ export async function detectImageColors(
     dominantColor = needsDarkText
       ? { r: 0, g: 0, b: 0 }
       : { r: 255, g: 255, b: 255 };
-    console.log(
-      `No suitable color found, falling back to ${needsDarkText ? "black" : "white"}`,
-    );
   }
 
   // Calculate final metrics for the selected dominant color
@@ -419,14 +376,6 @@ export async function detectImageColors(
       textType: textLum > 0.5 ? "light" : "dark",
     };
   }
-
-  console.log("Image color analysis:", {
-    totalPixelsSampled: allPixels.length,
-    uniqueColors: colorMap.size,
-    dominantColor: rgbToHex(dominantColor.r, dominantColor.g, dominantColor.b),
-    averageColor: rgbToHex(averageColor.r, averageColor.g, averageColor.b),
-    ...contrastInfo,
-  });
 
   return {
     dominant: rgbToHex(dominantColor.r, dominantColor.g, dominantColor.b),

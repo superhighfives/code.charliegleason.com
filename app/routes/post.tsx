@@ -167,7 +167,7 @@ export default function Post() {
           to="/"
           onMouseEnter={replay}
           onFocus={replay}
-          className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2"
+          className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"
         >
           ❯ cd ~/code
           <span className="hidden sm:inline">.</span>

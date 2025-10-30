@@ -72,6 +72,12 @@ html.dark .shiki span {
   color: var(--shiki-dark) !important;
 }
 
+.shiki:focus-visible {
+  outline: none;
+  border-radius: 2px;
+  @apply ring-4 ring-offset-2 ring-indigo-100 bg-indigo-100 ring-offset-indigo-100 dark:ring-indigo-900 dark:bg-indigo-900 dark:ring-offset-indigo-900;
+}
+
 /*************************************************************/
 /* Markdown alerts */
 /*************************************************************/
@@ -201,6 +207,10 @@ html.dark .shiki span {
 /* Sandpack */
 /*************************************************************/
 
+/* code has child .custom-wrapper focus within */
+.code:has(.sp-cm:focus-visible) {
+  @apply ring-2 ring-indigo-500 ring-offset-2 dark:ring-offset-gray-950 rounded-sm;
+}
 .code .custom-wrapper {
   @apply subpixel-antialiased;
 }

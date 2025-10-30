@@ -58,15 +58,18 @@ function VideoCard({
           src={imageUrl}
           alt=""
           loading="lazy"
-          className="group-hover:opacity-25 transition-opacity"
+          className="transition-opacity"
         />
-        <div className="absolute inset-0 z-10">
+        <div className="absolute inset-0 left-auto z-10">
           <video
             ref={videoRef}
             src={videoUrl}
             muted
-            loop
-            className="p-4 size-full object-fit opacity-0 group-hover:opacity-100 transition-opacity"
+            className="size-full object-fit opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{
+              // add a mask to the video left graident
+              mask: "linear-gradient(to right, transparent 0%, black 25%)",
+            }}
           />
         </div>
       </a>

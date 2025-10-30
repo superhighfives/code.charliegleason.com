@@ -2,24 +2,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, RefreshCw, Share2 } from "lucide-react";
 import { useState } from "react";
 import type { VisualConfig } from "~/mdx/types";
+import { extractModelName } from "~/utils/replicate";
 import {
   randomVideoIndexExcluding,
   toUserIndex,
   VIDEO_COUNT,
 } from "~/utils/video-index";
-
-/**
- * Extracts the model name from a Replicate URL
- * @param url - Replicate model URL (e.g. "https://replicate.com/jakedahn/flux-latentpop")
- * @returns Model name (e.g. "flux-latentpop")
- */
-function extractModelName(url: string): string {
-  const match = url.match(/replicate\.com\/[^/]+\/([^/?#]+)/);
-  if (!match) {
-    throw new Error(`Invalid Replicate URL format: ${url}`);
-  }
-  return match[1];
-}
 
 export default function VideoMasthead({
   slug,
@@ -86,14 +74,14 @@ export default function VideoMasthead({
             Generated with{" "}
             <a
               href={visual.image.url}
-              className="underline underline-offset-2 hover:text-gray-600 dark:hover:text-gray-300"
+              className="underline underline-offset-2 hover:text-gray-600 dark:hover:text-gray-300 outline-none focus:text-gray-600 dark:focus:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
             >
               {extractModelName(visual.image.url)}
             </a>
             {" and "}
             <a
               href={visual.video.url}
-              className="underline underline-offset-2  hover:text-gray-600 dark:hover:text-gray-300"
+              className="underline underline-offset-2  hover:text-gray-600 dark:hover:text-gray-300 outline-none focus:text-gray-600 dark:focus:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
             >
               {extractModelName(visual.video.url)}
             </a>

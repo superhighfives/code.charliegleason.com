@@ -80,10 +80,6 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
           imageIndex !== null ? imageIndex : randomVideoIndex();
         const aiImagePath = `/posts/${slug}/${selectedIndex}.png`;
 
-        console.log(
-          `Loading AI image for ${slug}: index ${selectedIndex}${imageIndex !== null ? " (from query param)" : " (random)"}`,
-        );
-
         const aiImageResponse = await context.assets.fetch(
           new URL(aiImagePath, request.url),
         );
@@ -99,9 +95,6 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
               sampleRate: 10,
               edgeDepth: 10,
             });
-            console.log(
-              `Detected edge color for ${slug}: ${edgeColors.dominant}`,
-            );
 
             // Step 2: Get dominant image color, excluding edge colors and boosting contrast
             const imageColors = await detectImageColors(aiImageBase64, {
@@ -112,22 +105,15 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
             });
             textColor = imageColors.dominant;
             backgroundColor = edgeColors.left;
-            console.log(
-              `Detected text color for ${slug}: ${textColor} (excluding edge color)`,
-            );
           } catch (colorError) {
-            console.log(
-              `Color detection failed for ${slug}, using fallback: ${colorError}`,
-            );
-            // Falls back to white
+            // Falls back to white on error
           }
         }
       } catch (e) {
         // If image doesn't exist, we'll fall back to text-only layout
-        console.log(`No AI image found for ${slug}, using fallback: ${e}`);
       }
     }
-    // If image is true or missing, aiImageBase64 stays null and we use text-only layout
+    // If visual is missing, aiImageBase64 stays null and we use text-only layout
 
     const options: SatoriOptions = {
       width: OG_IMAGE_WIDTH,

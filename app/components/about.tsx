@@ -3,8 +3,8 @@ import { Link } from "react-router";
 
 export function About() {
   return (
-    <div className="flex flex-wrap sm:flex-nowrap gap-4 dark:text-white">
-      <div className="sm:border border-indigo-500 text-indigo-500 sm:h-full flex sm:items-center sm:justify-center sm:w-64 rounded">
+    <div className="flex flex-wrap sm:flex-nowrap gap-6 dark:text-white">
+      <div className="sm:border border-indigo-500 text-indigo-500 sm:h-full flex sm:items-center sm:justify-center sm:w-92 rounded">
         <Hand size="48" className="rotate-45" />
       </div>
       <div className="flex flex-col gap-2 items-start">

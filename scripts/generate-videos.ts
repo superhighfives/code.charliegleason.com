@@ -137,17 +137,25 @@ async function main() {
       try {
         console.log(`   🎬 Generating video ${index}...`);
         console.log(`   📝 Using image: ${imagePath}`);
-        console.log(`   📝 Prompt: ${post.visual.prompt}`);
-        console.log(`   📝 Model: ${videoModelName} (${post.visual.video.version})`);
+
+        // Append optional guidance if provided
+        const prompt = post.visual.video.guidance
+          ? `${post.visual.prompt}, ${post.visual.video.guidance}`
+          : post.visual.prompt;
+
+        console.log(`   📝 Prompt: ${prompt}`);
+        console.log(
+          `   📝 Model: ${videoModelName} (${post.visual.video.version})`,
+        );
 
         const input = {
           fps: 24,
           image: await readFile(imagePath),
-          prompt: `${post.visual.prompt}`,
+          prompt,
           duration: 3,
           resolution: "480p",
           aspect_ratio: "1:1",
-          camera_fixed: true,
+          camera_fixed: false,
         };
 
         const output = (await replicate.run(

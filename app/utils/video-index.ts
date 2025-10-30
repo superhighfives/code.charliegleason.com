@@ -67,3 +67,20 @@ export function toUserIndex(internalIndex: number): number {
 export function randomVideoIndex(): number {
   return Math.floor(Math.random() * VIDEO_COUNT);
 }
+
+/**
+ * Generate a random internal index (0-20) that's different from the current index.
+ *
+ * @param currentIndex - The current internal index to exclude
+ * @returns A random internal index different from currentIndex
+ *
+ * @example
+ * randomVideoIndexExcluding(5) // returns 0-20 but never 5
+ */
+export function randomVideoIndexExcluding(currentIndex: number): number {
+  let newIndex = randomVideoIndex();
+  while (newIndex === currentIndex) {
+    newIndex = randomVideoIndex();
+  }
+  return newIndex;
+}

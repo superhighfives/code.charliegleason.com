@@ -139,10 +139,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
   let className =
-    "border-b-2 font-medium hover:text-indigo-500 hover:dark:text-indigo-300";
+    "border-b-2 font-medium hover:text-indigo-500 hover:dark:text-indigo-300 focus-visible:text-indigo-500 focus-visible:dark:text-indigo-300 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm";
   className += isActive
     ? " text-indigo-500 dark:text-indigo-300 border-indigo-500 dark:border-indigo-300"
-    : " border-indigo-600/20 dark:border-indigo-400/30 hover:border-current hover:border-indigo-600/20 hover:dark:border-indigo-400/30";
+    : " border-indigo-600/20 dark:border-indigo-400/30 hover:border-current hover:border-indigo-600/20 hover:dark:border-indigo-400/30 focus-visible:border-current focus-visible:border-indigo-600/20 focus-visible:dark:border-indigo-400/30";
   return className;
 }
 
@@ -158,7 +158,7 @@ function App() {
         <div className="z-50 fixed inset-x-0 bottom-0 bg-gray-50 dark:bg-gray-900 drop-shadow-2xl">
           <div className="flex justify-between border-t dark:border-gray-800 px-8 pt-4 pb-4 sm:pb-12">
             <div className="flex gap-6">
-              <Link to="/" className="flex gap-1 leading-tight select-none">
+              <Link to="/" className="flex gap-1 leading-tight select-none rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950">
                 <span>{"❯"}</span>
                 <span className="animate-blink step">█</span>
               </Link>

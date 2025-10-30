@@ -3,7 +3,7 @@ import { Check, RefreshCw, Share2 } from "lucide-react";
 import { useState } from "react";
 import type { VisualConfig } from "~/mdx/types";
 import {
-  randomVideoIndex,
+  randomVideoIndexExcluding,
   toUserIndex,
   VIDEO_COUNT,
 } from "~/utils/video-index";
@@ -36,7 +36,7 @@ export default function VideoMasthead({
   const [copied, setCopied] = useState(false);
 
   const changeVideo = () => {
-    const newVideo = randomVideoIndex();
+    const newVideo = randomVideoIndexExcluding(currentVideo);
     setCurrentVideo(newVideo);
     setRotationCount((prev: number) => prev + 1);
     setHasChanged(true);
@@ -86,14 +86,14 @@ export default function VideoMasthead({
             Generated with{" "}
             <a
               href={visual.image.url}
-              className="underline underline-offset-2"
+              className="underline underline-offset-2 hover:text-gray-600 dark:hover:text-gray-300"
             >
               {extractModelName(visual.image.url)}
             </a>
             {" and "}
             <a
               href={visual.video.url}
-              className="underline underline-offset-2"
+              className="underline underline-offset-2  hover:text-gray-600 dark:hover:text-gray-300"
             >
               {extractModelName(visual.video.url)}
             </a>
@@ -104,7 +104,7 @@ export default function VideoMasthead({
           <button
             type="button"
             onClick={changeVideo}
-            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
           >
             <motion.div
               animate={{ rotate: rotationCount * 180 }}
@@ -124,7 +124,7 @@ export default function VideoMasthead({
           <button
             type="button"
             onClick={shareUrl}
-            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
           >
             <AnimatePresence mode="wait">
               <motion.div

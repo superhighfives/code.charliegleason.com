@@ -12,6 +12,11 @@ vi.mock("framer-motion", () => ({
   },
 }));
 
+// Mock video index utilities
+vi.mock("~/utils/video-index", () => ({
+  randomVideoIndexExcluding: vi.fn((current: number) => (current + 1) % 21),
+}));
+
 describe("NavBlock", () => {
   const defaultProps = {
     title: "Test Post Title",

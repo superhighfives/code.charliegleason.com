@@ -1,9 +1,11 @@
 import { Link, useLoaderData } from "react-router";
+import { useScramble } from "use-scramble";
 import EditOnGitHub from "~/components/edit-on-github";
 import { KudosButton } from "~/components/kudos-button";
 import Metadata from "~/components/metadata";
 import Metalinks from "~/components/metalinks";
 import { components } from "~/components/utils/components";
+import { scrambleOptions } from "~/components/utils/scramble";
 import tags from "~/components/utils/tags";
 import VideoMasthead from "~/components/video-masthead";
 import { customMdxParse } from "~/mdx/custom-mdx-parser";
@@ -146,18 +148,33 @@ export default function Post() {
   const { title, data, links, date, slug, visual } = useMdxAttributes();
   const { metadata, isOldArticle } = processArticleDate(data, date);
 
+  const { ref, replay } = useScramble({
+    ...scrambleOptions,
+    text: "charliegleason",
+  });
+
   return (
     <div className="grid gap-y-4 relative">
       {slug && initialVideo !== undefined && visual && (
-        <VideoMasthead slug={slug} initialVideo={initialVideo} visual={visual} />
+        <VideoMasthead
+          slug={slug}
+          initialVideo={initialVideo}
+          visual={visual}
+        />
       )}
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
         <Link
           to="/"
+          onMouseEnter={replay}
+          onFocus={replay}
           className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2"
         >
           ❯ cd ~/code
-          <span className="hidden sm:inline">.charliegleason.com</span>
+          <span className="hidden sm:inline">.</span>
+          <span ref={ref} className="hidden sm:inline">
+            charliegleason
+          </span>
+          <span className="hidden sm:inline">.com</span>
         </Link>
         <span className="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
         <h1 className="text-gray-900 dark:text-gray-100 leading-relaxed sm:pl-4">

@@ -16,7 +16,7 @@ export default function LinkBlock({
   return (
     <a
       href={href}
-      className="@container flex flex-col group hover:bg-gray-50 dark:hover:bg-gray-900 relative before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 px-4 py-3 gap-2  "
+      className="@container flex flex-col group hover:bg-gray-50 dark:hover:bg-gray-900 focus:bg-gray-50 dark:focus:bg-gray-900 relative before:content-[''] before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 focus:before:bg-indigo-500 px-4 py-3 gap-2 outline-none"
       rel="noreferrer"
       target={action === "Open" ? "_blank" : "_self"}
     >
@@ -34,7 +34,7 @@ export default function LinkBlock({
           ) : null}
         </div>
         <div className="ml-4 shrink-0">
-          <span className="mt-1 font-medium text-indigo-600 group-hover:text-indigo-700 dark:text-indigo-400 dark:group-hover:text-indigo-300 flex gap-2 items-center">
+          <span className="mt-1 font-medium text-indigo-600 group-hover:text-indigo-700 group-focus:text-indigo-700 dark:text-indigo-400 dark:group-hover:text-indigo-300 dark:group-focus:text-indigo-300 flex gap-2 items-center">
             <span className="@max-lg:hidden text-xs">{action}</span>
             {action === "Open" ? (
               <ExternalLink size={16} />

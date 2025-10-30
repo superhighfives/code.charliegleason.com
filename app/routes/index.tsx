@@ -46,9 +46,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     // If no cookie exists, generate random and prepare cookie header
     if (videoIndex === null) {
       videoIndex = randomVideoIndex();
-      newCookies.push(
-        `${cookieName}=${videoIndex}; path=/; samesite=lax`,
-      );
+      newCookies.push(`${cookieName}=${videoIndex}; path=/; samesite=lax`);
     }
 
     initialVideos[post.slug] = videoIndex;
@@ -78,7 +76,7 @@ export default function Index() {
       <div className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 grid gap-4">
         <div className="rounded-md overflow-hidden shadow-sm divide-y divide-gray-100 dark:divide-gray-900 border border-gray-200 dark:border-gray-800">
           {posts.length ? (
-            posts.map((post) => {
+            posts.map((post, index) => {
               const dateCaption =
                 post.date && differenceInMonths(new Date(), post.date) <= 3
                   ? `${formatDistanceToNow(post.date)} ago`
@@ -92,6 +90,7 @@ export default function Index() {
                   href={post.url}
                   slug={post.slug}
                   initialVideo={initialVideos[post.slug]}
+                  index={index}
                 />
               );
             })

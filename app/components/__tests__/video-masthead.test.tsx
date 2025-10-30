@@ -16,6 +16,7 @@ vi.mock("framer-motion", () => ({
 // Mock video index utilities
 vi.mock("~/utils/video-index", () => ({
   randomVideoIndex: vi.fn(() => 10),
+  randomVideoIndexExcluding: vi.fn(() => 10),
   toUserIndex: (index: number) => index + 1,
   VIDEO_COUNT: 21,
 }));
@@ -116,7 +117,7 @@ describe("VideoMasthead", () => {
   });
 
   it("should change video on refresh button click", async () => {
-    const { randomVideoIndex } = await import("~/utils/video-index");
+    const { randomVideoIndexExcluding } = await import("~/utils/video-index");
 
     render(<VideoMasthead {...defaultProps} />);
 
@@ -124,14 +125,14 @@ describe("VideoMasthead", () => {
     fireEvent.click(refreshButton);
 
     await waitFor(() => {
-      expect(randomVideoIndex).toHaveBeenCalled();
+      expect(randomVideoIndexExcluding).toHaveBeenCalled();
     });
 
     // Should update URL with pushState
     expect(window.history.pushState).toHaveBeenCalledWith(
       {},
       "",
-      "/test-post/11", // randomVideoIndex returns 10, +1 = 11
+      "/test-post/11", // randomVideoIndexExcluding returns 10, +1 = 11
     );
 
     // Should set cookie

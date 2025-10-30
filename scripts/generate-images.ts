@@ -116,8 +116,10 @@ async function main() {
         try {
           console.log(`   🎨 Generating image ${index}${attemptPrefix}...`);
 
-          // Use the visual.prompt field as the prompt description
-          const prompt = `${post.visual.prompt}, solid background, LTNP style`;
+          // Append optional guidance if provided
+          const prompt = post.visual.image.guidance
+            ? `${post.visual.prompt}, ${post.visual.image.guidance}`
+            : post.visual.prompt;
 
           if (attempt === 1) {
             console.log(`   📝 Prompt: ${prompt}`);

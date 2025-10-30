@@ -18,6 +18,7 @@ export function extractModelName(url: string): string {
 export interface ModelConfig {
   url: string;
   version: string;
+  guidance?: string;
 }
 
 export interface VisualConfig {
@@ -98,10 +99,12 @@ export async function getPosts(): Promise<PostData[]> {
           image: {
             url: visual.image.url,
             version: visual.image.version,
+            ...(visual.image.guidance && { guidance: visual.image.guidance }),
           },
           video: {
             url: visual.video.url,
             version: visual.video.version,
+            ...(visual.video.guidance && { guidance: visual.video.guidance }),
           },
         },
       });

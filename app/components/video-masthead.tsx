@@ -29,10 +29,6 @@ export default function VideoMasthead({
     setRotationCount((prev: number) => prev + 1);
     setHasChanged(true);
 
-    // Update URL with pushState (creates history entry)
-    const newPath = `/${slug}/${toUserIndex(newVideo)}`;
-    window.history.pushState({}, "", newPath);
-
     // Update cookie so it persists (session cookie, deleted when browser closes)
     // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
     document.cookie = `visual-index-${slug}=${newVideo}; path=/; samesite=lax`;

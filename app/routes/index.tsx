@@ -1,4 +1,5 @@
 import { differenceInMonths, formatDistanceToNow } from "date-fns";
+import { useEffect } from "react";
 import type { MetaFunction } from "react-router";
 import { data, useLoaderData } from "react-router";
 import { About } from "~/components/about";
@@ -66,6 +67,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function Index() {
   const { posts, initialVideos } = useLoaderData<typeof loader>();
+
+  // Preload all initial videos on mount
+  useEffect(() => {
+    posts.forEach((post) => {
+      fetch(`/posts/${post.slug}/${initialVideos[post.slug]}.mp4`, {
+        priority: "low",
+      } as RequestInit).catch(() => {});
+    });
+  }, [posts, initialVideos]);
 
   return (
     <div className="grid gap-4 sm:gap-8 max-w-[65ch] content-end h-full">

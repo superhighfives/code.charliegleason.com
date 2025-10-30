@@ -10,6 +10,7 @@ export default function NavBlock({
   slug,
   initialVideo,
   index = 0,
+  isFirst = false,
 }: {
   title: string;
   caption?: string | null;
@@ -18,6 +19,7 @@ export default function NavBlock({
   slug: string;
   initialVideo: number;
   index?: number;
+  isFirst?: boolean;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -39,6 +41,7 @@ export default function NavBlock({
   const elementRef = useRef<HTMLAnchorElement>(null);
 
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
+  const [nextVideo, setNextVideo] = useState<number | null>(null);
 
   // Derived active state - element is active if hovered OR focused (NOT viewport)
   const isActive = isHovered || isFocused;
@@ -58,6 +61,18 @@ export default function NavBlock({
       setIsHovered(true);
       isHoveredRef.current = true;
       hasEnteredRef.current = true;
+
+      // Pre-select and preload the next video for smooth transition
+      const upcomingVideo = randomVideoIndexExcluding(currentVideo);
+      setNextVideo(upcomingVideo);
+
+      // Create a hidden video element to preload (more reliable than link preload for videos)
+      const video = document.createElement("video");
+      video.preload = "auto";
+      video.src = `/posts/${slug}/${upcomingVideo}.mp4`;
+      video.style.display = "none";
+      video.id = `preload-${slug}-${upcomingVideo}`;
+      document.body.appendChild(video);
     }
   };
 
@@ -75,14 +90,25 @@ export default function NavBlock({
   const handleMouseLeave = () => {
     // Only change video if we've actually entered before and nothing else is active
     // This prevents the weird animation when page loads with mouse already over element
-    if (hasEnteredRef.current && !isFocusedRef.current) {
-      const randomVideo = randomVideoIndexExcluding(currentVideo);
-      setCurrentVideo(randomVideo);
+    if (hasEnteredRef.current && !isFocusedRef.current && nextVideo !== null) {
+      // Use the preloaded video instead of generating a new random one
+      setCurrentVideo(nextVideo);
       setVideoKey((prev) => prev + 1);
 
       // Update cookie when video changes (on mouse leave only)
       // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
-      document.cookie = `visual-index-${slug}=${randomVideo}; path=/; samesite=lax`;
+      document.cookie = `visual-index-${slug}=${nextVideo}; path=/; samesite=lax`;
+
+      // Clean up preload video element
+      const preloadVideo = document.getElementById(
+        `preload-${slug}-${nextVideo}`,
+      );
+      if (preloadVideo) {
+        preloadVideo.remove();
+      }
+
+      // Reset for next interaction
+      setNextVideo(null);
     }
 
     setIsHovered(false);
@@ -99,19 +125,42 @@ export default function NavBlock({
       setIsFocused(true);
       isFocusedRef.current = true;
       hasEnteredRef.current = true;
+
+      // Pre-select and preload the next video for smooth transition
+      const upcomingVideo = randomVideoIndexExcluding(currentVideo);
+      setNextVideo(upcomingVideo);
+
+      // Create a hidden video element to preload
+      const video = document.createElement("video");
+      video.preload = "auto";
+      video.src = `/posts/${slug}/${upcomingVideo}.mp4`;
+      video.style.display = "none";
+      video.id = `preload-${slug}-${upcomingVideo}`;
+      document.body.appendChild(video);
     }
   };
 
   const handleBlur = () => {
     // Only change video if we've actually entered before and nothing else is active
-    if (hasEnteredRef.current && !isHoveredRef.current) {
-      const randomVideo = randomVideoIndexExcluding(currentVideo);
-      setCurrentVideo(randomVideo);
+    if (hasEnteredRef.current && !isHoveredRef.current && nextVideo !== null) {
+      // Use the preloaded video instead of generating a new random one
+      setCurrentVideo(nextVideo);
       setVideoKey((prev) => prev + 1);
 
       // Update cookie when video changes (on blur only if not hovered)
       // biome-ignore lint/suspicious/noDocumentCookie: Client-side cookie setting for video index persistence
-      document.cookie = `visual-index-${slug}=${randomVideo}; path=/; samesite=lax`;
+      document.cookie = `visual-index-${slug}=${nextVideo}; path=/; samesite=lax`;
+
+      // Clean up preload video element
+      const preloadVideo = document.getElementById(
+        `preload-${slug}-${nextVideo}`,
+      );
+      if (preloadVideo) {
+        preloadVideo.remove();
+      }
+
+      // Reset for next interaction
+      setNextVideo(null);
     }
 
     setIsFocused(false);

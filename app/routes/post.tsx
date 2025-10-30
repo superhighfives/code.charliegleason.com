@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useLoaderData } from "react-router";
 import { useScramble } from "use-scramble";
 import EditOnGitHub from "~/components/edit-on-github";
@@ -14,7 +15,11 @@ import type { PostLoaderData } from "~/mdx/types";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
 import { processArticleDate } from "~/utils/posts";
 import { highlightCode } from "~/utils/shiki.server";
-import { parseImageIndex, randomVideoIndex } from "~/utils/video-index";
+import {
+  parseImageIndex,
+  randomVideoIndex,
+  VIDEO_COUNT,
+} from "~/utils/video-index";
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
 
@@ -152,6 +157,18 @@ export default function Post() {
     ...scrambleOptions,
     text: "charliegleason",
   });
+
+  // Preload all 21 videos on mount for instant transitions on refresh button
+  useEffect(() => {
+    if (!slug || !visual) return;
+
+    // Preload all videos using fetch with low priority
+    for (let i = 0; i < VIDEO_COUNT; i++) {
+      fetch(`/posts/${slug}/${i}.mp4`, {
+        priority: "low",
+      } as RequestInit).catch(() => {});
+    }
+  }, [slug, visual]);
 
   return (
     <div className="grid gap-y-4 relative">

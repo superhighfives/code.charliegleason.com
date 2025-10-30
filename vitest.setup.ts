@@ -37,3 +37,25 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: vi.fn(),
   })),
 });
+
+// Mock HTMLMediaElement (video/audio) to prevent 500 errors in tests
+beforeAll(() => {
+  // Mock the play method
+  window.HTMLMediaElement.prototype.play = vi.fn().mockImplementation(() => {
+    return Promise.resolve();
+  });
+
+  // Mock the pause method
+  window.HTMLMediaElement.prototype.pause = vi.fn();
+
+  // Mock the load method to prevent actual network requests
+  window.HTMLMediaElement.prototype.load = vi.fn().mockImplementation(
+    function (this: HTMLMediaElement) {
+      // Simulate successful load by triggering loadeddata event
+      setTimeout(() => {
+        const event = new Event("loadeddata");
+        this.dispatchEvent(event);
+      }, 0);
+    },
+  );
+});

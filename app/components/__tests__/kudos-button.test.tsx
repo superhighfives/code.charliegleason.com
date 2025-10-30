@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { KudosButton } from "../kudos-button";
 
 // Mock the confetti component
@@ -13,21 +13,36 @@ vi.mock("~/components/confetti", () => ({
 
 // Mock the useKudos hook
 vi.mock("~/hooks/useKudos", () => ({
-  useKudos: vi.fn(({ initialTotal, initialYou }: { initialTotal: number; initialYou: number }) => ({
-    fetcher: {
-      Form: ({ children, onClick, ...props }: React.FormHTMLAttributes<HTMLFormElement> & { children: React.ReactNode; onClick?: () => void }) => (
-        <form {...props} onClick={onClick}>
-          {children}
-        </form>
-      ),
-    },
-    fingerprint: "test-fingerprint-123",
-    total: initialTotal,
-    you: initialYou,
-    remaining: 50 - initialYou,
-    disabled: initialYou >= 50,
-    pending: false,
-  })),
+  useKudos: vi.fn(
+    ({
+      initialTotal,
+      initialYou,
+    }: {
+      initialTotal: number;
+      initialYou: number;
+    }) => ({
+      fetcher: {
+        Form: ({
+          children,
+          onClick,
+          ...props
+        }: React.FormHTMLAttributes<HTMLFormElement> & {
+          children: React.ReactNode;
+          onClick?: () => void;
+        }) => (
+          <form {...props} onClick={onClick}>
+            {children}
+          </form>
+        ),
+      },
+      fingerprint: "test-fingerprint-123",
+      total: initialTotal,
+      you: initialYou,
+      remaining: 50 - initialYou,
+      disabled: initialYou >= 50,
+      pending: false,
+    }),
+  ),
 }));
 
 // Mock the useScramble hook
@@ -114,7 +129,9 @@ describe("KudosButton", () => {
     fireEvent.click(form!);
 
     // Confetti should appear
-    expect(container.querySelector('[data-testid^="confetti-"]')).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-testid^="confetti-"]'),
+    ).toBeInTheDocument();
   });
 
   it("should be disabled when limit reached", async () => {
@@ -122,12 +139,19 @@ describe("KudosButton", () => {
 
     vi.mocked(useKudos).mockReturnValueOnce({
       fetcher: {
-        Form: ({ children, onClick, ...props }: React.FormHTMLAttributes<HTMLFormElement> & { children: React.ReactNode; onClick?: () => void }) => (
+        Form: ({
+          children,
+          onClick,
+          ...props
+        }: React.FormHTMLAttributes<HTMLFormElement> & {
+          children: React.ReactNode;
+          onClick?: () => void;
+        }) => (
           <form {...props} onClick={onClick}>
             {children}
           </form>
         ),
-      } as ReturnType<typeof useKudos>['fetcher'],
+      } as ReturnType<typeof useKudos>["fetcher"],
       fingerprint: "test-fingerprint-123",
       total: 100,
       you: 50,
@@ -169,12 +193,19 @@ describe("KudosButton", () => {
 
     vi.mocked(useKudos).mockReturnValueOnce({
       fetcher: {
-        Form: ({ children, onClick, ...props }: React.FormHTMLAttributes<HTMLFormElement> & { children: React.ReactNode; onClick?: () => void }) => (
+        Form: ({
+          children,
+          onClick,
+          ...props
+        }: React.FormHTMLAttributes<HTMLFormElement> & {
+          children: React.ReactNode;
+          onClick?: () => void;
+        }) => (
           <form {...props} onClick={onClick}>
             {children}
           </form>
         ),
-      } as ReturnType<typeof useKudos>['fetcher'],
+      } as ReturnType<typeof useKudos>["fetcher"],
       fingerprint: "test-fingerprint-123",
       total: 100,
       you: 50,

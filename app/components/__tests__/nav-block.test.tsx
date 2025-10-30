@@ -8,7 +8,7 @@ vi.mock("framer-motion", () => ({
     <div>{children}</div>
   ),
   motion: {
-    video: ({ children, ...props }: any) => <video {...props}>{children}</video>,
+    video: ({ children, initial, animate, exit, transition, onAnimationComplete, ...props }: any) => <video {...props}>{children}</video>,
   },
 }));
 

@@ -64,74 +64,39 @@ describe("Post Route Loader", () => {
         headers: { Cookie: "visual-index-test-post=5" },
       });
 
-      const result = await loader({
+      const response = await loader({
         request: mockRequest,
         context: mockContext,
         params: { index: "15" },
       } as unknown as Route.LoaderArgs);
 
       // URL param 15 converts to internal index 14 (15 - 1)
-      expect(result.randomVideo).toBe(14);
+      expect(response.data.randomVideo).toBe(14);
     });
 
-    it("should use cookie when navigating from index (referrer ends with /)", async () => {
-      // Create a mock request with headers that work around forbidden header restrictions
-      const mockRequest = new Request("http://localhost:3000/test-post");
-
-      // Spy on headers.get to return our test values
-      const originalGet = mockRequest.headers.get.bind(mockRequest.headers);
-      vi.spyOn(mockRequest.headers, "get").mockImplementation((name: string) => {
-        if (name === "Cookie") return "visual-index-test-post=7";
-        if (name === "Referer") return "http://localhost:3000/";
-        return originalGet(name);
-      });
-
-      const result = await loader({
-        request: mockRequest,
-        context: mockContext,
-        params: {},
-      } as unknown as Route.LoaderArgs);
-
-      // Should use cookie value (7)
-      expect(result.randomVideo).toBe(7);
-    });
-
-    it("should use cookie when navigation cookie is set (from index)", async () => {
-      const mockRequest = new Request("http://localhost:3000/test-post");
-      vi.spyOn(mockRequest.headers, "get").mockImplementation((name: string) => {
-        if (name === "Cookie") return "visual-index-test-post=7; nav-from-index-test-post=1";
-        return null;
-      });
-
-      const result = await loader({
-        request: mockRequest,
-        context: mockContext,
-        params: {},
-      } as unknown as Route.LoaderArgs);
-
-      // Should use cookie value (7) because nav cookie is present
-      expect(result.randomVideo).toBe(7);
-    });
-
-    it("should generate random when refreshing (no matching referrer)", async () => {
-      const { randomVideoIndex } = await import("~/utils/video-index");
-
+    it("should use cookie when present and delete it", async () => {
       const mockRequest = new Request("http://localhost:3000/test-post");
       vi.spyOn(mockRequest.headers, "get").mockImplementation((name: string) => {
         if (name === "Cookie") return "visual-index-test-post=7";
-        if (name === "Referer") return "http://localhost:3000/test-post";
         return null;
       });
 
-      const result = await loader({
+      const response = await loader({
         request: mockRequest,
         context: mockContext,
         params: {},
       } as unknown as Route.LoaderArgs);
 
-      // Should call randomVideoIndex and use its value (10)
-      expect(randomVideoIndex).toHaveBeenCalled();
-      expect(result.randomVideo).toBe(10);
+      // Should use cookie value (7) and delete the cookie
+      expect(response.data.randomVideo).toBe(7);
+
+      // Check that Set-Cookie header was sent to delete the cookie
+      expect(response.init?.headers).toBeDefined();
+      const headers = response.init?.headers as Headers;
+      const setCookie = headers.get("Set-Cookie");
+      expect(setCookie).toBeDefined();
+      expect(setCookie).toContain("visual-index-test-post=");
+      expect(setCookie).toContain("max-age=0");
     });
 
     it("should generate random when no cookie exists and no URL param", async () => {
@@ -141,7 +106,7 @@ describe("Post Route Loader", () => {
         headers: {},
       });
 
-      const result = await loader({
+      const response = await loader({
         request: mockRequest,
         context: mockContext,
         params: {},
@@ -149,28 +114,27 @@ describe("Post Route Loader", () => {
 
       // Should call randomVideoIndex and use its value (10)
       expect(randomVideoIndex).toHaveBeenCalled();
-      expect(result.randomVideo).toBe(10);
+      expect(response.data.randomVideo).toBe(10);
     });
 
-    it("should NOT use cookie when referrer is not index", async () => {
+    it("should prefer cookie over random generation when cookie exists", async () => {
       const { randomVideoIndex } = await import("~/utils/video-index");
 
       const mockRequest = new Request("http://localhost:3000/test-post");
       vi.spyOn(mockRequest.headers, "get").mockImplementation((name: string) => {
         if (name === "Cookie") return "visual-index-test-post=7";
-        if (name === "Referer") return "http://localhost:3000/other-page";
         return null;
       });
 
-      const result = await loader({
+      const response = await loader({
         request: mockRequest,
         context: mockContext,
         params: {},
       } as unknown as Route.LoaderArgs);
 
-      // Should generate random, not use cookie
-      expect(randomVideoIndex).toHaveBeenCalled();
-      expect(result.randomVideo).toBe(10);
+      // Should use cookie, not call random
+      expect(randomVideoIndex).not.toHaveBeenCalled();
+      expect(response.data.randomVideo).toBe(7);
     });
 
     it("should handle invalid URL param by generating random", async () => {
@@ -181,7 +145,7 @@ describe("Post Route Loader", () => {
         headers: {},
       });
 
-      const result = await loader({
+      const response = await loader({
         request: mockRequest,
         context: mockContext,
         params: { index: "999" },
@@ -189,7 +153,7 @@ describe("Post Route Loader", () => {
 
       // Should call randomVideoIndex when param is invalid
       expect(randomVideoIndex).toHaveBeenCalled();
-      expect(result.randomVideo).toBe(10);
+      expect(response.data.randomVideo).toBe(10);
     });
 
     it("should return undefined randomVideo when no visual config", async () => {
@@ -207,73 +171,14 @@ describe("Post Route Loader", () => {
         headers: {},
       });
 
-      const result = await loader({
+      const response = await loader({
         request: mockRequest,
         context: mockContext,
         params: {},
       } as unknown as Route.LoaderArgs);
 
       // Should return undefined when no visual
-      expect(result.randomVideo).toBeUndefined();
-    });
-  });
-
-  describe("referrer detection", () => {
-    it("should detect index referrer with trailing slash", async () => {
-      const mockRequest = new Request("http://localhost:3000/test-post");
-      vi.spyOn(mockRequest.headers, "get").mockImplementation((name: string) => {
-        if (name === "Cookie") return "visual-index-test-post=5";
-        if (name === "Referer") return "http://localhost:3000/";
-        return null;
-      });
-
-      const result = await loader({
-        request: mockRequest,
-        context: mockContext,
-        params: {},
-      } as unknown as Route.LoaderArgs);
-
-      // Should use cookie (5) because referrer is index
-      expect(result.randomVideo).toBe(5);
-    });
-
-    it("should detect index referrer without path", async () => {
-      const mockRequest = new Request("http://localhost:3000/test-post");
-      vi.spyOn(mockRequest.headers, "get").mockImplementation((name: string) => {
-        if (name === "Cookie") return "visual-index-test-post=5";
-        if (name === "Referer") return "http://localhost:3000";
-        return null;
-      });
-
-      const result = await loader({
-        request: mockRequest,
-        context: mockContext,
-        params: {},
-      } as unknown as Route.LoaderArgs);
-
-      // Should use cookie (5) because referrer is index
-      expect(result.randomVideo).toBe(5);
-    });
-
-    it("should handle missing referrer header", async () => {
-      const { randomVideoIndex } = await import("~/utils/video-index");
-
-      const mockRequest = new Request("http://localhost:3000/test-post");
-      vi.spyOn(mockRequest.headers, "get").mockImplementation((name: string) => {
-        if (name === "Cookie") return "visual-index-test-post=5";
-        // No Referer header - return null
-        return null;
-      });
-
-      const result = await loader({
-        request: mockRequest,
-        context: mockContext,
-        params: {},
-      } as unknown as Route.LoaderArgs);
-
-      // Should generate random (not use cookie) when no referrer
-      expect(randomVideoIndex).toHaveBeenCalled();
-      expect(result.randomVideo).toBe(10);
+      expect(response.data.randomVideo).toBeUndefined();
     });
   });
 
@@ -283,18 +188,18 @@ describe("Post Route Loader", () => {
         headers: {},
       });
 
-      const result = await loader({
+      const response = await loader({
         request: mockRequest,
         context: mockContext,
         params: {},
       } as unknown as Route.LoaderArgs);
 
-      expect(result).toHaveProperty("__raw");
-      expect(result).toHaveProperty("attributes");
-      expect(result).toHaveProperty("highlightedBlocks");
-      expect(result).toHaveProperty("kudosTotal");
-      expect(result).toHaveProperty("kudosYou");
-      expect(result).toHaveProperty("randomVideo");
+      expect(response.data).toHaveProperty("__raw");
+      expect(response.data).toHaveProperty("attributes");
+      expect(response.data).toHaveProperty("highlightedBlocks");
+      expect(response.data).toHaveProperty("kudosTotal");
+      expect(response.data).toHaveProperty("kudosYou");
+      expect(response.data).toHaveProperty("randomVideo");
     });
   });
 });

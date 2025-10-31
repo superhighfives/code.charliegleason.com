@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, RefreshCw, Share2 } from "lucide-react";
 import { useState } from "react";
 import type { VisualConfig } from "~/mdx/types";
-import { setVisualIndexCookie } from "~/utils/cookies";
 import { extractModelName } from "~/utils/replicate";
 import {
   randomVideoIndexExcluding,
@@ -29,9 +28,6 @@ export default function VideoMasthead({
     setCurrentVideo(newVideo);
     setRotationCount((prev: number) => prev + 1);
     setHasChanged(true);
-
-    // Update cookie so it persists (session cookie, deleted when browser closes)
-    setVisualIndexCookie(slug, newVideo);
   };
 
   const shareUrl = () => {

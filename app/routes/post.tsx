@@ -1,18 +1,14 @@
 import { useEffect } from "react";
-import { Link, useLoaderData } from "react-router";
-import { useScramble } from "use-scramble";
+import { data, Link, useLoaderData } from "react-router";
 import EditOnGitHub from "~/components/edit-on-github";
 import { KudosButton } from "~/components/kudos-button";
 import Metadata from "~/components/metadata";
 import Metalinks from "~/components/metalinks";
 import { components } from "~/components/utils/components";
-import { scrambleOptions } from "~/components/utils/scramble";
 import tags from "~/components/utils/tags";
 import VideoMasthead from "~/components/video-masthead";
 import { customMdxParse } from "~/mdx/custom-mdx-parser";
 import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
-import type { PostLoaderData } from "~/mdx/types";
-import { setVisualIndexCookie } from "~/utils/cookies";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
 import { processArticleDate } from "~/utils/posts";
 import { highlightCode } from "~/utils/shiki.server";
@@ -24,11 +20,7 @@ import {
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
 
-export async function loader({
-  request,
-  context,
-  params,
-}: Route.LoaderArgs): Promise<PostLoaderData> {
+export async function loader({ request, context, params }: Route.LoaderArgs) {
   const { content, frontmatter } = await loadMdxRuntime(request.url);
   const rawContent = content as string;
 
@@ -66,7 +58,7 @@ export async function loader({
   const imageParam = (params as { index?: string }).index;
   const parsedIndex = parseImageIndex(imageParam ?? null);
 
-  // Get image index from cookie (set by video-masthead on post page)
+  // Get image index from cookie (set by redirect handler or video-masthead)
   const cookieHeader = request.headers.get("Cookie");
   let cookieIndex: number | null = null;
   if (frontmatter.slug && cookieHeader) {
@@ -80,46 +72,25 @@ export async function loader({
     }
   }
 
-  // Check if navigation came from index page
-  // Note: In client-side navigation, request.headers may not have Referer
-  // We rely on the cookie timestamp to determine if this is a fresh navigation from index
-  const referrer = request.headers.get("Referer") || "";
-  let isFromIndex = false;
-
-  if (referrer) {
-    try {
-      const refUrl = new URL(referrer);
-      // Index page is when pathname is "/" or empty
-      isFromIndex = refUrl.pathname === "/" || refUrl.pathname === "";
-    } catch {
-      // Invalid URL, not from index
-      isFromIndex = false;
-    }
-  }
-
-  // Check for navigation cookie set by index page (expires in 1 second)
-  const navCookieName = `nav-from-index-${frontmatter.slug}`;
-  const navCookie = cookieHeader?.match(new RegExp(`${navCookieName}=1`));
-  if (navCookie) {
-    isFromIndex = true;
-  }
-
   // Determine which video to show (0-20 internal index)
-  // Priority: URL param > Cookie (only if from index) > Random
+  // Priority: URL param > Cookie > Random
   let randomVideo: number | undefined;
+  let shouldDeleteCookie = false;
 
   if (parsedIndex !== null) {
-    // Valid URL parameter provided (share link)
+    // Valid URL parameter provided (share link via redirect)
     randomVideo = parsedIndex;
-  } else if (cookieIndex !== null && isFromIndex && frontmatter.visual) {
-    // Use cookie value ONLY if navigating from index page (first click)
+  } else if (cookieIndex !== null && frontmatter.visual) {
+    // Use cookie value (set by redirect handler on navigation from index)
     randomVideo = cookieIndex;
+    // Delete the cookie after reading it so refresh generates a new random video
+    shouldDeleteCookie = true;
   } else if (frontmatter.visual) {
-    // No parameter or not from index - generate random (refresh scenario)
+    // No parameter or cookie - generate random (refresh or first visit scenario)
     randomVideo = randomVideoIndex();
   }
 
-  return {
+  const responseData = {
     __raw: rawContent,
     attributes: frontmatter,
     highlightedBlocks,
@@ -127,6 +98,18 @@ export async function loader({
     kudosYou,
     randomVideo,
   };
+
+  // If we used the cookie, delete it so next refresh is random
+  if (shouldDeleteCookie && frontmatter.slug) {
+    const headers = new Headers();
+    headers.append(
+      "Set-Cookie",
+      `visual-index-${frontmatter.slug}=; path=/; max-age=0; samesite=lax`,
+    );
+    return data(responseData, { headers });
+  }
+
+  return data(responseData);
 }
 
 export function meta({ data, params }: Route.MetaArgs) {
@@ -154,19 +137,6 @@ export default function Post() {
   const { title, data, links, date, slug, visual } = useMdxAttributes();
   const { metadata, isOldArticle } = processArticleDate(data, date);
 
-  const { ref, replay } = useScramble({
-    ...scrambleOptions,
-    text: "charliegleason",
-  });
-
-  // Update cookie when video index changes (including random generation on refresh)
-  useEffect(() => {
-    if (initialVideo !== undefined && slug) {
-      // Update cookie so it persists (session cookie, deleted when browser closes)
-      setVisualIndexCookie(slug, initialVideo);
-    }
-  }, [initialVideo, slug]);
-
   // Preload all 21 videos on mount for instant transitions on refresh button
   useEffect(() => {
     if (!slug || !visual) return;
@@ -191,15 +161,11 @@ export default function Post() {
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
         <Link
           to="/"
-          onMouseEnter={replay}
-          onFocus={replay}
-          className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"
+          className="group text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"
         >
           ❯ cd ~/code
           <span className="hidden sm:inline">.</span>
-          <span ref={ref} className="hidden sm:inline">
-            charliegleason
-          </span>
+          <span className="hidden sm:inline">charliegleason</span>
           <span className="hidden sm:inline">.com</span>
         </Link>
         <span className="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>

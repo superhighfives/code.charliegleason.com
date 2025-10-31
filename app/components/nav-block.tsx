@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { setNavigationCookie, setVisualIndexCookie } from "~/utils/cookies";
-import { randomVideoIndexExcluding } from "~/utils/video-index";
+import { randomVideoIndexExcluding, toUserIndex } from "~/utils/video-index";
 
 export default function NavBlock({
   title,
@@ -89,9 +88,6 @@ export default function NavBlock({
       setCurrentVideo(nextVideo);
       setVideoKey((prev) => prev + 1);
 
-      // Update cookie when video changes (on mouse leave only)
-      setVisualIndexCookie(slug, nextVideo);
-
       // Clean up preload video element
       const preloadVideo = document.getElementById(
         `preload-${slug}-${nextVideo}`,
@@ -139,9 +135,6 @@ export default function NavBlock({
       // Use the preloaded video instead of generating a new random one
       setCurrentVideo(nextVideo);
       setVideoKey((prev) => prev + 1);
-
-      // Update cookie when video changes (on blur only if not hovered)
-      setVisualIndexCookie(slug, nextVideo);
 
       // Clean up preload video element
       const preloadVideo = document.getElementById(
@@ -250,16 +243,10 @@ export default function NavBlock({
     // No need to do anything here
   };
 
-  const handleClick = () => {
-    // Set a short-lived navigation cookie to indicate we're navigating from index
-    // This cookie expires in 2 seconds (just enough time for navigation)
-    setNavigationCookie(slug);
-  };
-
   return (
     <a
       ref={elementRef}
-      href={href}
+      href={`${href}/${toUserIndex(currentVideo)}`}
       className="p-2 flex flex-col xs:flex-row group hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-gray-900 dark:focus:bg-gray-900 relative before:content-[''] before:rounded-r-sm before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 focus:before:bg-indigo-500 before:z-10 gap-2 outline-none focus-visible:ring-0"
       rel="noreferrer"
       onMouseEnter={handleMouseEnter}
@@ -267,7 +254,6 @@ export default function NavBlock({
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      onClick={handleClick}
     >
       {/* Video container */}
       <div className="relative w-full xs:size-32 aspect-square shrink-0 overflow-hidden rounded-md ml-[3px]">

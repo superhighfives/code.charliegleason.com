@@ -1,18 +1,17 @@
 import { differenceInMonths, formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
 import type { MetaFunction } from "react-router";
-import { data, useLoaderData } from "react-router";
+import { useLoaderData } from "react-router";
 import { About } from "~/components/about";
 import NavBlock from "~/components/nav-block";
 import tags from "~/components/utils/tags";
 import { loadAllMdxRuntime } from "~/mdx/mdx-runtime";
 import type { Post } from "~/mdx/types";
 import { randomVideoIndex } from "~/utils/video-index";
-import type { Route } from "./+types/index";
 
 export const meta: MetaFunction = () => tags();
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader() {
   const posts = await loadAllMdxRuntime();
 
   // Sort posts by published date (newest first)
@@ -23,46 +22,14 @@ export async function loader({ request }: Route.LoaderArgs) {
       return b.date.getTime() - a.date.getTime();
     });
 
-  // Read existing cookies
-  const cookieHeader = request.headers.get("Cookie");
+  // Generate random initial videos for each post
+  // These are just for display; the redirect handler will set cookies on click
   const initialVideos: Record<string, number> = {};
-  const newCookies: string[] = [];
-
-  // For each post, check if cookie exists, otherwise generate random
   for (const post of sortedPosts) {
-    const cookieName = `visual-index-${post.slug}`;
-    let videoIndex: number | null = null;
-
-    // Try to read from cookie
-    if (cookieHeader) {
-      const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]+)`));
-      if (match) {
-        const value = Number.parseInt(match[1], 10);
-        if (!Number.isNaN(value) && value >= 0 && value <= 20) {
-          videoIndex = value;
-        }
-      }
-    }
-
-    // If no cookie exists, generate random and prepare cookie header
-    if (videoIndex === null) {
-      videoIndex = randomVideoIndex();
-      newCookies.push(`${cookieName}=${videoIndex}; path=/; samesite=lax`);
-    }
-
-    initialVideos[post.slug] = videoIndex;
+    initialVideos[post.slug] = randomVideoIndex();
   }
 
-  // Return data with Set-Cookie headers for new cookies
-  const headers = new Headers();
-  for (const cookie of newCookies) {
-    headers.append("Set-Cookie", cookie);
-  }
-
-  return data(
-    { posts: sortedPosts, initialVideos },
-    { headers: newCookies.length > 0 ? headers : undefined },
-  );
+  return { posts: sortedPosts, initialVideos };
 }
 
 export default function Index() {

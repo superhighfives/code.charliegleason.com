@@ -81,11 +81,12 @@ describe("NavBlock", () => {
     expect(video.src).toContain("/posts/test-post/5.mp4");
   });
 
-  it("should render link with correct href", () => {
+  it("should render link with correct href including video index", () => {
     render(<NavBlock {...defaultProps} />);
 
     const link = screen.getByRole("link");
-    expect(link).toHaveAttribute("href", "/test-post");
+    // Should include video index (initialVideo 5 + 1 = 6 in user-facing format)
+    expect(link).toHaveAttribute("href", "/test-post/6");
   });
 
   it("should display View action text", () => {
@@ -122,20 +123,25 @@ describe("NavBlock", () => {
     expect(video).toBeInTheDocument();
   });
 
-  it("should set cookie on mouse leave", async () => {
+  it("should change video on mouse leave", async () => {
     const { container } = render(<NavBlock {...defaultProps} />);
 
     const link = screen.getByRole("link");
 
-    // First enter to set the hasEnteredRef
+    // Get initial video src
+    const initialVideo = container.querySelector("video") as HTMLVideoElement;
+    expect(initialVideo.src).toContain("/posts/test-post/5.mp4");
+
+    // First enter to set the hasEnteredRef and preload next video
     fireEvent.mouseEnter(link);
 
-    // Then leave to trigger cookie setting
+    // Then leave to trigger video change (from 5 to 6, based on mock)
     fireEvent.mouseLeave(link);
 
     await waitFor(() => {
-      // Check that a cookie was set (the value will be random 0-20)
-      expect(document.cookie).toContain("visual-index-test-post=");
+      // Video should have changed (mock returns current + 1, so 5 becomes 6)
+      const updatedVideo = container.querySelector("video") as HTMLVideoElement;
+      expect(updatedVideo.src).toContain("/posts/test-post/6.mp4");
     });
   });
 
@@ -156,14 +162,22 @@ describe("NavBlock", () => {
     expect(link).toHaveClass("hover:bg-gray-50");
   });
 
-  it("should set navigation cookie on click", () => {
+  it("should update href when video changes", async () => {
     render(<NavBlock {...defaultProps} />);
 
     const link = screen.getByRole("link");
-    fireEvent.click(link);
 
-    // Should set the nav-from-index cookie
-    expect(document.cookie).toContain("nav-from-index-test-post=1");
+    // Initial href should include initial video (5 + 1 = 6)
+    expect(link).toHaveAttribute("href", "/test-post/6");
+
+    // Hover to trigger video change
+    fireEvent.mouseEnter(link);
+    fireEvent.mouseLeave(link);
+
+    await waitFor(() => {
+      // After hover cycle, video changes to 6, so href should be /test-post/7
+      expect(link).toHaveAttribute("href", "/test-post/7");
+    });
   });
 
   it("should render all content within link element", () => {

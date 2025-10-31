@@ -128,8 +128,8 @@ describe("VideoMasthead", () => {
       expect(randomVideoIndexExcluding).toHaveBeenCalled();
     });
 
-    // Should set cookie
-    expect(document.cookie).toContain("visual-index-test-post=10");
+    // Cookie should NOT be set - we want refreshes to be random
+    expect(document.cookie).not.toContain("visual-index-test-post=");
   });
 
   it("should copy URL to clipboard on share button click", async () => {

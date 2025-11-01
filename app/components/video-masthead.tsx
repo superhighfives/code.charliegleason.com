@@ -8,6 +8,7 @@ import {
   toUserIndex,
   VIDEO_COUNT,
 } from "~/utils/video-index";
+import IconSwapAnimation from "./icon-swap-animation";
 
 export default function VideoMasthead({
   slug,
@@ -106,29 +107,18 @@ export default function VideoMasthead({
             onClick={shareUrl}
             className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={copied ? "check" : "share"}
-                initial={hasChanged ? { scale: 0.8, opacity: 0 } : false}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {copied ? (
-                  <Check
-                    className="text-gray-500 dark:text-gray-400"
-                    size={12}
-                    fontWeight="light"
-                  />
-                ) : (
-                  <Share2
-                    className="text-gray-500 dark:text-gray-400"
-                    size={12}
-                    fontWeight="light"
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
+            <IconSwapAnimation condition={copied}>
+              <Check
+                className="text-gray-500 dark:text-gray-400"
+                size={12}
+                fontWeight="light"
+              />
+              <Share2
+                className="text-gray-500 dark:text-gray-400"
+                size={12}
+                fontWeight="light"
+              />
+            </IconSwapAnimation>
 
             <span className="text-gray-400 dark:text-gray-500">
               {copied ? "Copied!" : "Share"}

@@ -84,3 +84,48 @@ export function randomVideoIndexExcluding(currentIndex: number): number {
   }
   return newIndex;
 }
+
+/**
+ * Preload a video by creating a hidden video element.
+ * This ensures smooth transitions when the video is displayed.
+ *
+ * @param slug - The post slug
+ * @param videoIndex - The internal video index (0-20) to preload
+ * @returns The ID of the preloaded video element for later cleanup
+ *
+ * @example
+ * const preloadId = preloadVideo("hello-world", 5)
+ * // Later: cleanupPreloadedVideo(preloadId)
+ */
+export function preloadVideo(slug: string, videoIndex: number): string {
+  const preloadId = `preload-${slug}-${videoIndex}`;
+
+  // Check if already preloaded
+  if (document.getElementById(preloadId)) {
+    return preloadId;
+  }
+
+  const video = document.createElement("video");
+  video.preload = "auto";
+  video.src = `/posts/${slug}/${videoIndex}.mp4`;
+  video.style.display = "none";
+  video.id = preloadId;
+  document.body.appendChild(video);
+
+  return preloadId;
+}
+
+/**
+ * Clean up a preloaded video element.
+ *
+ * @param preloadId - The ID returned from preloadVideo()
+ *
+ * @example
+ * cleanupPreloadedVideo("preload-hello-world-5")
+ */
+export function cleanupPreloadedVideo(preloadId: string): void {
+  const preloadVideo = document.getElementById(preloadId);
+  if (preloadVideo) {
+    preloadVideo.remove();
+  }
+}

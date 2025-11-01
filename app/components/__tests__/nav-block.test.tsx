@@ -15,6 +15,9 @@ vi.mock("framer-motion", () => ({
 // Mock video index utilities
 vi.mock("~/utils/video-index", () => ({
   randomVideoIndexExcluding: vi.fn((current: number) => (current + 1) % 21),
+  toUserIndex: vi.fn((internal: number) => internal + 1),
+  preloadVideo: vi.fn((slug: string, index: number) => `preload-${slug}-${index}`),
+  cleanupPreloadedVideo: vi.fn(),
 }));
 
 describe("NavBlock", () => {

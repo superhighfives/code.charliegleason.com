@@ -1,6 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { randomVideoIndexExcluding, toUserIndex } from "~/utils/video-index";
+import {
+  cleanupPreloadedVideo,
+  preloadVideo,
+  randomVideoIndexExcluding,
+  toUserIndex,
+} from "~/utils/video-index";
 
 export default function NavBlock({
   title,
@@ -58,14 +63,7 @@ export default function NavBlock({
       // Pre-select and preload the next video for smooth transition
       const upcomingVideo = randomVideoIndexExcluding(currentVideo);
       setNextVideo(upcomingVideo);
-
-      // Create a hidden video element to preload (more reliable than link preload for videos)
-      const video = document.createElement("video");
-      video.preload = "auto";
-      video.src = `/posts/${slug}/${upcomingVideo}.mp4`;
-      video.style.display = "none";
-      video.id = `preload-${slug}-${upcomingVideo}`;
-      document.body.appendChild(video);
+      preloadVideo(slug, upcomingVideo);
     }
   };
 
@@ -80,24 +78,21 @@ export default function NavBlock({
     }
   };
 
+  // Shared logic for transitioning to the next preloaded video
+  const transitionToNextVideo = () => {
+    if (nextVideo !== null) {
+      setCurrentVideo(nextVideo);
+      setVideoKey((prev) => prev + 1);
+      cleanupPreloadedVideo(`preload-${slug}-${nextVideo}`);
+      setNextVideo(null);
+    }
+  };
+
   const handleMouseLeave = () => {
     // Only change video if we've actually entered before and nothing else is active
     // This prevents the weird animation when page loads with mouse already over element
-    if (hasEnteredRef.current && !isFocusedRef.current && nextVideo !== null) {
-      // Use the preloaded video instead of generating a new random one
-      setCurrentVideo(nextVideo);
-      setVideoKey((prev) => prev + 1);
-
-      // Clean up preload video element
-      const preloadVideo = document.getElementById(
-        `preload-${slug}-${nextVideo}`,
-      );
-      if (preloadVideo) {
-        preloadVideo.remove();
-      }
-
-      // Reset for next interaction
-      setNextVideo(null);
+    if (hasEnteredRef.current && !isFocusedRef.current) {
+      transitionToNextVideo();
     }
 
     setIsHovered(false);
@@ -118,34 +113,14 @@ export default function NavBlock({
       // Pre-select and preload the next video for smooth transition
       const upcomingVideo = randomVideoIndexExcluding(currentVideo);
       setNextVideo(upcomingVideo);
-
-      // Create a hidden video element to preload
-      const video = document.createElement("video");
-      video.preload = "auto";
-      video.src = `/posts/${slug}/${upcomingVideo}.mp4`;
-      video.style.display = "none";
-      video.id = `preload-${slug}-${upcomingVideo}`;
-      document.body.appendChild(video);
+      preloadVideo(slug, upcomingVideo);
     }
   };
 
   const handleBlur = () => {
     // Only change video if we've actually entered before and nothing else is active
-    if (hasEnteredRef.current && !isHoveredRef.current && nextVideo !== null) {
-      // Use the preloaded video instead of generating a new random one
-      setCurrentVideo(nextVideo);
-      setVideoKey((prev) => prev + 1);
-
-      // Clean up preload video element
-      const preloadVideo = document.getElementById(
-        `preload-${slug}-${nextVideo}`,
-      );
-      if (preloadVideo) {
-        preloadVideo.remove();
-      }
-
-      // Reset for next interaction
-      setNextVideo(null);
+    if (hasEnteredRef.current && !isHoveredRef.current) {
+      transitionToNextVideo();
     }
 
     setIsFocused(false);

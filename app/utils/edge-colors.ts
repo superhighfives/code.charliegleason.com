@@ -6,6 +6,41 @@ import {
   rgbToHex,
 } from "./png-utils.js";
 
+/**
+ * Decode a base64-encoded PNG image to PngData structure
+ * @param base64Image - Base64-encoded PNG image (with or without data URI prefix)
+ * @returns Decoded PNG data structure
+ */
+function decodeBase64ToPng(base64Image: string): PngData {
+  // Remove data URI prefix if present
+  const base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
+  const binaryString = atob(base64Data);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+
+  // Decode PNG
+  const png = decode(bytes);
+  const { width, height, data, depth, channels, palette } = png;
+
+  // Validate decoded PNG data
+  if (!width || !height || !data || data.length === 0) {
+    throw new Error(
+      `Invalid PNG data: width=${width}, height=${height}, dataLength=${data?.length || 0}`,
+    );
+  }
+
+  return {
+    width,
+    height,
+    data: data as Uint8Array,
+    depth,
+    channels,
+    palette,
+  };
+}
+
 export interface EdgeColors {
   top: string;
   bottom: string;
@@ -37,35 +72,8 @@ export async function detectEdgeColors(
 ): Promise<EdgeColors> {
   const { sampleRate = 10, edgeDepth = 10 } = options;
 
-  // Decode base64 to Uint8Array
-  const base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
-  const binaryString = atob(base64Data);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-
-  // Decode PNG
-  const png = decode(bytes);
-  const { width, height, data, depth, channels, palette } = png;
-
-  // Validate decoded PNG data
-  if (!width || !height || !data || data.length === 0) {
-    throw new Error(
-      `Invalid PNG data: width=${width}, height=${height}, dataLength=${data?.length || 0}`,
-    );
-  }
-
-
-  // Use shared PNG utilities
-  const pngData: PngData = {
-    width,
-    height,
-    data: data as Uint8Array,
-    depth,
-    channels,
-    palette,
-  };
+  // Decode base64 PNG image
+  const pngData = decodeBase64ToPng(base64Image);
 
   // Collect edge pixels
   const edgePixels = {
@@ -74,6 +82,8 @@ export async function detectEdgeColors(
     left: [] as RGB[],
     right: [] as RGB[],
   };
+
+  const { width, height } = pngData;
 
   // Sample top edge (first edgeDepth rows)
   for (let y = 0; y < Math.min(edgeDepth, height); y++) {
@@ -176,25 +186,9 @@ export async function detectImageColors(
     contrastBoost = 1,
   } = options;
 
-  // Decode base64 to Uint8Array
-  const base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
-  const binaryString = atob(base64Data);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-
-  // Decode PNG
-  const png = decode(bytes);
-  const { width, height, data, depth, channels, palette } = png;
-
-  // Validate decoded PNG data
-  if (!width || !height || !data || data.length === 0) {
-    throw new Error(
-      `Invalid PNG data: width=${width}, height=${height}, dataLength=${data?.length || 0}`,
-    );
-  }
-
+  // Decode base64 PNG image
+  const pngData = decodeBase64ToPng(base64Image);
+  const { width, height } = pngData;
 
   // Parse exclude color if provided
   let excludeRGB: RGB | null = null;
@@ -244,16 +238,6 @@ export async function detectImageColors(
     const lighter = Math.max(lum1, lum2);
     const darker = Math.min(lum1, lum2);
     return (lighter + 0.05) / (darker + 0.05);
-  };
-
-  // Use shared PNG utilities
-  const pngData: PngData = {
-    width,
-    height,
-    data: data as Uint8Array,
-    depth,
-    channels,
-    palette,
   };
 
   // Sample pixels from entire image

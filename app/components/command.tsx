@@ -1,8 +1,8 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import IconSwapAnimation from "./icon-swap-animation";
 
 export default function Command({
   highlightedHtml,
@@ -32,21 +32,10 @@ export default function Command({
         className="absolute top-2.5 right-2.5 p-2 rounded-xs bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
         aria-label="Copy to clipboard"
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={copied ? "check" : "copy"}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {copied ? (
-              <Check size={16} className="text-green-500" />
-            ) : (
-              <Copy size={16} className="text-gray-500" />
-            )}
-          </motion.div>
-        </AnimatePresence>
+        <IconSwapAnimation condition={copied}>
+          <Check size={16} className="text-green-500" />
+          <Copy size={16} className="text-gray-500" />
+        </IconSwapAnimation>
       </button>
     </div>
   );

@@ -10,6 +10,7 @@
     "@epic-web/invariant": "^1.0.0",
     "@resvg/resvg-wasm": "^2.6.2",
     "@tailwindcss/typography": "^0.5.19",
+    "ahooks": "^3.9.6",
     "cookie": "^1.0.2",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",

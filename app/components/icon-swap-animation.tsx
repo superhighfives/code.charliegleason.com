@@ -1,5 +1,6 @@
+import { useMount } from "ahooks";
 import { AnimatePresence, motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
 /**
  * A reusable component for animating between two icons with a smooth transition.
@@ -21,12 +22,14 @@ export default function IconSwapAnimation({
   children: [ReactNode, ReactNode];
 }) {
   const [trueIcon, falseIcon] = children;
+  const [animate, setAnimate] = useState(false);
+  useMount(() => setAnimate(true));
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={condition ? "true" : "false"}
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={!animate ? false : { scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.8, opacity: 0 }}
         transition={{ duration: 0.2 }}

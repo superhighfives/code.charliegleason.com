@@ -65,7 +65,7 @@ async function main() {
         }
       }
     } catch (error) {
-      console.log(`   ⚠️  Could not process directory: ${postDir}`);
+      console.log(`   ⚠️  Could not process directory: ${postDir}`, error);
     }
   }
 

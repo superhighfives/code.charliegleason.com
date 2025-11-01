@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import NavBlock from "../nav-block";
 
 // Mock framer-motion to avoid animation complexity in tests
@@ -8,7 +8,16 @@ vi.mock("framer-motion", () => ({
     <div>{children}</div>
   ),
   motion: {
-    video: ({ children, initial, animate, exit, transition, onAnimationComplete, ...props }: any) => <video {...props}>{children}</video>,
+    video: ({
+      children,
+      initial,
+      animate,
+      exit,
+      transition,
+      onAnimationComplete,
+      ...props
+      // biome-ignore lint/suspicious/noExplicitAny: test environment
+    }: any) => <video {...props}>{children}</video>,
   },
 }));
 
@@ -16,7 +25,9 @@ vi.mock("framer-motion", () => ({
 vi.mock("~/utils/video-index", () => ({
   randomVideoIndexExcluding: vi.fn((current: number) => (current + 1) % 21),
   toUserIndex: vi.fn((internal: number) => internal + 1),
-  preloadVideo: vi.fn((slug: string, index: number) => `preload-${slug}-${index}`),
+  preloadVideo: vi.fn(
+    (slug: string, index: number) => `preload-${slug}-${index}`,
+  ),
   cleanupPreloadedVideo: vi.fn(),
 }));
 
@@ -36,7 +47,9 @@ describe("NavBlock", () => {
     window.HTMLMediaElement.prototype.pause = vi.fn();
 
     // Clear cookies before each test
-    document.cookie = "visual-index-test-post=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    // biome-ignore lint/suspicious/noDocumentCookie: test environment
+    document.cookie =
+      "visual-index-test-post=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   });
 
   afterEach(() => {
@@ -188,7 +201,9 @@ describe("NavBlock", () => {
 
     const link = screen.getByRole("link");
     expect(link).toContainElement(screen.getByText("Test Post Title"));
-    expect(link).toContainElement(screen.getByText("This is a test description"));
+    expect(link).toContainElement(
+      screen.getByText("This is a test description"),
+    );
     expect(link).toContainElement(screen.getByText("View"));
   });
 });

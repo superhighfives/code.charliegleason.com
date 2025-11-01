@@ -38,7 +38,7 @@ describe("Visual", () => {
   it("should clone child element with caption as alt", () => {
     render(
       <Visual caption="Descriptive caption">
-        <img src="/test.png" />
+        <img alt="" src="/test.png" />
       </Visual>,
     );
 
@@ -94,7 +94,7 @@ describe("Visual", () => {
   });
 
   it("should render diagram caption with border styling", () => {
-    const { container } = render(
+    render(
       <Visual caption="Test diagram" type="diagram">
         <img src="/test.png" alt="" />
       </Visual>,
@@ -120,6 +120,7 @@ describe("Visual", () => {
     render(
       <Visual caption="SVG caption">
         <svg data-testid="test-svg">
+          <title>Test SVG</title>
           <circle cx="50" cy="50" r="40" />
         </svg>
       </Visual>,
@@ -144,7 +145,7 @@ describe("Visual", () => {
   it("should apply alt to valid React elements", () => {
     render(
       <Visual caption="Applied caption">
-        <img src="/test.png" />
+        <img alt="" src="/test.png" />
       </Visual>,
     );
 

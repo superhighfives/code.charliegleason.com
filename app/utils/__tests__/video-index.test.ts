@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MAX_INTERNAL_INDEX,
   MAX_USER_INDEX,
@@ -172,7 +172,9 @@ describe("video-index utilities", () => {
 
     it("should verify index consistency", () => {
       // Verify that the constants are consistent with each other
-      expect(MAX_USER_INDEX - MIN_USER_INDEX).toBe(MAX_INTERNAL_INDEX - MIN_INTERNAL_INDEX);
+      expect(MAX_USER_INDEX - MIN_USER_INDEX).toBe(
+        MAX_INTERNAL_INDEX - MIN_INTERNAL_INDEX,
+      );
       expect(MAX_USER_INDEX - MIN_USER_INDEX + 1).toBe(VIDEO_COUNT);
     });
   });

@@ -1,10 +1,10 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import tags from "../tags";
 
 describe("tags utility", () => {
   beforeEach(() => {
     // Reset to development mode by default
-    (import.meta as any).env.PROD = false;
+    import.meta.env.PROD = false;
   });
 
   it("should return default tags when no attributes provided", () => {

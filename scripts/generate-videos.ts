@@ -5,12 +5,8 @@ import { readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import Replicate from "replicate";
-import {
-  extractModelName,
-  getPosts,
-  IMAGES_PER_POST,
-  OUTPUT_DIR,
-} from "./utils.js";
+import { extractModelName } from "../app/utils/replicate";
+import { getPosts, IMAGES_PER_POST, OUTPUT_DIR } from "./utils";
 
 const execAsync = promisify(exec);
 

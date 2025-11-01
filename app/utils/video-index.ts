@@ -25,8 +25,12 @@ export const MAX_INTERNAL_INDEX = VIDEO_COUNT - 1;
  * parseImageIndex("abc") // null (not a number)
  * parseImageIndex(null) // null (not provided)
  */
-export function parseImageIndex(imageParam: string | null): number | null {
+export function parseImageIndex(imageParam: unknown | null): number | null {
   if (imageParam === null) {
+    return null;
+  }
+
+  if (typeof imageParam !== "string") {
     return null;
   }
 

@@ -1,7 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { glob } from "glob";
 import matter from "gray-matter";
-import { extractModelName } from "../app/utils/replicate.js";
 
 export interface ModelConfig {
   url: string;
@@ -46,35 +45,39 @@ export async function getPosts(): Promise<PostData[]> {
       const visual = data.visual;
 
       // Validate required fields exist
-      if (!visual.prompt || typeof visual.prompt !== "string" || !visual.prompt.trim()) {
+      if (
+        !visual.prompt ||
+        typeof visual.prompt !== "string" ||
+        !visual.prompt.trim()
+      ) {
         throw new Error(
-          `Post ${filePath} has a visual field but missing or invalid prompt`
+          `Post ${filePath} has a visual field but missing or invalid prompt`,
         );
       }
 
       if (!visual.image || typeof visual.image !== "object") {
         throw new Error(
-          `Post ${filePath} has a visual field but missing or invalid image config`
+          `Post ${filePath} has a visual field but missing or invalid image config`,
         );
       }
 
       if (!visual.video || typeof visual.video !== "object") {
         throw new Error(
-          `Post ${filePath} has a visual field but missing or invalid video config`
+          `Post ${filePath} has a visual field but missing or invalid video config`,
         );
       }
 
       // Validate image model config
       if (!visual.image.url || !visual.image.version) {
         throw new Error(
-          `Post ${filePath} has invalid image config (missing url or version)`
+          `Post ${filePath} has invalid image config (missing url or version)`,
         );
       }
 
       // Validate video model config
       if (!visual.video.url || !visual.video.version) {
         throw new Error(
-          `Post ${filePath} has invalid video config (missing url or version)`
+          `Post ${filePath} has invalid video config (missing url or version)`,
         );
       }
 

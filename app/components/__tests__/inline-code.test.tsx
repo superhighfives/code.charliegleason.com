@@ -68,7 +68,7 @@ describe("InlineCode", () => {
   });
 
   it("should render special characters", () => {
-    render(<InlineCode>{'<Component />'}</InlineCode>);
+    render(<InlineCode>{"<Component />"}</InlineCode>);
 
     expect(screen.getByText("<Component />")).toBeInTheDocument();
   });

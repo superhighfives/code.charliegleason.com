@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock theme hook - must be before imports
 vi.mock("~/routes/resources/theme-switch");
 
-import Picture from "../picture";
 import { useTheme } from "~/routes/resources/theme-switch";
+import Picture from "../picture";
 
 describe("Picture", () => {
   const defaultProps = {
@@ -21,7 +21,9 @@ describe("Picture", () => {
   it("should render picture element", () => {
     render(<Picture {...defaultProps} />);
 
-    const picture = screen.getByAltText("Test image description").closest("picture");
+    const picture = screen
+      .getByAltText("Test image description")
+      .closest("picture");
     expect(picture).toBeInTheDocument();
   });
 

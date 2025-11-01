@@ -5,6 +5,8 @@ import { KudosButton } from "../kudos-button";
 // Mock the confetti component
 vi.mock("~/components/confetti", () => ({
   Confetti: ({ id, onComplete }: { id: string; onComplete: () => void }) => (
+    // biome-ignore lint/a11y/noStaticElementInteractions: test environment
+    // biome-ignore lint/a11y/useKeyWithClickEvents: test environment
     <div data-testid={`confetti-${id}`} onClick={() => onComplete()}>
       Confetti
     </div>
@@ -30,6 +32,7 @@ vi.mock("~/hooks/useKudos", () => ({
           children: React.ReactNode;
           onClick?: () => void;
         }) => (
+          // biome-ignore lint/a11y/useKeyWithClickEvents: test environment
           <form {...props} onClick={onClick}>
             {children}
           </form>
@@ -126,6 +129,7 @@ describe("KudosButton", () => {
     expect(container.querySelector('[data-testid^="confetti-"]')).toBe(null);
 
     // Click the form
+    // biome-ignore lint/style/noNonNullAssertion: test environment
     fireEvent.click(form!);
 
     // Confetti should appear
@@ -147,6 +151,7 @@ describe("KudosButton", () => {
           children: React.ReactNode;
           onClick?: () => void;
         }) => (
+          // biome-ignore lint/a11y/useKeyWithClickEvents: test environment
           <form {...props} onClick={onClick}>
             {children}
           </form>
@@ -201,6 +206,7 @@ describe("KudosButton", () => {
           children: React.ReactNode;
           onClick?: () => void;
         }) => (
+          // biome-ignore lint/a11y/useKeyWithClickEvents: test environment
           <form {...props} onClick={onClick}>
             {children}
           </form>
@@ -226,6 +232,7 @@ describe("KudosButton", () => {
     const form = screen.getByRole("button").closest("form");
 
     // Click to trigger confetti
+    // biome-ignore lint/style/noNonNullAssertion: test environment
     fireEvent.click(form!);
 
     // Confetti should appear
@@ -233,6 +240,7 @@ describe("KudosButton", () => {
     expect(confetti).toBeInTheDocument();
 
     // Simulate confetti completion
+    // biome-ignore lint/style/noNonNullAssertion: test environment
     fireEvent.click(confetti!);
 
     // This test verifies the structure - actual removal would need more complex mocking

@@ -8,10 +8,19 @@ vi.mock("framer-motion", () => ({
     <div>{children}</div>
   ),
   motion: {
-    video: ({ children, initial, animate, exit, transition, ...props }: any) => (
-      <video {...props}>{children}</video>
+    video: ({
+      children,
+      initial,
+      animate,
+      exit,
+      transition,
+      ...props
+      // biome-ignore lint/suspicious/noExplicitAny: test environment
+    }: any) => <video {...props}>{children}</video>,
+    // biome-ignore lint/suspicious/noExplicitAny: test environment
+    div: ({ children, initial, animate, exit, transition, ...props }: any) => (
+      <div {...props}>{children}</div>
     ),
-    div: ({ children, initial, animate, exit, transition, ...props }: any) => <div {...props}>{children}</div>,
   },
 }));
 
@@ -61,6 +70,7 @@ describe("VideoMasthead", () => {
     });
 
     // Clear cookies
+    // biome-ignore lint/suspicious/noDocumentCookie: test environment
     document.cookie =
       "visual-index-test-post=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   });
@@ -138,6 +148,7 @@ describe("VideoMasthead", () => {
     const shareButton = screen.getByText("Share").closest("button");
     expect(shareButton).toBeInTheDocument();
 
+    // biome-ignore lint/style/noNonNullAssertion: test environment
     fireEvent.click(shareButton!);
 
     await waitFor(() => {
@@ -156,6 +167,7 @@ describe("VideoMasthead", () => {
     render(<VideoMasthead {...defaultProps} />);
 
     const shareButton = screen.getByText("Share").closest("button");
+    // biome-ignore lint/style/noNonNullAssertion: test environment
     fireEvent.click(shareButton!);
 
     // Should show "Copied!" after click

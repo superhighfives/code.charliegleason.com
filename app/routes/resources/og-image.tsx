@@ -42,8 +42,9 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
 
   // Get image index from path parameter (e.g., /slug/1.png)
   // Convert from user-facing (1-21) to internal (0-20)
-  const imageParam = (params as { slug: string; index?: string }).index;
-  const imageIndex = parseImageIndex(imageParam ?? null);
+  // The index param is optional - only present for indexed OG images
+  const imageParam = "index" in params ? params.index : undefined;
+  const imageIndex = parseImageIndex(imageParam);
 
   const imageResponse = await context.assets.fetch(
     new URL(background, request.url),

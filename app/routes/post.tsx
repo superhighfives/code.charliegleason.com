@@ -55,8 +55,9 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     : 0;
 
   // Get image from path params and validate
-  const imageParam = (params as { index?: string }).index;
-  const parsedIndex = parseImageIndex(imageParam ?? null);
+  // The index param is optional - only present when navigating from shared links
+  const imageParam = "index" in params ? params.index : undefined;
+  const parsedIndex = parseImageIndex(imageParam);
 
   // Get image index from cookie (set by redirect handler or video-masthead)
   const cookieHeader = request.headers.get("Cookie");
@@ -115,7 +116,9 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
 export function meta({ data, params }: Route.MetaArgs) {
   if (!data) return tags();
   const { attributes } = data;
-  const imageParam = (params as { imageIndex?: string }).imageIndex;
+  // The index param is optional - only present when navigating from shared links
+  const imageParam =
+    "index" in params ? (params.index as string | undefined) : undefined;
   const parsedIndex = parseImageIndex(imageParam ?? null);
   // Convert internal index (0-20) back to user-facing (1-21) for meta tags
   return tags(attributes, parsedIndex !== null ? parsedIndex + 1 : undefined);

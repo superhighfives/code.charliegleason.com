@@ -4,9 +4,9 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import Replicate from "replicate";
 import sharp from "sharp";
-import { hasValidSolidLeftEdge } from "./image-validation.js";
+import { extractModelName } from "../app/utils/replicate";
+import { hasValidSolidLeftEdge } from "./image-validation";
 import {
-  extractModelName,
   getPosts,
   IMAGES_PER_POST,
   OUTPUT_DIR,

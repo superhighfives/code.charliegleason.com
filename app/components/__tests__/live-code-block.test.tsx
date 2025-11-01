@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock ClientOnly
 vi.mock("remix-utils/client-only", () => ({
@@ -11,8 +11,8 @@ vi.mock("remix-utils/client-only", () => ({
 // Mock theme hook
 vi.mock("~/routes/resources/theme-switch");
 
-import LiveCodeBlock from "../live-code-block";
 import { useTheme } from "~/routes/resources/theme-switch";
+import LiveCodeBlock from "../live-code-block";
 
 // Mock Sandpack components
 vi.mock("@codesandbox/sandpack-react", () => ({

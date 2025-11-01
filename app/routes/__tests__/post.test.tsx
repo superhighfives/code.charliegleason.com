@@ -1,6 +1,6 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { loader } from "../post";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Route } from "../+types/post";
+import { loader } from "../post";
 
 // Mock dependencies
 vi.mock("~/mdx/mdx-runtime", () => ({
@@ -12,7 +12,9 @@ vi.mock("~/mdx/custom-mdx-parser", () => ({
 }));
 
 vi.mock("~/utils/shiki.server", () => ({
-  highlightCode: vi.fn(() => Promise.resolve("<highlighted>code</highlighted>")),
+  highlightCode: vi.fn(() =>
+    Promise.resolve("<highlighted>code</highlighted>"),
+  ),
 }));
 
 vi.mock("~/utils/kudos.server", () => ({
@@ -76,10 +78,12 @@ describe("Post Route Loader", () => {
 
     it("should use cookie when present and delete it", async () => {
       const mockRequest = new Request("http://localhost:3000/test-post");
-      vi.spyOn(mockRequest.headers, "get").mockImplementation((name: string) => {
-        if (name === "Cookie") return "visual-index-test-post=7";
-        return null;
-      });
+      vi.spyOn(mockRequest.headers, "get").mockImplementation(
+        (name: string) => {
+          if (name === "Cookie") return "visual-index-test-post=7";
+          return null;
+        },
+      );
 
       const response = await loader({
         request: mockRequest,
@@ -121,10 +125,12 @@ describe("Post Route Loader", () => {
       const { randomVideoIndex } = await import("~/utils/video-index");
 
       const mockRequest = new Request("http://localhost:3000/test-post");
-      vi.spyOn(mockRequest.headers, "get").mockImplementation((name: string) => {
-        if (name === "Cookie") return "visual-index-test-post=7";
-        return null;
-      });
+      vi.spyOn(mockRequest.headers, "get").mockImplementation(
+        (name: string) => {
+          if (name === "Cookie") return "visual-index-test-post=7";
+          return null;
+        },
+      );
 
       const response = await loader({
         request: mockRequest,
@@ -138,7 +144,9 @@ describe("Post Route Loader", () => {
     });
 
     it("should handle invalid URL param by generating random", async () => {
-      const { randomVideoIndex, parseImageIndex } = await import("~/utils/video-index");
+      const { randomVideoIndex, parseImageIndex } = await import(
+        "~/utils/video-index"
+      );
       vi.mocked(parseImageIndex).mockReturnValueOnce(null); // Invalid param
 
       const mockRequest = new Request("http://localhost:3000/test-post/999", {

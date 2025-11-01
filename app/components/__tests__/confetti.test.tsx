@@ -5,6 +5,7 @@ import { Confetti } from "../confetti";
 // Mock framer-motion
 vi.mock("framer-motion", () => ({
   motion: {
+    // biome-ignore lint/suspicious/noExplicitAny: test environment
     div: ({ children, onAnimationComplete, ...props }: any) => {
       // Simulate animation complete for the last piece (index 19)
       // Use useEffect-like behavior to call onAnimationComplete after render

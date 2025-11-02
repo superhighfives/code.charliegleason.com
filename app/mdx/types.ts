@@ -28,11 +28,22 @@ export interface Post {
   frontmatter: PostFrontmatter;
 }
 
+export interface ModelConfig {
+  url: string;
+  version: string;
+}
+
+export interface VisualConfig {
+  prompt: string;
+  image: ModelConfig;
+  video: ModelConfig;
+}
+
 export interface PostFrontmatter {
   title?: string;
   description?: string;
   tags?: string[];
-  image?: boolean | string;
+  visual?: VisualConfig;
   data?: MetaData[];
   slug?: string;
   date?: string;
@@ -54,6 +65,7 @@ export interface PostLoaderData {
   highlightedBlocks?: Record<string, string>;
   kudosTotal?: number;
   kudosYou?: number;
+  randomVideo?: number;
 }
 
 export type MdxAttributes = {

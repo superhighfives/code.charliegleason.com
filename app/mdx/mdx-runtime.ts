@@ -6,10 +6,14 @@ export async function getRuntimeMdxManifest(): Promise<{ files: MdxFile[] }> {
 }
 
 export async function loadMdxRuntime(
-  request: Request,
+  requestUrl: string,
 ): Promise<MdxRuntimeData> {
-  const url = new URL(request.url);
-  const pathname = url.pathname;
+  const url = new URL(requestUrl);
+  let pathname = url.pathname;
+
+  // Strip image index from pathname if present (e.g., /hello-world/15 -> /hello-world)
+  // Image indices are numbers 1-21
+  pathname = pathname.replace(/\/\d+$/, "");
 
   const { files } = await getRuntimeMdxManifest();
   const mdxFile = files.find(

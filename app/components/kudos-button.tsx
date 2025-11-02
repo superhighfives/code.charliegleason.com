@@ -1,7 +1,9 @@
 import { ThumbsUp } from "lucide-react";
 import { useState } from "react";
+import { useScramble } from "use-scramble";
 import { Confetti } from "~/components/confetti";
 import { useKudos } from "~/hooks/useKudos";
+import { scrambleOptions } from "./utils/scramble";
 
 interface KudosButtonProps {
   slug: string;
@@ -18,13 +20,24 @@ export function KudosButton({
   initialTotal = 0,
   initialYou = 0,
 }: KudosButtonProps) {
-  const { fetcher, fingerprint, total, remaining, disabled, pending } =
-    useKudos({
-      initialTotal,
-      initialYou,
-    });
+  const { fetcher, fingerprint, total, remaining, disabled } = useKudos({
+    initialTotal,
+    initialYou,
+  });
 
   const [confettiBursts, setConfettiBursts] = useState<ConfettiBurst[]>([]);
+
+  const { ref: totalRef } = useScramble({
+    ...scrambleOptions,
+    range: [48, 57],
+    text: total?.toString() ?? "—",
+  });
+
+  const { ref: remainingRef } = useScramble({
+    ...scrambleOptions,
+    range: [48, 57],
+    text: remaining?.toString() ?? "—",
+  });
 
   const handleClick = () => {
     // Trigger confetti on every click
@@ -56,16 +69,20 @@ export function KudosButton({
       </div>
       <button
         type="submit"
-        disabled={disabled || pending}
+        disabled={disabled}
         aria-label="Give kudos"
         title={disabled ? "Limit reached" : "Give kudos"}
-        className={`bg-white dark:bg-gray-950 relative z-10 inline-flex items-center gap-2 px-3 py-2 border border-indigo-600/20 dark:border-indigo-400/30 text-indigo-600 dark:text-indigo-400 transition-colors ${disabled || pending ? "border-current/20" : "hover:text-indigo-500 hover:dark:text-indigo-300 hover:border-current active:dark:text-white active:dark:border-white"} ${disabled ? "cursor-not-allowed" : ""} ${!pending && !disabled ? "cursor-pointer" : ""}`}
+        className={`bg-white dark:bg-gray-950 relative z-10 inline-flex items-center gap-2 px-3 py-2 border border-indigo-600/50 dark:border-indigo-400/50 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 ${disabled ? "border-current/20" : "hover:text-indigo-500 hover:dark:text-indigo-300 focus-visible:text-indigo-500 focus-visible:dark:text-indigo-300 focus-visible:border-current"} ${disabled ? "cursor-not-allowed" : ""} ${!disabled ? "cursor-pointer" : ""}`}
       >
         <span role="img" aria-hidden="true">
           <ThumbsUp size={16} />
         </span>
-        <span className="font-medium">{total ?? "—"}</span>
-        <span className="text-xs opacity-70">({remaining} left)</span>
+        <span ref={totalRef} className="font-medium">
+          {total ?? "—"}
+        </span>
+        <span className="text-xs opacity-70">
+          (<span ref={remainingRef}>{remaining}</span> left)
+        </span>
       </button>
     </fetcher.Form>
   );

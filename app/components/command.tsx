@@ -2,6 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import IconSwapAnimation from "./icon-swap-animation";
 
 export default function Command({
   highlightedHtml,
@@ -21,22 +22,21 @@ export default function Command({
 
   return (
     <div className="relative border border-b-4 p-4 pr-16 rounded-xs bg-gray-50 dark:bg-gray-950 border-gray-200 dark:border-gray-700 mt-4 break-words [&_pre_code]:whitespace-pre-wrap">
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="absolute top-2.5 right-2.5 p-2 rounded-xs bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        aria-label="Copy to clipboard"
-      >
-        {copied ? (
-          <Check size={16} className="text-green-500" />
-        ) : (
-          <Copy size={16} className="text-gray-500" />
-        )}
-      </button>
       <div
         // biome-ignore lint/security/noDangerouslySetInnerHtml: required by shiki
         dangerouslySetInnerHTML={{ __html: highlightedHtml }}
       />
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="absolute top-2.5 right-2.5 p-2 rounded-xs bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+        aria-label="Copy to clipboard"
+      >
+        <IconSwapAnimation condition={copied}>
+          <Check size={16} className="text-green-500" />
+          <Copy size={16} className="text-gray-500" />
+        </IconSwapAnimation>
+      </button>
     </div>
   );
 }

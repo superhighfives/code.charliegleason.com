@@ -1,11 +1,13 @@
 import { differenceInMonths, formatDistanceToNow } from "date-fns";
+import { useEffect } from "react";
 import type { MetaFunction } from "react-router";
 import { useLoaderData } from "react-router";
 import { About } from "~/components/about";
-import LinkBlock from "~/components/link-block";
+import NavBlock from "~/components/nav-block";
 import tags from "~/components/utils/tags";
 import { loadAllMdxRuntime } from "~/mdx/mdx-runtime";
 import type { Post } from "~/mdx/types";
+import { randomVideoIndex } from "~/utils/video-index";
 
 export const meta: MetaFunction = () => tags();
 
@@ -20,11 +22,27 @@ export async function loader() {
       return b.date.getTime() - a.date.getTime();
     });
 
-  return { posts: sortedPosts };
+  // Generate random initial videos for each post
+  // These are just for display; the redirect handler will set cookies on click
+  const initialVideos: Record<string, number> = {};
+  for (const post of sortedPosts) {
+    initialVideos[post.slug] = randomVideoIndex();
+  }
+
+  return { posts: sortedPosts, initialVideos };
 }
 
 export default function Index() {
-  const { posts } = useLoaderData<typeof loader>();
+  const { posts, initialVideos } = useLoaderData<typeof loader>();
+
+  // Preload all initial videos on mount
+  useEffect(() => {
+    posts.forEach((post) => {
+      fetch(`/posts/${post.slug}/${initialVideos[post.slug]}.mp4`, {
+        priority: "low",
+      } as RequestInit).catch(() => {});
+    });
+  }, [posts, initialVideos]);
 
   return (
     <div className="grid gap-4 sm:gap-8 max-w-[65ch] content-end h-full">
@@ -35,18 +53,21 @@ export default function Index() {
       <div className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 grid gap-4">
         <div className="rounded-md overflow-hidden shadow-sm divide-y divide-gray-100 dark:divide-gray-900 border border-gray-200 dark:border-gray-800">
           {posts.length ? (
-            posts.map((post) => {
+            posts.map((post, index) => {
               const dateCaption =
                 post.date && differenceInMonths(new Date(), post.date) <= 3
                   ? `${formatDistanceToNow(post.date)} ago`
                   : null;
               return (
-                <LinkBlock
+                <NavBlock
                   key={post.slug}
                   title={post.title}
                   description={post.description}
                   caption={dateCaption}
                   href={post.url}
+                  slug={post.slug}
+                  initialVideo={initialVideos[post.slug]}
+                  index={index}
                 />
               );
             })

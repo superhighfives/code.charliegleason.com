@@ -106,11 +106,11 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
             });
             textColor = imageColors.dominant;
             backgroundColor = edgeColors.left;
-          } catch (colorError) {
+          } catch (_colorError) {
             // Falls back to white on error
           }
         }
-      } catch (e) {
+      } catch (_e) {
         // If image doesn't exist, we'll fall back to text-only layout
       }
     }

@@ -256,7 +256,6 @@ export async function detectImageColors(
     }
   }
 
-
   // Calculate average color
   const averageColor = calculateAverageColor(allPixels);
 

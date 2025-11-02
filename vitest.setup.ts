@@ -49,13 +49,13 @@ beforeAll(() => {
   window.HTMLMediaElement.prototype.pause = vi.fn();
 
   // Mock the load method to prevent actual network requests
-  window.HTMLMediaElement.prototype.load = vi.fn().mockImplementation(
-    function (this: HTMLMediaElement) {
-      // Simulate successful load by triggering loadeddata event
-      setTimeout(() => {
-        const event = new Event("loadeddata");
-        this.dispatchEvent(event);
-      }, 0);
-    },
-  );
+  window.HTMLMediaElement.prototype.load = vi.fn().mockImplementation(function (
+    this: HTMLMediaElement,
+  ) {
+    // Simulate successful load by triggering loadeddata event
+    setTimeout(() => {
+      const event = new Event("loadeddata");
+      this.dispatchEvent(event);
+    }, 0);
+  });
 });

@@ -109,7 +109,6 @@ function Document({
         <Meta />
         <Links />
         {sandpackCss && (
-          // biome-ignore lint/correctness/useUniqueElementIds: sandpack css
           <style
             // biome-ignore lint/security/noDangerouslySetInnerHtml: sandpack css
             dangerouslySetInnerHTML={{ __html: sandpackCss }}

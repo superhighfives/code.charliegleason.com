@@ -77,7 +77,7 @@ export function KudosButton({
         <span role="img" aria-hidden="true">
           <ThumbsUp size={16} />
         </span>
-        <span ref={totalRef} className="font-medium">
+        <span ref={totalRef} className="font-semibold">
           {total ?? "—"}
         </span>
         <span className="text-xs opacity-70">

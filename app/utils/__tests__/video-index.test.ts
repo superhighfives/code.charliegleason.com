@@ -7,23 +7,23 @@ import {
   parseImageIndex,
   randomVideoIndex,
   toUserIndex,
-  VIDEO_COUNT,
+  VISUAL_COUNT,
 } from "../video-index";
 
 describe("video-index utilities", () => {
   describe("constants", () => {
-    it("should have correct VIDEO_COUNT", () => {
-      expect(VIDEO_COUNT).toBe(21);
+    it("should have correct VISUAL_COUNT", () => {
+      expect(VISUAL_COUNT).toBe(9);
     });
 
     it("should have correct user index range", () => {
       expect(MIN_USER_INDEX).toBe(1);
-      expect(MAX_USER_INDEX).toBe(21);
+      expect(MAX_USER_INDEX).toBe(9);
     });
 
     it("should have correct internal index range", () => {
       expect(MIN_INTERNAL_INDEX).toBe(0);
-      expect(MAX_INTERNAL_INDEX).toBe(20);
+      expect(MAX_INTERNAL_INDEX).toBe(8);
     });
   });
 
@@ -35,7 +35,7 @@ describe("video-index utilities", () => {
     it("should convert valid user index to internal index", () => {
       expect(parseImageIndex("1")).toBe(0);
       expect(parseImageIndex("5")).toBe(4);
-      expect(parseImageIndex("21")).toBe(20);
+      expect(parseImageIndex("9")).toBe(8);
     });
 
     it("should return null for index below minimum (0)", () => {
@@ -46,8 +46,8 @@ describe("video-index utilities", () => {
       expect(parseImageIndex("-1")).toBe(null);
     });
 
-    it("should return null for index above maximum (22+)", () => {
-      expect(parseImageIndex("22")).toBe(null);
+    it("should return null for index above maximum (10+)", () => {
+      expect(parseImageIndex("10")).toBe(null);
       expect(parseImageIndex("100")).toBe(null);
     });
 
@@ -65,7 +65,7 @@ describe("video-index utilities", () => {
 
     it("should handle boundary values correctly", () => {
       expect(parseImageIndex("1")).toBe(0); // Min valid
-      expect(parseImageIndex("21")).toBe(20); // Max valid
+      expect(parseImageIndex("9")).toBe(8); // Max valid
     });
 
     it("should handle string numbers with whitespace", () => {
@@ -73,9 +73,9 @@ describe("video-index utilities", () => {
     });
 
     it("should handle valid middle range values", () => {
-      expect(parseImageIndex("10")).toBe(9);
-      expect(parseImageIndex("11")).toBe(10);
-      expect(parseImageIndex("15")).toBe(14);
+      expect(parseImageIndex("5")).toBe(4);
+      expect(parseImageIndex("6")).toBe(5);
+      expect(parseImageIndex("7")).toBe(6);
     });
   });
 
@@ -83,7 +83,7 @@ describe("video-index utilities", () => {
     it("should convert internal index to user index", () => {
       expect(toUserIndex(0)).toBe(1);
       expect(toUserIndex(5)).toBe(6);
-      expect(toUserIndex(20)).toBe(21);
+      expect(toUserIndex(8)).toBe(9);
     });
 
     it("should handle boundary values", () => {
@@ -144,7 +144,7 @@ describe("video-index utilities", () => {
 
   describe("integration tests", () => {
     it("should round-trip conversion work correctly", () => {
-      for (let internal = 0; internal <= 20; internal++) {
+      for (let internal = 0; internal <= 8; internal++) {
         const user = toUserIndex(internal);
         const backToInternal = parseImageIndex(user.toString());
         expect(backToInternal).toBe(internal);
@@ -152,11 +152,11 @@ describe("video-index utilities", () => {
     });
 
     it("should handle all valid user inputs correctly", () => {
-      for (let user = 1; user <= 21; user++) {
+      for (let user = 1; user <= 9; user++) {
         const internal = parseImageIndex(user.toString());
         expect(internal).not.toBe(null);
         expect(internal).toBeGreaterThanOrEqual(0);
-        expect(internal).toBeLessThanOrEqual(20);
+        expect(internal).toBeLessThanOrEqual(8);
       }
     });
 
@@ -175,7 +175,7 @@ describe("video-index utilities", () => {
       expect(MAX_USER_INDEX - MIN_USER_INDEX).toBe(
         MAX_INTERNAL_INDEX - MIN_INTERNAL_INDEX,
       );
-      expect(MAX_USER_INDEX - MIN_USER_INDEX + 1).toBe(VIDEO_COUNT);
+      expect(MAX_USER_INDEX - MIN_USER_INDEX + 1).toBe(VISUAL_COUNT);
     });
   });
 });

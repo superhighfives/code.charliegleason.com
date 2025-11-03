@@ -1,7 +1,11 @@
 import { differenceInMonths, format, parseISO } from "date-fns";
 import type { MetaData } from "~/mdx/types";
 
-export function processArticleDate(data: MetaData[] = [], date?: string) {
+export function processArticleDate(
+  data: MetaData[] = [],
+  date?: string,
+  currentDate: Date = new Date(),
+) {
   if (!date) {
     return { metadata: data, isOldArticle: false };
   }
@@ -15,7 +19,7 @@ export function processArticleDate(data: MetaData[] = [], date?: string) {
     ...data,
   ];
 
-  const isOldArticle = differenceInMonths(Date.now(), dateObject) >= 3;
+  const isOldArticle = differenceInMonths(currentDate, dateObject) >= 3;
 
   return { metadata, isOldArticle };
 }

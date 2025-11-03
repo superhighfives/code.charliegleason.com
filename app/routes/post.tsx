@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { data, Link, useLoaderData } from "react-router";
 import EditOnGitHub from "~/components/edit-on-github";
 import { KudosButton } from "~/components/kudos-button";
@@ -15,7 +14,8 @@ import { highlightCode } from "~/utils/shiki.server";
 import {
   parseImageIndex,
   randomVideoIndex,
-  VIDEO_COUNT,
+  randomVideoIndexExcluding,
+  VISUAL_COUNT,
 } from "~/utils/video-index";
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
@@ -67,15 +67,16 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]+)`));
     if (match) {
       const value = Number.parseInt(match[1], 10);
-      if (!Number.isNaN(value) && value >= 0 && value <= 20) {
+      if (!Number.isNaN(value) && value >= 0 && value < VISUAL_COUNT) {
         cookieIndex = value;
       }
     }
   }
 
-  // Determine which video to show (0-20 internal index)
+  // Determine which video to show (internal index)
   // Priority: URL param > Cookie > Random
   let randomVideo: number | undefined;
+  let nextVideo: number | undefined;
   let shouldDeleteCookie = false;
 
   if (parsedIndex !== null) {
@@ -91,6 +92,19 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     randomVideo = randomVideoIndex();
   }
 
+  // Pre-generate next video on server to prevent hydration mismatch
+  if (randomVideo !== undefined && frontmatter.visual) {
+    nextVideo = randomVideoIndexExcluding(randomVideo);
+  }
+
+  // Calculate isOldArticle on server to prevent hydration mismatch
+  const currentDate = new Date();
+  const { isOldArticle } = processArticleDate(
+    frontmatter.data,
+    frontmatter.date,
+    currentDate,
+  );
+
   const responseData = {
     __raw: rawContent,
     attributes: frontmatter,
@@ -98,6 +112,8 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     kudosTotal,
     kudosYou,
     randomVideo,
+    nextVideo,
+    isOldArticle,
   };
 
   // If we used the cookie, delete it so next refresh is random
@@ -120,7 +136,7 @@ export function meta({ data, params }: Route.MetaArgs) {
   const imageParam =
     "index" in params ? (params.index as string | undefined) : undefined;
   const parsedIndex = parseImageIndex(imageParam ?? null);
-  // Convert internal index (0-20) back to user-facing (1-21) for meta tags
+  // Convert internal index back to user-facing for meta tags
   return tags(attributes, parsedIndex !== null ? parsedIndex + 1 : undefined);
 }
 
@@ -134,34 +150,28 @@ export default function Post() {
     kudosTotal,
     kudosYou,
     randomVideo: initialVideo,
+    nextVideo,
+    isOldArticle,
   } = useLoaderData<typeof loader>();
 
   const Component = useMdxComponent(components);
   const { title, data, links, date, slug, visual } = useMdxAttributes();
-  const { metadata, isOldArticle } = processArticleDate(data, date);
-
-  // Preload all 21 videos on mount for instant transitions on refresh button
-  useEffect(() => {
-    if (!slug || !visual) return;
-
-    // Preload all videos using fetch with low priority
-    for (let i = 0; i < VIDEO_COUNT; i++) {
-      fetch(`/posts/${slug}/${i}.mp4`, {
-        priority: "low",
-      } as RequestInit).catch(() => {});
-    }
-  }, [slug, visual]);
+  const { metadata } = processArticleDate(data, date);
 
   return (
     <div className="grid gap-y-4 relative">
-      {slug && initialVideo !== undefined && visual && (
-        <VideoMasthead
-          slug={slug}
-          initialVideo={initialVideo}
-          visual={visual}
-        />
-      )}
-      <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
+      {slug &&
+        initialVideo !== undefined &&
+        nextVideo !== undefined &&
+        visual && (
+          <VideoMasthead
+            slug={slug}
+            initialVideo={initialVideo}
+            nextVideo={nextVideo}
+            visual={visual}
+          />
+        )}
+      <div className="flex flex-wrap gap-y-2 font-semibold max-w-[65ch]">
         <Link
           to="/"
           className="group text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"

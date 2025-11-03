@@ -24,15 +24,20 @@ import { useNonce } from "./utils/nonce-provider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  // Preload critical font weights for instant rendering
   {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
+    rel: "preload",
+    href: "/fonts/JetBrainsMono-Regular.woff2",
+    as: "font",
+    type: "font/woff2",
     crossOrigin: "anonymous",
   },
   {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap",
+    rel: "preload",
+    href: "/fonts/JetBrainsMono-SemiBold.woff2",
+    as: "font",
+    type: "font/woff2",
+    crossOrigin: "anonymous",
   },
   {
     rel: "icon",
@@ -138,7 +143,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
   let className =
-    "border-b-2 font-medium hover:text-indigo-500 hover:dark:text-indigo-300 focus-visible:text-indigo-500 focus-visible:dark:text-indigo-300 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 focus-visible:rounded-sm";
+    "border-b-2 font-semibold hover:text-indigo-500 hover:dark:text-indigo-300 focus-visible:text-indigo-500 focus-visible:dark:text-indigo-300 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 focus-visible:rounded-sm";
   className += isActive
     ? " text-indigo-500 dark:text-indigo-300 border-indigo-500 dark:border-indigo-300"
     : " border-indigo-600/20 dark:border-indigo-400/30 hover:border-current hover:border-indigo-600/20 hover:dark:border-indigo-400/30 focus-visible:border-current focus-visible:border-indigo-600/20 focus-visible:dark:border-indigo-400/30";

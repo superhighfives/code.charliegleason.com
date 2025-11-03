@@ -24,7 +24,7 @@ export default function LinkBlock({
         <div
           className={`flex w-0 flex-1 flex-col @md:flex-row items-start @md:justify-between flex-wrap @lg:flex-nowrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
         >
-          <span className="font-medium dark:text-gray-200 leading-5 text-pretty">
+          <span className="font-semibold dark:text-gray-200 leading-5 text-pretty">
             {title}
           </span>
           {caption ? (
@@ -34,7 +34,7 @@ export default function LinkBlock({
           ) : null}
         </div>
         <div className="ml-4 shrink-0">
-          <span className="mt-1 font-medium text-indigo-600 group-hover:text-indigo-700 group-focus:text-indigo-700 dark:text-indigo-400 dark:group-hover:text-indigo-300 dark:group-focus:text-indigo-300 flex gap-2 items-center">
+          <span className="mt-1 font-semibold text-indigo-600 group-hover:text-indigo-700 group-focus:text-indigo-700 dark:text-indigo-400 dark:group-hover:text-indigo-300 dark:group-focus:text-indigo-300 flex gap-2 items-center">
             <span className="@max-lg:hidden text-xs">{action}</span>
             {action === "Open" ? (
               <ExternalLink size={16} />

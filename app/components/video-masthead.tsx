@@ -1,32 +1,45 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, RefreshCw, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { VisualConfig } from "~/mdx/types";
 import { extractModelName } from "~/utils/replicate";
 import {
+  preloadVideo,
   randomVideoIndexExcluding,
   toUserIndex,
-  VIDEO_COUNT,
+  VISUAL_COUNT,
 } from "~/utils/video-index";
 import IconSwapAnimation from "./icon-swap-animation";
 
 export default function VideoMasthead({
   slug,
   initialVideo,
+  nextVideo: initialNextVideo,
   visual,
 }: {
   slug: string;
   initialVideo: number;
+  nextVideo: number;
   visual: VisualConfig;
 }) {
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
+  const [nextVideo, setNextVideo] = useState(initialNextVideo);
   const [rotationCount, setRotationCount] = useState(0);
   const [hasChanged, setHasChanged] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Preload current and next video on mount and when they change
+  useEffect(() => {
+    preloadVideo(slug, currentVideo);
+    preloadVideo(slug, nextVideo);
+  }, [slug, currentVideo, nextVideo]);
+
   const changeVideo = () => {
-    const newVideo = randomVideoIndexExcluding(currentVideo);
-    setCurrentVideo(newVideo);
+    // Show the pre-decided next video
+    setCurrentVideo(nextVideo);
+    // Generate and preload the new next video
+    const newNextVideo = randomVideoIndexExcluding(nextVideo);
+    setNextVideo(newNextVideo);
     setRotationCount((prev: number) => prev + 1);
     setHasChanged(true);
   };
@@ -99,7 +112,7 @@ export default function VideoMasthead({
             </motion.div>
 
             <span className="text-gray-400 dark:text-gray-500">
-              {String(toUserIndex(currentVideo)).padStart(2, "0")}/{VIDEO_COUNT}
+              {toUserIndex(currentVideo)}/{VISUAL_COUNT}
             </span>
           </button>
           <button

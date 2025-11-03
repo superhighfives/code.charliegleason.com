@@ -40,27 +40,29 @@ vi.mock("~/components/about", () => ({
   About: () => <div data-testid="about">About Component</div>,
 }));
 
-vi.mock("~/components/link-block", () => ({
+vi.mock("~/components/nav-block", () => ({
   default: ({
     title,
     description,
     caption,
     href,
+    initialVideo,
   }: {
     title: string;
     description?: string;
-    caption?: string;
+    caption?: string | null;
     href: string;
+    initialVideo: number;
   }) => (
-    <div data-testid="link-block">
-      <a href={href}>{title}</a>
+    <div data-testid="nav-block">
+      <a href={`${href}/${initialVideo + 1}`}>{title}</a>
       {description && <p>{description}</p>}
       {caption && <span>{caption}</span>}
     </div>
   ),
 }));
 
-vi.mock("~/components/tags", () => ({
+vi.mock("~/components/utils/tags", () => ({
   default: vi.fn(() => []),
 }));
 

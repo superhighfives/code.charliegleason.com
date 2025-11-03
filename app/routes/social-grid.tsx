@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useLoaderData } from "react-router";
 import tags from "~/components/utils/tags";
+import { VISUAL_COUNT } from "~/config/constants";
 import { loadMdxRuntime } from "~/mdx/mdx-runtime";
 import type { Route } from "./+types/social-grid";
 
@@ -79,13 +80,13 @@ function VideoCard({
 export default function SocialGrid() {
   const { slug } = useLoaderData<typeof loader>();
 
-  // Generate array of image indices (0-20)
-  const imageIndices = Array.from({ length: 21 }, (_, i) => i);
+  // Generate array of image indices
+  const imageIndices = Array.from({ length: VISUAL_COUNT }, (_, i) => i);
 
   return (
     <div className="grid grid-cols-3 gap-4">
       {imageIndices.map((index) => {
-        // Convert internal index (0-20) to user-facing (1-21) for URLs
+        // Convert internal index to user-facing for URLs
         const userIndex = index + 1;
         const imageUrl = `/${slug}/${userIndex}.png`;
         const videoUrl = `/posts/${slug}/${index}.mp4`;

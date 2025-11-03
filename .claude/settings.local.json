@@ -27,7 +27,10 @@
       "Bash(git merge-base:*)",
       "Bash(git merge:*)",
       "Bash(git diff:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(wrangler --help:*)",
+      "Bash(npx wrangler --help:*)",
+      "Bash(npx wrangler deployments --help:*)"
     ],
     "deny": [],
     "ask": []

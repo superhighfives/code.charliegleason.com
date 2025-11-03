@@ -64,10 +64,13 @@
   },
   "scripts": {
     "build": "react-router build",
+    "build:staging": "CLOUDFLARE_ENV=staging react-router build",
     "typegen": "wrangler types && react-router typegen",
     "check": "tsc && react-router build && wrangler deploy --dry-run",
     "deploy": "npm run build && wrangler deploy",
+    "deploy:staging": "npm run build:staging && wrangler deploy",
     "dev": "react-router dev",
+    "dev:staging": "CLOUDFLARE_ENV=staging react-router dev",
     "preview": "npm run build && vite preview",
     "typecheck": "npm run typegen && tsc -b",
     "lint": "biome check .",

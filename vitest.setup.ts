@@ -10,6 +10,29 @@ afterEach(() => {
   cleanup();
 });
 
+// Mock global fetch to prevent network requests in tests
+beforeAll(() => {
+  global.fetch = vi.fn().mockImplementation(() =>
+    Promise.resolve({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      redirected: false,
+      type: "basic",
+      url: "",
+      clone: () => ({} as Response),
+      body: null,
+      bodyUsed: false,
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+      blob: () => Promise.resolve(new Blob()),
+      formData: () => Promise.resolve(new FormData()),
+      json: () => Promise.resolve({}),
+      text: () => Promise.resolve(""),
+    } as Response),
+  );
+});
+
 // Suppress expected AbortError messages from fetch cleanup
 beforeAll(() => {
   const originalConsoleError = console.error;

@@ -22,9 +22,8 @@ export default function NavBlock({
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const readyVideoRef = useRef<HTMLVideoElement | null>(null);
-  const isHoveredRef = useRef(false);
-  const isFocusedRef = useRef(false);
+  const isVideoReadyRef = useRef(false);
+  const rewindAnimationRef = useRef<number | null>(null);
 
   // Touch device detection (hydration-safe)
   const [isTouchDevice, setIsTouchDevice] = useState<boolean | undefined>(
@@ -45,28 +44,18 @@ export default function NavBlock({
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    isHoveredRef.current = true;
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    isHoveredRef.current = false;
-    if (!isFocusedRef.current) {
-      readyVideoRef.current = null;
-    }
   };
 
   const handleFocus = () => {
     setIsFocused(true);
-    isFocusedRef.current = true;
   };
 
   const handleBlur = () => {
     setIsFocused(false);
-    isFocusedRef.current = false;
-    if (!isHoveredRef.current) {
-      readyVideoRef.current = null;
-    }
   };
 
   // Handle when video loads
@@ -80,30 +69,21 @@ export default function NavBlock({
   };
 
   // Called when video animation completes (slide in finishes)
-  // Store the video element ref when it's fully ready
+  // Mark video as ready for playback control
   const handleAnimationComplete = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    readyVideoRef.current = video;
-
-    // Use ref instead of state to get current video active status (hover, focus, or viewport)
-    if (isVideoActiveRef.current) {
-      video.currentTime = 0;
-      video.play().catch(() => {
-        // Ignore autoplay errors
-      });
-    } else {
-      // Ensure video is paused if not active
-      video.pause();
-      video.currentTime = 0;
-    }
+    isVideoReadyRef.current = true;
   };
 
   // Play/pause based on video active state (hover, focus, or viewport on touch)
   useEffect(() => {
-    const video = readyVideoRef.current;
-    if (!video) return;
+    const video = videoRef.current;
+    if (!video || !isVideoReadyRef.current) return;
+
+    // Cancel any ongoing rewind animation
+    if (rewindAnimationRef.current) {
+      cancelAnimationFrame(rewindAnimationRef.current);
+      rewindAnimationRef.current = null;
+    }
 
     if (isVideoActive) {
       video.currentTime = 0;
@@ -112,8 +92,38 @@ export default function NavBlock({
       });
     } else {
       video.pause();
-      video.currentTime = 0;
+
+      // Rewind effect: animate backwards to first frame
+      const startTime = video.currentTime;
+      const rewindDuration = 300; // milliseconds
+      const startTimestamp = performance.now();
+
+      const rewind = (currentTimestamp: number) => {
+        const elapsed = currentTimestamp - startTimestamp;
+        const progress = Math.min(elapsed / rewindDuration, 1);
+
+        // Ease out for smoother motion
+        const easeProgress = 1 - (1 - progress) ** 3;
+
+        video.currentTime = startTime * (1 - easeProgress);
+
+        if (progress < 1) {
+          rewindAnimationRef.current = requestAnimationFrame(rewind);
+        } else {
+          rewindAnimationRef.current = null;
+        }
+      };
+
+      rewindAnimationRef.current = requestAnimationFrame(rewind);
     }
+
+    // Cleanup function to cancel animation on unmount
+    return () => {
+      if (rewindAnimationRef.current) {
+        cancelAnimationFrame(rewindAnimationRef.current);
+        rewindAnimationRef.current = null;
+      }
+    };
   }, [isVideoActive]);
 
   // Detect touch device (client-side only, hydration-safe)

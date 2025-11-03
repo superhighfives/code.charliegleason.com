@@ -29,7 +29,9 @@ vi.mock("~/utils/video-index", () => ({
   randomVideoIndexExcluding: vi.fn(() => 10),
   toUserIndex: (index: number) => index + 1,
   VIDEO_COUNT: 21,
-  preloadVideo: vi.fn((slug: string, index: number) => `preload-${slug}-${index}`),
+  preloadVideo: vi.fn(
+    (slug: string, index: number) => `preload-${slug}-${index}`,
+  ),
 }));
 
 describe("VideoMasthead", () => {
@@ -128,7 +130,9 @@ describe("VideoMasthead", () => {
   });
 
   it("should change video on refresh button click", async () => {
-    const { randomVideoIndexExcluding, preloadVideo } = await import("~/utils/video-index");
+    const { randomVideoIndexExcluding, preloadVideo } = await import(
+      "~/utils/video-index"
+    );
     const { container } = render(<VideoMasthead {...defaultProps} />);
 
     const refreshButton = screen.getByRole("button", { name: /06\/21/i });

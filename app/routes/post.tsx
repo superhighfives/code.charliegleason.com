@@ -159,14 +159,17 @@ export default function Post() {
 
   return (
     <div className="grid gap-y-4 relative">
-      {slug && initialVideo !== undefined && nextVideo !== undefined && visual && (
-        <VideoMasthead
-          slug={slug}
-          initialVideo={initialVideo}
-          nextVideo={nextVideo}
-          visual={visual}
-        />
-      )}
+      {slug &&
+        initialVideo !== undefined &&
+        nextVideo !== undefined &&
+        visual && (
+          <VideoMasthead
+            slug={slug}
+            initialVideo={initialVideo}
+            nextVideo={nextVideo}
+            visual={visual}
+          />
+        )}
       <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
         <Link
           to="/"

@@ -21,7 +21,7 @@ beforeAll(() => {
       redirected: false,
       type: "basic",
       url: "",
-      clone: () => ({} as Response),
+      clone: () => ({}) as Response,
       body: null,
       bodyUsed: false,
       arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),

@@ -6,7 +6,7 @@ This is a little code blog, built with React Router 7 and deployed on Cloudflare
 
 - 🚀 **React Router 7** with server-side rendering
 - ⚡ **Cloudflare Workers** - everything runs on the edge
-- 🎨 **AI-generated visuals** via Replicate with 9 unique variations per post
+- 🎨 **AI-generated visuals** via Replicate with user-controlled variations per post
 - 🍪 **Cookie-based routing** for clean URLs between index and posts
 - 💻 **Live code blocks** powered by Sandpack
 - 🤓 **WASM-powered** syntax highlighting with Shiki and OG image generation with Satori

@@ -35,5 +35,28 @@
       "pattern": "code.charliegleason.com",
       "custom_domain": true
     }
-  ]
+  ],
+  "env": {
+    "staging": {
+      "name": "code-staging",
+      "vars": {
+        "VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare (Staging)"
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "KUDOS_DO",
+            "class_name": "KudosObject",
+            "script_name": "code-staging"
+          }
+        ]
+      },
+      "routes": [
+        {
+          "pattern": "staging.code.charliegleason.com",
+          "custom_domain": true
+        }
+      ]
+    }
+  }
 }

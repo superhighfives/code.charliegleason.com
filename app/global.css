@@ -9,7 +9,7 @@
   font-family: "JetBrains Mono";
   font-style: normal;
   font-weight: 400;
-  font-display: optional;
+  font-display: swap;
   src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
 }
 
@@ -18,26 +18,8 @@
   font-family: "JetBrains Mono";
   font-style: italic;
   font-weight: 400;
-  font-display: optional;
+  font-display: swap;
   src: url("/fonts/JetBrainsMono-Italic.woff2") format("woff2");
-}
-
-/* JetBrains Mono - Medium */
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 500;
-  font-display: optional;
-  src: url("/fonts/JetBrainsMono-Medium.woff2") format("woff2");
-}
-
-/* JetBrains Mono - Medium Italic */
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: italic;
-  font-weight: 500;
-  font-display: optional;
-  src: url("/fonts/JetBrainsMono-MediumItalic.woff2") format("woff2");
 }
 
 /* JetBrains Mono - SemiBold */
@@ -45,7 +27,7 @@
   font-family: "JetBrains Mono";
   font-style: normal;
   font-weight: 600;
-  font-display: optional;
+  font-display: swap;
   src: url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
 }
 
@@ -54,26 +36,8 @@
   font-family: "JetBrains Mono";
   font-style: italic;
   font-weight: 600;
-  font-display: optional;
+  font-display: swap;
   src: url("/fonts/JetBrainsMono-SemiBoldItalic.woff2") format("woff2");
-}
-
-/* JetBrains Mono - Bold */
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 700;
-  font-display: optional;
-  src: url("/fonts/JetBrainsMono-Bold.woff2") format("woff2");
-}
-
-/* JetBrains Mono - Bold Italic */
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: italic;
-  font-weight: 700;
-  font-display: optional;
-  src: url("/fonts/JetBrainsMono-BoldItalic.woff2") format("woff2");
 }
 
 /*************************************************************/
@@ -119,6 +83,7 @@ body {
   overflow-x: hidden;
   overscroll-behavior-x: none;
   background-color: var(--color-white);
+  font-family: monospace;
   @apply text-sm font-mono bg-white dark:bg-gray-950;
 }
 
@@ -277,6 +242,14 @@ html.dark .shiki span {
 
 .code {
 	@apply overflow-x-scroll max-w-[calc(100vw)] -mx-4 sm:-mx-12 border-y border-gray-200 dark:border-gray-700 dark:bg-gray-900 bg-gray-50 text-gray-400 [&>*]:mx-8 sm:[&>*]:mx-12 [&>*]:inline-block;
+}
+
+/*************************************************************/
+/* Text styles */
+/*************************************************************/
+
+strong {
+  @apply font-semibold;
 }
 
 /*************************************************************/

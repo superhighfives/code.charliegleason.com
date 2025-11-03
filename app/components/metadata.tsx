@@ -11,7 +11,7 @@ export default function Metadata({ data }: { data?: MetaData[] }) {
             key={JSON.stringify(item)}
             className="sm:px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4"
           >
-            <dt className="font-medium text-gray-400 dark:text-gray-500">
+            <dt className="font-semibold text-gray-400 dark:text-gray-500">
               {item.key}
             </dt>
             <dd className="mt-1 text-gray-700 dark:text-gray-300 sm:col-span-2 sm:mt-0">

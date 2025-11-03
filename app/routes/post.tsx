@@ -171,7 +171,7 @@ export default function Post() {
             visual={visual}
           />
         )}
-      <div className="flex flex-wrap gap-y-2 font-medium max-w-[65ch]">
+      <div className="flex flex-wrap gap-y-2 font-semibold max-w-[65ch]">
         <Link
           to="/"
           className="group text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"

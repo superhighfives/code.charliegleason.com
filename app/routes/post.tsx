@@ -15,7 +15,7 @@ import { highlightCode } from "~/utils/shiki.server";
 import {
   parseImageIndex,
   randomVideoIndex,
-  VIDEO_COUNT,
+  VISUAL_COUNT,
 } from "~/utils/video-index";
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
@@ -67,13 +67,13 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]+)`));
     if (match) {
       const value = Number.parseInt(match[1], 10);
-      if (!Number.isNaN(value) && value >= 0 && value <= 20) {
+      if (!Number.isNaN(value) && value >= 0 && value < VISUAL_COUNT) {
         cookieIndex = value;
       }
     }
   }
 
-  // Determine which video to show (0-20 internal index)
+  // Determine which video to show (internal index)
   // Priority: URL param > Cookie > Random
   let randomVideo: number | undefined;
   let shouldDeleteCookie = false;
@@ -120,7 +120,7 @@ export function meta({ data, params }: Route.MetaArgs) {
   const imageParam =
     "index" in params ? (params.index as string | undefined) : undefined;
   const parsedIndex = parseImageIndex(imageParam ?? null);
-  // Convert internal index (0-20) back to user-facing (1-21) for meta tags
+  // Convert internal index back to user-facing for meta tags
   return tags(attributes, parsedIndex !== null ? parsedIndex + 1 : undefined);
 }
 
@@ -140,12 +140,12 @@ export default function Post() {
   const { title, data, links, date, slug, visual } = useMdxAttributes();
   const { metadata, isOldArticle } = processArticleDate(data, date);
 
-  // Preload all 21 videos on mount for instant transitions on refresh button
+  // Preload all videos on mount for instant transitions on refresh button
   useEffect(() => {
     if (!slug || !visual) return;
 
     // Preload all videos using fetch with low priority
-    for (let i = 0; i < VIDEO_COUNT; i++) {
+    for (let i = 0; i < VISUAL_COUNT; i++) {
       fetch(`/posts/${slug}/${i}.mp4`, {
         priority: "low",
       } as RequestInit).catch(() => {});

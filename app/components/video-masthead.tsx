@@ -6,7 +6,7 @@ import { extractModelName } from "~/utils/replicate";
 import {
   randomVideoIndexExcluding,
   toUserIndex,
-  VIDEO_COUNT,
+  VISUAL_COUNT,
 } from "~/utils/video-index";
 import IconSwapAnimation from "./icon-swap-animation";
 
@@ -99,7 +99,7 @@ export default function VideoMasthead({
             </motion.div>
 
             <span className="text-gray-400 dark:text-gray-500">
-              {String(toUserIndex(currentVideo)).padStart(2, "0")}/{VIDEO_COUNT}
+              {toUserIndex(currentVideo)}/{VISUAL_COUNT}
             </span>
           </button>
           <button

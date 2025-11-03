@@ -1,27 +1,31 @@
+import { VISUAL_COUNT as VISUAL_COUNT_CONSTANT } from "~/config/constants";
+
 /**
  * Utilities for handling video/image index conversion and validation.
- * Images and videos are stored as 0-20 (21 total files).
- * User-facing URLs and UI display as 1-21.
+ * Images and videos are stored as 0-(VISUAL_COUNT-1).
+ * User-facing URLs and UI display as 1-VISUAL_COUNT.
  */
 
-export const VIDEO_COUNT = 21;
+// Re-export VISUAL_COUNT for convenience
+export const VISUAL_COUNT = VISUAL_COUNT_CONSTANT;
+
 export const MIN_USER_INDEX = 1;
-export const MAX_USER_INDEX = VIDEO_COUNT;
+export const MAX_USER_INDEX = VISUAL_COUNT;
 export const MIN_INTERNAL_INDEX = 0;
-export const MAX_INTERNAL_INDEX = VIDEO_COUNT - 1;
+export const MAX_INTERNAL_INDEX = VISUAL_COUNT - 1;
 
 /**
  * Parse and validate an image query parameter.
- * Converts from user-facing index (1-21) to internal index (0-20).
+ * Converts from user-facing index to internal index.
  *
- * @param imageParam - The raw query parameter value from URL (e.g., "1", "21", "invalid")
- * @returns The internal index (0-20) if valid, null if invalid or not provided
+ * @param imageParam - The raw query parameter value from URL
+ * @returns The internal index if valid, null if invalid or not provided
  *
  * @example
  * parseImageIndex("1") // 0
- * parseImageIndex("21") // 20
+ * parseImageIndex("9") // 8
  * parseImageIndex("0") // null (invalid)
- * parseImageIndex("22") // null (out of range)
+ * parseImageIndex("10") // null (out of range)
  * parseImageIndex("abc") // null (not a number)
  * parseImageIndex(null) // null (not provided)
  */
@@ -36,7 +40,7 @@ export function parseImageIndex(imageParam: unknown | null): number | null {
 
   const parsed = parseInt(imageParam, 10);
 
-  // Validate: must be a valid number between 1-21
+  // Validate: must be a valid number in the user-facing range
   if (
     Number.isNaN(parsed) ||
     parsed < MIN_USER_INDEX ||
@@ -45,41 +49,41 @@ export function parseImageIndex(imageParam: unknown | null): number | null {
     return null;
   }
 
-  // Convert from user-facing (1-21) to internal (0-20)
+  // Convert from user-facing to internal index
   return parsed - 1;
 }
 
 /**
- * Convert internal index (0-20) to user-facing index (1-21).
+ * Convert internal index to user-facing index.
  *
- * @param internalIndex - The internal index (0-20)
- * @returns The user-facing index (1-21)
+ * @param internalIndex - The internal index
+ * @returns The user-facing index
  *
  * @example
  * toUserIndex(0) // 1
- * toUserIndex(20) // 21
+ * toUserIndex(8) // 9
  */
 export function toUserIndex(internalIndex: number): number {
   return internalIndex + 1;
 }
 
 /**
- * Generate a random internal index (0-20).
+ * Generate a random internal index.
  *
  * @returns A random internal index
  */
 export function randomVideoIndex(): number {
-  return Math.floor(Math.random() * VIDEO_COUNT);
+  return Math.floor(Math.random() * VISUAL_COUNT);
 }
 
 /**
- * Generate a random internal index (0-20) that's different from the current index.
+ * Generate a random internal index that's different from the current index.
  *
  * @param currentIndex - The current internal index to exclude
  * @returns A random internal index different from currentIndex
  *
  * @example
- * randomVideoIndexExcluding(5) // returns 0-20 but never 5
+ * randomVideoIndexExcluding(5) // returns a random index but never 5
  */
 export function randomVideoIndexExcluding(currentIndex: number): number {
   let newIndex = randomVideoIndex();
@@ -94,7 +98,7 @@ export function randomVideoIndexExcluding(currentIndex: number): number {
  * This ensures smooth transitions when the video is displayed.
  *
  * @param slug - The post slug
- * @param videoIndex - The internal video index (0-20) to preload
+ * @param videoIndex - The internal video index to preload
  * @returns The ID of the preloaded video element for later cleanup
  *
  * @example

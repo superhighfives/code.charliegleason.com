@@ -41,7 +41,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
   const { slug } = params;
 
   // Get image index from path parameter (e.g., /slug/1.png)
-  // Convert from user-facing (1-21) to internal (0-20)
+  // Convert from user-facing to internal index
   // The index param is optional - only present for indexed OG images
   const imageParam = "index" in params ? params.index : undefined;
   const imageIndex = parseImageIndex(imageParam);
@@ -76,7 +76,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     // If visual is missing, fall back to text-only layout
     if (post.frontmatter.visual) {
       try {
-        // Use query parameter if provided, otherwise random selection (0-20)
+        // Use query parameter if provided, otherwise random selection
         const selectedIndex =
           imageIndex !== null ? imageIndex : randomVideoIndex();
         const aiImagePath = `/posts/${slug}/${selectedIndex}.png`;

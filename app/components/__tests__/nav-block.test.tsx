@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { VISUAL_COUNT } from "~/config/constants";
 import NavBlock from "../nav-block";
 
 // Mock framer-motion to avoid animation complexity in tests
@@ -22,14 +23,22 @@ vi.mock("framer-motion", () => ({
 }));
 
 // Mock video index utilities
-vi.mock("~/utils/video-index", () => ({
-  randomVideoIndexExcluding: vi.fn((current: number) => (current + 1) % 21),
-  toUserIndex: vi.fn((internal: number) => internal + 1),
-  preloadVideo: vi.fn(
-    (slug: string, index: number) => `preload-${slug}-${index}`,
-  ),
-  cleanupPreloadedVideo: vi.fn(),
-}));
+vi.mock("~/utils/video-index", async () => {
+  const { VISUAL_COUNT } =
+    await vi.importActual<typeof import("~/config/constants")>(
+      "~/config/constants",
+    );
+  return {
+    randomVideoIndexExcluding: vi.fn(
+      (current: number) => (current + 1) % VISUAL_COUNT,
+    ),
+    toUserIndex: vi.fn((internal: number) => internal + 1),
+    preloadVideo: vi.fn(
+      (slug: string, index: number) => `preload-${slug}-${index}`,
+    ),
+    cleanupPreloadedVideo: vi.fn(),
+  };
+});
 
 describe("NavBlock", () => {
   const defaultProps = {

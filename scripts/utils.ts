@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { glob } from "glob";
 import matter from "gray-matter";
+import { VISUAL_COUNT } from "../app/config/constants";
 
 export interface ModelConfig {
   url: string;
@@ -21,7 +22,7 @@ export interface PostData {
   visual: VisualConfig;
 }
 
-export const IMAGES_PER_POST = 21; // 0-20
+export const IMAGES_PER_POST = VISUAL_COUNT;
 export const OUTPUT_DIR = "public/posts";
 export const POSTS_DIR = "posts";
 

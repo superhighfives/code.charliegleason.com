@@ -46,14 +46,12 @@ vi.mock("~/components/nav-block", () => ({
     description,
     caption,
     href,
-    slug,
     initialVideo,
   }: {
     title: string;
     description?: string;
     caption?: string | null;
     href: string;
-    slug: string;
     initialVideo: number;
   }) => (
     <div data-testid="nav-block">

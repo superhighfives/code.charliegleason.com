@@ -1,6 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { VISUAL_COUNT } from "~/config/constants";
 import NavBlock from "../nav-block";
 
 // Mock framer-motion to avoid animation complexity in tests

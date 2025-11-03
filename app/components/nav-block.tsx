@@ -181,7 +181,8 @@ export default function NavBlock({
           onAnimationComplete={handleAnimationComplete}
           className="size-full object-cover"
           initial={{
-            filter: "sepia(1) hue-rotate(200deg) contrast(1.25) brightness(0.2)"
+            filter:
+              "sepia(1) hue-rotate(200deg) contrast(1.25) brightness(0.2)",
           }}
           animate={{
             filter: isVideoActive

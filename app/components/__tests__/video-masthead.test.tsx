@@ -26,10 +26,10 @@ vi.mock("framer-motion", () => ({
 
 // Mock video index utilities
 vi.mock("~/utils/video-index", () => ({
-  randomVideoIndex: vi.fn(() => 10),
   randomVideoIndexExcluding: vi.fn(() => 10),
   toUserIndex: (index: number) => index + 1,
   VIDEO_COUNT: 21,
+  preloadVideo: vi.fn((slug: string, index: number) => `preload-${slug}-${index}`),
 }));
 
 describe("VideoMasthead", () => {
@@ -127,15 +127,22 @@ describe("VideoMasthead", () => {
   });
 
   it("should change video on refresh button click", async () => {
-    const { randomVideoIndexExcluding } = await import("~/utils/video-index");
-
-    render(<VideoMasthead {...defaultProps} />);
+    const { randomVideoIndexExcluding, preloadVideo } = await import("~/utils/video-index");
+    const { container } = render(<VideoMasthead {...defaultProps} />);
 
     const refreshButton = screen.getByRole("button", { name: /06\/21/i });
+
+    // Initial video should be 5
+    const initialVideo = container.querySelector("video") as HTMLVideoElement;
+    expect(initialVideo.src).toContain("/posts/test-post/5.mp4");
+
     fireEvent.click(refreshButton);
 
     await waitFor(() => {
+      // Should have called randomVideoIndexExcluding to generate next video
       expect(randomVideoIndexExcluding).toHaveBeenCalled();
+      // Should preload the new next video
+      expect(preloadVideo).toHaveBeenCalled();
     });
 
     // Cookie should NOT be set - we want refreshes to be random
@@ -207,5 +214,18 @@ describe("VideoMasthead", () => {
     fireEvent.click(refreshButton);
 
     // The video index should update (tested by the change video test)
+  });
+
+  it("should preload current and next video on mount", async () => {
+    const { preloadVideo } = await import("~/utils/video-index");
+
+    render(<VideoMasthead {...defaultProps} />);
+
+    await waitFor(() => {
+      // Should preload current video (5)
+      expect(preloadVideo).toHaveBeenCalledWith("test-post", 5);
+      // Should preload next video (10, from mock)
+      expect(preloadVideo).toHaveBeenCalledWith("test-post", 10);
+    });
   });
 });

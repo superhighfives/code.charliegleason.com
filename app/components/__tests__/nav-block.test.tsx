@@ -4,15 +4,10 @@ import NavBlock from "../nav-block";
 
 // Mock framer-motion to avoid animation complexity in tests
 vi.mock("framer-motion", () => ({
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
   motion: {
     video: ({
       children,
-      initial,
       animate,
-      exit,
       transition,
       onAnimationComplete,
       ...props
@@ -23,12 +18,7 @@ vi.mock("framer-motion", () => ({
 
 // Mock video index utilities
 vi.mock("~/utils/video-index", () => ({
-  randomVideoIndexExcluding: vi.fn((current: number) => (current + 1) % 21),
   toUserIndex: vi.fn((internal: number) => internal + 1),
-  preloadVideo: vi.fn(
-    (slug: string, index: number) => `preload-${slug}-${index}`,
-  ),
-  cleanupPreloadedVideo: vi.fn(),
 }));
 
 describe("NavBlock", () => {
@@ -111,35 +101,18 @@ describe("NavBlock", () => {
     expect(screen.getByText("View")).toBeInTheDocument();
   });
 
-  it("should apply grayscale filter initially", () => {
-    const { container } = render(<NavBlock {...defaultProps} />);
-
-    const video = container.querySelector("video");
-    expect(video).toHaveStyle({ filter: "grayscale(100%)" });
-  });
-
   it("should handle mouse enter event", () => {
     const { container } = render(<NavBlock {...defaultProps} />);
 
     const link = screen.getByRole("link");
     fireEvent.mouseEnter(link);
 
-    // Video should have filter changed (handled by animation)
+    // Video should remain (no video switching on hover)
     const video = container.querySelector("video");
     expect(video).toBeInTheDocument();
   });
 
-  it("should handle mouse move event", () => {
-    const { container } = render(<NavBlock {...defaultProps} />);
-
-    const link = screen.getByRole("link");
-    fireEvent.mouseMove(link);
-
-    const video = container.querySelector("video");
-    expect(video).toBeInTheDocument();
-  });
-
-  it("should change video on mouse leave", async () => {
+  it("should not change video on mouse leave", async () => {
     const { container } = render(<NavBlock {...defaultProps} />);
 
     const link = screen.getByRole("link");
@@ -148,16 +121,14 @@ describe("NavBlock", () => {
     const initialVideo = container.querySelector("video") as HTMLVideoElement;
     expect(initialVideo.src).toContain("/posts/test-post/5.mp4");
 
-    // First enter to set the hasEnteredRef and preload next video
+    // Enter and leave - video should NOT change
     fireEvent.mouseEnter(link);
-
-    // Then leave to trigger video change (from 5 to 6, based on mock)
     fireEvent.mouseLeave(link);
 
     await waitFor(() => {
-      // Video should have changed (mock returns current + 1, so 5 becomes 6)
+      // Video should remain the same (no switching)
       const updatedVideo = container.querySelector("video") as HTMLVideoElement;
-      expect(updatedVideo.src).toContain("/posts/test-post/6.mp4");
+      expect(updatedVideo.src).toContain("/posts/test-post/5.mp4");
     });
   });
 
@@ -178,7 +149,7 @@ describe("NavBlock", () => {
     expect(link).toHaveClass("hover:bg-gray-50");
   });
 
-  it("should update href when video changes", async () => {
+  it("should maintain same href (video does not change)", async () => {
     render(<NavBlock {...defaultProps} />);
 
     const link = screen.getByRole("link");
@@ -186,13 +157,35 @@ describe("NavBlock", () => {
     // Initial href should include initial video (5 + 1 = 6)
     expect(link).toHaveAttribute("href", "/test-post/6");
 
-    // Hover to trigger video change
+    // Hover to trigger interaction - href should remain the same
     fireEvent.mouseEnter(link);
     fireEvent.mouseLeave(link);
 
     await waitFor(() => {
-      // After hover cycle, video changes to 6, so href should be /test-post/7
-      expect(link).toHaveAttribute("href", "/test-post/7");
+      // Href should remain the same (no video switching)
+      expect(link).toHaveAttribute("href", "/test-post/6");
+    });
+  });
+
+  it("should keep video static across multiple interactions", async () => {
+    const { container } = render(<NavBlock {...defaultProps} />);
+
+    const link = screen.getByRole("link");
+    const video = container.querySelector("video") as HTMLVideoElement;
+
+    // Initial video
+    expect(video.src).toContain("/posts/test-post/5.mp4");
+
+    // Multiple hover cycles
+    fireEvent.mouseEnter(link);
+    fireEvent.mouseLeave(link);
+    fireEvent.mouseEnter(link);
+    fireEvent.mouseLeave(link);
+
+    await waitFor(() => {
+      // Video should still be the same
+      const updatedVideo = container.querySelector("video") as HTMLVideoElement;
+      expect(updatedVideo.src).toContain("/posts/test-post/5.mp4");
     });
   });
 

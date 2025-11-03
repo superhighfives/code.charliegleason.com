@@ -35,11 +35,12 @@ export async function loader() {
 export default function Index() {
   const { posts, initialVideos } = useLoaderData<typeof loader>();
 
-  // Preload all initial videos on mount
+  // Preload initial videos for first 5 visible posts with high priority
   useEffect(() => {
-    posts.forEach((post) => {
+    const visiblePosts = posts.slice(0, 5);
+    visiblePosts.forEach((post) => {
       fetch(`/posts/${post.slug}/${initialVideos[post.slug]}.mp4`, {
-        priority: "low",
+        priority: "high",
       } as RequestInit).catch(() => {});
     });
   }, [posts, initialVideos]);

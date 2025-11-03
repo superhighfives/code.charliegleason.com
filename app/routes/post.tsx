@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { data, Link, useLoaderData } from "react-router";
 import EditOnGitHub from "~/components/edit-on-github";
 import { KudosButton } from "~/components/kudos-button";
@@ -12,11 +11,7 @@ import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
 import { processArticleDate } from "~/utils/posts";
 import { highlightCode } from "~/utils/shiki.server";
-import {
-  parseImageIndex,
-  randomVideoIndex,
-  VIDEO_COUNT,
-} from "~/utils/video-index";
+import { parseImageIndex, randomVideoIndex } from "~/utils/video-index";
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
 
@@ -139,18 +134,6 @@ export default function Post() {
   const Component = useMdxComponent(components);
   const { title, data, links, date, slug, visual } = useMdxAttributes();
   const { metadata, isOldArticle } = processArticleDate(data, date);
-
-  // Preload all 21 videos on mount for instant transitions on refresh button
-  useEffect(() => {
-    if (!slug || !visual) return;
-
-    // Preload all videos using fetch with low priority
-    for (let i = 0; i < VIDEO_COUNT; i++) {
-      fetch(`/posts/${slug}/${i}.mp4`, {
-        priority: "low",
-      } as RequestInit).catch(() => {});
-    }
-  }, [slug, visual]);
 
   return (
     <div className="grid gap-y-4 relative">

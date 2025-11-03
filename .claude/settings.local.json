@@ -19,7 +19,9 @@
       "Bash(head:*)",
       "Bash(done)",
       "Bash(npm test:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Read(//tmp/**)",
+      "Bash(unzip:*)"
     ],
     "deny": [],
     "ask": []

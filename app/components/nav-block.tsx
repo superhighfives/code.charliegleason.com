@@ -1,11 +1,6 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import {
-  cleanupPreloadedVideo,
-  preloadVideo,
-  randomVideoIndexExcluding,
-  toUserIndex,
-} from "~/utils/video-index";
+import { toUserIndex } from "~/utils/video-index";
 
 export default function NavBlock({
   title,
@@ -26,13 +21,10 @@ export default function NavBlock({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [videoKey, setVideoKey] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [hasChanged, setHasChanged] = useState(false);
   const readyVideoRef = useRef<HTMLVideoElement | null>(null);
   const isHoveredRef = useRef(false);
   const isFocusedRef = useRef(false);
-  const hasEnteredRef = useRef(false);
 
   // Touch device detection (hydration-safe)
   const [isTouchDevice, setIsTouchDevice] = useState<boolean | undefined>(
@@ -43,8 +35,7 @@ export default function NavBlock({
   const [isInViewport, setIsInViewport] = useState(false);
   const elementRef = useRef<HTMLAnchorElement>(null);
 
-  const [currentVideo, setCurrentVideo] = useState(initialVideo);
-  const [nextVideo, setNextVideo] = useState<number | null>(null);
+  const currentVideo = initialVideo;
 
   // Separate video active state - includes viewport for touch devices
   const isVideoActive =
@@ -53,48 +44,11 @@ export default function NavBlock({
   isVideoActiveRef.current = isVideoActive;
 
   const handleMouseEnter = () => {
-    // Only set hover state if not already hovered to prevent multiple fires
-    if (!isHovered) {
-      setHasChanged(true);
-      setIsHovered(true);
-      isHoveredRef.current = true;
-      hasEnteredRef.current = true;
-
-      // Pre-select and preload the next video for smooth transition
-      const upcomingVideo = randomVideoIndexExcluding(currentVideo);
-      setNextVideo(upcomingVideo);
-      preloadVideo(slug, upcomingVideo);
-    }
-  };
-
-  const handleMouseMove = () => {
-    // Detect if mouse is already over element on page load
-    // This triggers hover state even if onMouseEnter didn't fire
-    if (!hasEnteredRef.current) {
-      setHasChanged(true);
-      setIsHovered(true);
-      isHoveredRef.current = true;
-      hasEnteredRef.current = true;
-    }
-  };
-
-  // Shared logic for transitioning to the next preloaded video
-  const transitionToNextVideo = () => {
-    if (nextVideo !== null) {
-      setCurrentVideo(nextVideo);
-      setVideoKey((prev) => prev + 1);
-      cleanupPreloadedVideo(`preload-${slug}-${nextVideo}`);
-      setNextVideo(null);
-    }
+    setIsHovered(true);
+    isHoveredRef.current = true;
   };
 
   const handleMouseLeave = () => {
-    // Only change video if we've actually entered before and nothing else is active
-    // This prevents the weird animation when page loads with mouse already over element
-    if (hasEnteredRef.current && !isFocusedRef.current) {
-      transitionToNextVideo();
-    }
-
     setIsHovered(false);
     isHoveredRef.current = false;
     if (!isFocusedRef.current) {
@@ -103,26 +57,11 @@ export default function NavBlock({
   };
 
   const handleFocus = () => {
-    // Set focus state similar to hover
-    if (!isFocused) {
-      setHasChanged(true);
-      setIsFocused(true);
-      isFocusedRef.current = true;
-      hasEnteredRef.current = true;
-
-      // Pre-select and preload the next video for smooth transition
-      const upcomingVideo = randomVideoIndexExcluding(currentVideo);
-      setNextVideo(upcomingVideo);
-      preloadVideo(slug, upcomingVideo);
-    }
+    setIsFocused(true);
+    isFocusedRef.current = true;
   };
 
   const handleBlur = () => {
-    // Only change video if we've actually entered before and nothing else is active
-    if (hasEnteredRef.current && !isHoveredRef.current) {
-      transitionToNextVideo();
-    }
-
     setIsFocused(false);
     isFocusedRef.current = false;
     if (!isHoveredRef.current) {
@@ -225,43 +164,33 @@ export default function NavBlock({
       className="p-2 flex flex-col xs:flex-row group hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-gray-900 dark:focus:bg-gray-900 relative before:content-[''] before:rounded-r-sm before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 focus:before:bg-indigo-500 before:z-10 gap-2 outline-none focus-visible:ring-0"
       rel="noreferrer"
       onMouseEnter={handleMouseEnter}
-      onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}
       onBlur={handleBlur}
     >
       {/* Video container */}
       <div className="relative w-full xs:size-32 aspect-square shrink-0 overflow-hidden rounded-md ml-[3px]">
-        <AnimatePresence mode="popLayout">
-          <motion.video
-            key={videoKey}
-            ref={videoRef}
-            src={`/posts/${slug}/${currentVideo}.mp4`}
-            muted
-            playsInline
-            loop={false}
-            onEnded={handleVideoEnded}
-            onLoadedData={handleVideoLoad}
-            onAnimationComplete={handleAnimationComplete}
-            className="size-full object-cover"
-            style={{
-              filter: isVideoActive ? "grayscale(0%)" : "grayscale(100%)",
-            }}
-            initial={hasChanged ? { x: "100%" } : false}
-            animate={{
-              filter: isVideoActive
-                ? "sepia(0) hue-rotate(360deg) contrast(1) brightness(1)"
-                : "sepia(1) hue-rotate(200deg) contrast(1.25) brightness(0.2)",
-              x: 0,
-            }}
-            exit={hasChanged ? { x: "-100%" } : undefined}
-            transition={{
-              duration: 0.3,
-              // Add staggered delay for cascade effect on touch devices
-              delay: isTouchDevice && isInViewport ? index * 0.05 : 0,
-            }}
-          />
-        </AnimatePresence>
+        <motion.video
+          ref={videoRef}
+          src={`/posts/${slug}/${currentVideo}.mp4`}
+          muted
+          playsInline
+          loop={false}
+          onEnded={handleVideoEnded}
+          onLoadedData={handleVideoLoad}
+          onAnimationComplete={handleAnimationComplete}
+          className="size-full object-cover"
+          animate={{
+            filter: isVideoActive
+              ? "sepia(0) hue-rotate(360deg) contrast(1) brightness(1)"
+              : "sepia(1) hue-rotate(200deg) contrast(1.25) brightness(0.2)",
+          }}
+          transition={{
+            duration: 0.3,
+            // Add staggered delay for cascade effect on touch devices
+            delay: isTouchDevice && isInViewport ? index * 0.05 : 0,
+          }}
+        />
       </div>
 
       <div className="@container flex flex-col gap-2 px-4 py-3 flex-1">

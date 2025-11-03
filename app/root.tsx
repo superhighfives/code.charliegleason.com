@@ -24,15 +24,27 @@ import { useNonce } from "./utils/nonce-provider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  // Preload critical font weights for instant rendering
   {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
+    rel: "preload",
+    href: "/fonts/JetBrainsMono-Regular.woff2",
+    as: "font",
+    type: "font/woff2",
     crossOrigin: "anonymous",
   },
   {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap",
+    rel: "preload",
+    href: "/fonts/JetBrainsMono-Medium.woff2",
+    as: "font",
+    type: "font/woff2",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "preload",
+    href: "/fonts/JetBrainsMono-SemiBold.woff2",
+    as: "font",
+    type: "font/woff2",
+    crossOrigin: "anonymous",
   },
   {
     rel: "icon",

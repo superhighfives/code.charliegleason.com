@@ -1,6 +1,82 @@
 /* biome-ignore-file: Tailwind v4 @theme tokens unsupported by current Biome */
 
 /*************************************************************/
+/* Font Face Declarations */
+/*************************************************************/
+
+/* JetBrains Mono - Regular */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+
+/* JetBrains Mono - Regular Italic */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: italic;
+  font-weight: 400;
+  font-display: optional;
+  src: url("/fonts/JetBrainsMono-Italic.woff2") format("woff2");
+}
+
+/* JetBrains Mono - Medium */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url("/fonts/JetBrainsMono-Medium.woff2") format("woff2");
+}
+
+/* JetBrains Mono - Medium Italic */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: italic;
+  font-weight: 500;
+  font-display: optional;
+  src: url("/fonts/JetBrainsMono-MediumItalic.woff2") format("woff2");
+}
+
+/* JetBrains Mono - SemiBold */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src: url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
+}
+
+/* JetBrains Mono - SemiBold Italic */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: italic;
+  font-weight: 600;
+  font-display: optional;
+  src: url("/fonts/JetBrainsMono-SemiBoldItalic.woff2") format("woff2");
+}
+
+/* JetBrains Mono - Bold */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional;
+  src: url("/fonts/JetBrainsMono-Bold.woff2") format("woff2");
+}
+
+/* JetBrains Mono - Bold Italic */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: italic;
+  font-weight: 700;
+  font-display: optional;
+  src: url("/fonts/JetBrainsMono-BoldItalic.woff2") format("woff2");
+}
+
+/*************************************************************/
 /* Tailwind setup */
 /*************************************************************/
 

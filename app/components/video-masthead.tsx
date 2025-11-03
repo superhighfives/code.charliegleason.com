@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, RefreshCw, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { VisualConfig } from "~/mdx/types";
 import { extractModelName } from "~/utils/replicate";
 import {
+  preloadVideo,
   randomVideoIndexExcluding,
   toUserIndex,
   VIDEO_COUNT,
@@ -20,13 +21,25 @@ export default function VideoMasthead({
   visual: VisualConfig;
 }) {
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
+  const [nextVideo, setNextVideo] = useState(() =>
+    randomVideoIndexExcluding(initialVideo),
+  );
   const [rotationCount, setRotationCount] = useState(0);
   const [hasChanged, setHasChanged] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Preload current and next video on mount and when they change
+  useEffect(() => {
+    preloadVideo(slug, currentVideo);
+    preloadVideo(slug, nextVideo);
+  }, [slug, currentVideo, nextVideo]);
+
   const changeVideo = () => {
-    const newVideo = randomVideoIndexExcluding(currentVideo);
-    setCurrentVideo(newVideo);
+    // Show the pre-decided next video
+    setCurrentVideo(nextVideo);
+    // Generate and preload the new next video
+    const newNextVideo = randomVideoIndexExcluding(nextVideo);
+    setNextVideo(newNextVideo);
     setRotationCount((prev: number) => prev + 1);
     setHasChanged(true);
   };

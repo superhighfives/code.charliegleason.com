@@ -15,6 +15,7 @@ import {
   parseImageIndex,
   randomVideoIndex,
   randomVideoIndexExcluding,
+  VISUAL_COUNT,
 } from "~/utils/video-index";
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
@@ -66,13 +67,13 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]+)`));
     if (match) {
       const value = Number.parseInt(match[1], 10);
-      if (!Number.isNaN(value) && value >= 0 && value <= 20) {
+      if (!Number.isNaN(value) && value >= 0 && value < VISUAL_COUNT) {
         cookieIndex = value;
       }
     }
   }
 
-  // Determine which video to show (0-20 internal index)
+  // Determine which video to show (internal index)
   // Priority: URL param > Cookie > Random
   let randomVideo: number | undefined;
   let nextVideo: number | undefined;
@@ -135,7 +136,7 @@ export function meta({ data, params }: Route.MetaArgs) {
   const imageParam =
     "index" in params ? (params.index as string | undefined) : undefined;
   const parsedIndex = parseImageIndex(imageParam ?? null);
-  // Convert internal index (0-20) back to user-facing (1-21) for meta tags
+  // Convert internal index back to user-facing for meta tags
   return tags(attributes, parsedIndex !== null ? parsedIndex + 1 : undefined);
 }
 

@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { VISUAL_COUNT } from "~/config/constants";
 import VideoMasthead from "../video-masthead";
 
 // Mock framer-motion
@@ -25,14 +26,21 @@ vi.mock("framer-motion", () => ({
 }));
 
 // Mock video index utilities
-vi.mock("~/utils/video-index", () => ({
-  randomVideoIndexExcluding: vi.fn(() => 10),
-  toUserIndex: (index: number) => index + 1,
-  VIDEO_COUNT: 21,
-  preloadVideo: vi.fn(
-    (slug: string, index: number) => `preload-${slug}-${index}`,
-  ),
-}));
+vi.mock("~/utils/video-index", async () => {
+  const { VISUAL_COUNT } =
+    await vi.importActual<typeof import("~/config/constants")>(
+      "~/config/constants",
+    );
+  return {
+    VISUAL_COUNT,
+    randomVideoIndex: vi.fn(() => 5),
+    randomVideoIndexExcluding: vi.fn(() => 5),
+    toUserIndex: (index: number) => index + 1,
+    preloadVideo: vi.fn(
+      (slug: string, index: number) => `preload-${slug}-${index}`,
+    ),
+  };
+});
 
 describe("VideoMasthead", () => {
   const mockVisual = {
@@ -120,7 +128,8 @@ describe("VideoMasthead", () => {
     render(<VideoMasthead {...defaultProps} />);
 
     // initialVideo is 5, so user-facing index is 6 (5+1)
-    expect(screen.getByText("06/21")).toBeInTheDocument();
+    const expectedText = `6/${VISUAL_COUNT}`;
+    expect(screen.getByText(expectedText)).toBeInTheDocument();
   });
 
   it("should display Share button", () => {
@@ -135,7 +144,10 @@ describe("VideoMasthead", () => {
     );
     const { container } = render(<VideoMasthead {...defaultProps} />);
 
-    const refreshButton = screen.getByRole("button", { name: /06\/21/i });
+    const expectedText = `6/${VISUAL_COUNT}`;
+    const refreshButton = screen.getByRole("button", {
+      name: new RegExp(expectedText.replace("/", "\\/"), "i"),
+    });
 
     // Initial video should be 5
     const initialVideo = container.querySelector("video") as HTMLVideoElement;
@@ -209,10 +221,13 @@ describe("VideoMasthead", () => {
   it("should update video index display after refresh", () => {
     render(<VideoMasthead {...defaultProps} />);
 
-    // Initially shows 06/21
-    expect(screen.getByText("06/21")).toBeInTheDocument();
+    // Initially shows current video count
+    const expectedText = `6/${VISUAL_COUNT}`;
+    expect(screen.getByText(expectedText)).toBeInTheDocument();
 
-    const refreshButton = screen.getByRole("button", { name: /06\/21/i });
+    const refreshButton = screen.getByRole("button", {
+      name: new RegExp(expectedText.replace("/", "\\/"), "i"),
+    });
 
     // Test that the button exists and can be clicked
     expect(refreshButton).toBeInTheDocument();
@@ -229,7 +244,7 @@ describe("VideoMasthead", () => {
     await waitFor(() => {
       // Should preload current video (5)
       expect(preloadVideo).toHaveBeenCalledWith("test-post", 5);
-      // Should preload next video (10, from mock)
+      // Should preload next video (from defaultProps.nextVideo = 10)
       expect(preloadVideo).toHaveBeenCalledWith("test-post", 10);
     });
   });

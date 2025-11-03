@@ -22,7 +22,8 @@
       "Bash(npm view:*)",
       "Read(//tmp/**)",
       "Bash(unzip:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

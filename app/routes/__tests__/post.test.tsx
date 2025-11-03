@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { VISUAL_COUNT } from "~/config/constants";
 import type { Route } from "../+types/post";
 import { loader } from "../post";
 
@@ -22,16 +23,23 @@ vi.mock("~/utils/kudos.server", () => ({
   getKudosCookie: vi.fn(() => 5),
 }));
 
-vi.mock("~/utils/video-index", () => ({
-  parseImageIndex: vi.fn((val: string | null) => {
-    if (val === null) return null;
-    const num = Number.parseInt(val, 10);
-    if (Number.isNaN(num) || num < 1 || num > 21) return null;
-    return num - 1; // Convert user index to internal
-  }),
-  randomVideoIndex: vi.fn(() => 10),
-  randomVideoIndexExcluding: vi.fn(() => 10),
-}));
+vi.mock("~/utils/video-index", async () => {
+  const { VISUAL_COUNT } =
+    await vi.importActual<typeof import("~/config/constants")>(
+      "~/config/constants",
+    );
+  return {
+    VISUAL_COUNT,
+    parseImageIndex: vi.fn((val: string | null) => {
+      if (val === null) return null;
+      const num = Number.parseInt(val, 10);
+      if (Number.isNaN(num) || num < 1 || num > VISUAL_COUNT) return null;
+      return num - 1; // Convert user index to internal
+    }),
+    randomVideoIndex: vi.fn(() => Math.floor(VISUAL_COUNT / 2)),
+    randomVideoIndexExcluding: vi.fn(() => Math.floor(VISUAL_COUNT / 2)),
+  };
+});
 
 describe("Post Route Loader", () => {
   const mockContext = {
@@ -63,18 +71,18 @@ describe("Post Route Loader", () => {
 
   describe("video index priority logic", () => {
     it("should use URL param when provided (share link)", async () => {
-      const mockRequest = new Request("http://localhost:3000/test-post/15", {
+      const mockRequest = new Request("http://localhost:3000/test-post/7", {
         headers: { Cookie: "visual-index-test-post=5" },
       });
 
       const response = await loader({
         request: mockRequest,
         context: mockContext,
-        params: { index: "15" },
+        params: { index: "7" },
       } as unknown as Route.LoaderArgs);
 
-      // URL param 15 converts to internal index 14 (15 - 1)
-      expect(response.data.randomVideo).toBe(14);
+      // URL param 7 converts to internal index 6 (7 - 1)
+      expect(response.data.randomVideo).toBe(6);
     });
 
     it("should use cookie when present and delete it", async () => {
@@ -117,9 +125,9 @@ describe("Post Route Loader", () => {
         params: {},
       } as unknown as Route.LoaderArgs);
 
-      // Should call randomVideoIndex and use its value (10)
+      // Should call randomVideoIndex and use its value (Math.floor(VISUAL_COUNT / 2) = 4)
       expect(randomVideoIndex).toHaveBeenCalled();
-      expect(response.data.randomVideo).toBe(10);
+      expect(response.data.randomVideo).toBe(Math.floor(VISUAL_COUNT / 2));
     });
 
     it("should prefer cookie over random generation when cookie exists", async () => {
@@ -160,9 +168,9 @@ describe("Post Route Loader", () => {
         params: { index: "999" },
       } as unknown as Route.LoaderArgs);
 
-      // Should call randomVideoIndex when param is invalid
+      // Should call randomVideoIndex when param is invalid (Math.floor(VISUAL_COUNT / 2) = 4)
       expect(randomVideoIndex).toHaveBeenCalled();
-      expect(response.data.randomVideo).toBe(10);
+      expect(response.data.randomVideo).toBe(Math.floor(VISUAL_COUNT / 2));
     });
 
     it("should return undefined randomVideo when no visual config", async () => {
@@ -229,7 +237,7 @@ describe("Post Route Loader", () => {
       // Should have called randomVideoIndexExcluding to generate nextVideo
       expect(randomVideoIndexExcluding).toHaveBeenCalled();
       expect(response.data.nextVideo).toBeDefined();
-      expect(response.data.nextVideo).toBe(10); // From mock
+      expect(response.data.nextVideo).toBe(Math.floor(VISUAL_COUNT / 2)); // From mock
     });
 
     it("should calculate isOldArticle on server", async () => {

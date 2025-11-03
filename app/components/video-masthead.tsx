@@ -14,16 +14,16 @@ import IconSwapAnimation from "./icon-swap-animation";
 export default function VideoMasthead({
   slug,
   initialVideo,
+  nextVideo: initialNextVideo,
   visual,
 }: {
   slug: string;
   initialVideo: number;
+  nextVideo: number;
   visual: VisualConfig;
 }) {
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
-  const [nextVideo, setNextVideo] = useState(() =>
-    randomVideoIndexExcluding(initialVideo),
-  );
+  const [nextVideo, setNextVideo] = useState(initialNextVideo);
   const [rotationCount, setRotationCount] = useState(0);
   const [hasChanged, setHasChanged] = useState(false);
   const [copied, setCopied] = useState(false);

@@ -4,13 +4,16 @@ This is a little code blog, built with React Router 7 and deployed on Cloudflare
 
 ## What it does
 
-- 🚀 **React Router 7** for server-side rendering and routing
-- 📝 **MDX content** with live, editable code examples powered by Sandpack
-- 🎨 **Syntax highlighting** using Shiki with Catppuccin Latte and Mocha themes
-- 📡 **RSS feed** for people who use feed readers
-- 🌓 **Dark and light themes** that respect your system preferences
-- 🖼️ **OG image generation** with Satori for social media previews
-- 🤓 **WASM powered** for syntax highlighting and image generation
+- 🚀 **React Router 7** with server-side rendering
+- ⚡ **Cloudflare Workers** - everything runs on the edge
+- 🎨 **AI-generated visuals** via Replicate with 9 unique variations per post
+- 🍪 **Cookie-based routing** for clean URLs between index and posts
+- 💻 **Live code blocks** powered by Sandpack
+- 🤓 **WASM-powered** syntax highlighting with Shiki and OG image generation with Satori
+- 📝 **MDX content** with full React component support
+- 🖼️ **Dynamic social images** generated on-the-fly
+- 🌓 **Dark and light themes** that respect system preferences
+- 📡 **RSS feed** for your favorite feed reader
 
 ## How it works
 

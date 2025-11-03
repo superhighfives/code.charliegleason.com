@@ -48,6 +48,7 @@ describe("VideoMasthead", () => {
   const defaultProps = {
     slug: "test-post",
     initialVideo: 5,
+    nextVideo: 10,
     visual: mockVisual,
   };
 

@@ -30,6 +30,7 @@ vi.mock("~/utils/video-index", () => ({
     return num - 1; // Convert user index to internal
   }),
   randomVideoIndex: vi.fn(() => 10),
+  randomVideoIndexExcluding: vi.fn(() => 10),
 }));
 
 describe("Post Route Loader", () => {
@@ -208,6 +209,42 @@ describe("Post Route Loader", () => {
       expect(response.data).toHaveProperty("kudosTotal");
       expect(response.data).toHaveProperty("kudosYou");
       expect(response.data).toHaveProperty("randomVideo");
+      expect(response.data).toHaveProperty("nextVideo");
+      expect(response.data).toHaveProperty("isOldArticle");
+    });
+
+    it("should calculate nextVideo when randomVideo exists", async () => {
+      const { randomVideoIndexExcluding } = await import("~/utils/video-index");
+
+      const mockRequest = new Request("http://localhost:3000/test-post", {
+        headers: {},
+      });
+
+      const response = await loader({
+        request: mockRequest,
+        context: mockContext,
+        params: {},
+      } as unknown as Route.LoaderArgs);
+
+      // Should have called randomVideoIndexExcluding to generate nextVideo
+      expect(randomVideoIndexExcluding).toHaveBeenCalled();
+      expect(response.data.nextVideo).toBeDefined();
+      expect(response.data.nextVideo).toBe(10); // From mock
+    });
+
+    it("should calculate isOldArticle on server", async () => {
+      const mockRequest = new Request("http://localhost:3000/test-post", {
+        headers: {},
+      });
+
+      const response = await loader({
+        request: mockRequest,
+        context: mockContext,
+        params: {},
+      } as unknown as Route.LoaderArgs);
+
+      expect(response.data.isOldArticle).toBeDefined();
+      expect(typeof response.data.isOldArticle).toBe("boolean");
     });
   });
 });

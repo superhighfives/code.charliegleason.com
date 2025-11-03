@@ -11,7 +11,11 @@ import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
 import { processArticleDate } from "~/utils/posts";
 import { highlightCode } from "~/utils/shiki.server";
-import { parseImageIndex, randomVideoIndex } from "~/utils/video-index";
+import {
+  parseImageIndex,
+  randomVideoIndex,
+  randomVideoIndexExcluding,
+} from "~/utils/video-index";
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
 
@@ -71,6 +75,7 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
   // Determine which video to show (0-20 internal index)
   // Priority: URL param > Cookie > Random
   let randomVideo: number | undefined;
+  let nextVideo: number | undefined;
   let shouldDeleteCookie = false;
 
   if (parsedIndex !== null) {
@@ -86,6 +91,19 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     randomVideo = randomVideoIndex();
   }
 
+  // Pre-generate next video on server to prevent hydration mismatch
+  if (randomVideo !== undefined && frontmatter.visual) {
+    nextVideo = randomVideoIndexExcluding(randomVideo);
+  }
+
+  // Calculate isOldArticle on server to prevent hydration mismatch
+  const currentDate = new Date();
+  const { isOldArticle } = processArticleDate(
+    frontmatter.data,
+    frontmatter.date,
+    currentDate,
+  );
+
   const responseData = {
     __raw: rawContent,
     attributes: frontmatter,
@@ -93,6 +111,8 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     kudosTotal,
     kudosYou,
     randomVideo,
+    nextVideo,
+    isOldArticle,
   };
 
   // If we used the cookie, delete it so next refresh is random
@@ -129,18 +149,21 @@ export default function Post() {
     kudosTotal,
     kudosYou,
     randomVideo: initialVideo,
+    nextVideo,
+    isOldArticle,
   } = useLoaderData<typeof loader>();
 
   const Component = useMdxComponent(components);
   const { title, data, links, date, slug, visual } = useMdxAttributes();
-  const { metadata, isOldArticle } = processArticleDate(data, date);
+  const { metadata } = processArticleDate(data, date);
 
   return (
     <div className="grid gap-y-4 relative">
-      {slug && initialVideo !== undefined && visual && (
+      {slug && initialVideo !== undefined && nextVideo !== undefined && visual && (
         <VideoMasthead
           slug={slug}
           initialVideo={initialVideo}
+          nextVideo={nextVideo}
           visual={visual}
         />
       )}

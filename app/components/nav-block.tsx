@@ -33,6 +33,7 @@ export default function NavBlock({
   // Viewport intersection state (starts false to match SSR)
   const [isInViewport, setIsInViewport] = useState(false);
   const elementRef = useRef<HTMLAnchorElement>(null);
+  const viewportDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const currentVideo = initialVideo;
 
@@ -63,8 +64,15 @@ export default function NavBlock({
     const video = videoRef.current;
     if (!video) return;
 
-    // Always ensure video is paused when it loads
-    video.pause();
+    // If video should be active when it loads, play it
+    // Otherwise pause it to ensure it starts in paused state
+    if (isVideoActiveRef.current) {
+      video.play().catch(() => {
+        // Ignore autoplay errors
+      });
+    } else {
+      video.pause();
+    }
   };
 
   // Play/pause based on video active state (hover, focus, or viewport on touch)
@@ -138,14 +146,28 @@ export default function NavBlock({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          setIsInViewport(entry.isIntersecting);
+          // Clear any pending debounce
+          if (viewportDebounceRef.current) {
+            clearTimeout(viewportDebounceRef.current);
+          }
+
+          if (entry.isIntersecting) {
+            // Immediately set to true when entering viewport (no debounce)
+            // This ensures videos start playing right away
+            setIsInViewport(true);
+          } else {
+            // Debounce setting to false to prevent rewind thrashing during scroll
+            viewportDebounceRef.current = setTimeout(() => {
+              setIsInViewport(false);
+            }, 100);
+          }
         });
       },
       {
-        // Trigger when 50% of the element is visible
-        threshold: 0.5,
-        // Add some margin to trigger slightly before/after entering viewport
-        rootMargin: "0px 0px -80px 0px",
+        // Lower threshold to trigger earlier and prevent initial play issue
+        threshold: 0.25,
+        // Remove bottom margin to prevent boundary flickering
+        rootMargin: "0px 0px 0px 0px",
       },
     );
 
@@ -153,6 +175,10 @@ export default function NavBlock({
 
     return () => {
       observer.disconnect();
+      // Clean up any pending debounce on unmount
+      if (viewportDebounceRef.current) {
+        clearTimeout(viewportDebounceRef.current);
+      }
     };
   }, [isTouchDevice]);
 

@@ -30,7 +30,9 @@
       "Bash(git log:*)",
       "Bash(wrangler --help:*)",
       "Bash(npx wrangler --help:*)",
-      "Bash(npx wrangler deployments --help:*)"
+      "Bash(npx wrangler deployments --help:*)",
+      "Bash(npx wrangler:*)",
+      "Bash(./scripts/upload-assets.sh)"
     ],
     "deny": [],
     "ask": []

@@ -67,8 +67,8 @@
     "build:staging": "CLOUDFLARE_ENV=staging react-router build",
     "typegen": "wrangler types && react-router typegen",
     "check": "tsc && react-router build && wrangler deploy --dry-run",
-    "deploy": "npm run build && wrangler deploy",
-    "deploy:staging": "npm run build:staging && wrangler deploy",
+    "deploy": "npm run build && npm run upload:assets:production && npm run clean:videos:build && wrangler deploy",
+    "deploy:staging": "npm run build:staging && npm run upload:assets:staging && npm run clean:videos:build && wrangler deploy",
     "dev": "react-router dev",
     "dev:staging": "CLOUDFLARE_ENV=staging react-router dev",
     "preview": "npm run build && vite preview",
@@ -83,6 +83,9 @@
     "generate:videos": "npx tsx scripts/generate-videos.ts",
     "validate:images": "npx tsx scripts/validate-images.ts",
     "delete:invalid-images": "npx tsx scripts/delete-invalid-images.ts",
+    "upload:assets:production": "./scripts/upload-assets.sh",
+    "upload:assets:staging": "CLOUDFLARE_ENV=staging ./scripts/upload-assets.sh",
+    "clean:videos:build": "find build/client/posts -name '*.mp4' -delete 2>/dev/null || true",
     "fix:image-profiles": "npx tsx scripts/fix-image-profiles.ts"
   },
   "type": "module"

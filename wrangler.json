@@ -15,6 +15,12 @@
     "directory": "./public/",
     "binding": "ASSETS"
   },
+  "r2_buckets": [
+    {
+      "bucket_name": "visual-assets",
+      "binding": "VISUAL_ASSETS"
+    }
+  ],
   "durable_objects": {
     "bindings": [
       {
@@ -42,6 +48,12 @@
       "vars": {
         "VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare (Staging)"
       },
+      "r2_buckets": [
+        {
+          "bucket_name": "visual-assets-staging",
+          "binding": "VISUAL_ASSETS"
+        }
+      ],
       "durable_objects": {
         "bindings": [
           {

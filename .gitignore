@@ -140,3 +140,6 @@ dist
 .mf
 .wrangler
 .dev.vars*
+
+# Upload cache
+.upload-cache.json

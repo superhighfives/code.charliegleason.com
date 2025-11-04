@@ -22,7 +22,6 @@ export default function NavBlock({
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const isVideoReadyRef = useRef(false);
   const rewindAnimationRef = useRef<number | null>(null);
   const hasPlayedRef = useRef(false);
 
@@ -66,22 +65,12 @@ export default function NavBlock({
 
     // Always ensure video is paused when it loads
     video.pause();
-    video.currentTime = 0;
-
-    // Mark as ready once loaded
-    isVideoReadyRef.current = true;
-  };
-
-  // Called when video animation completes (slide in finishes)
-  // Ensure video is marked as ready (backup to handleVideoLoad)
-  const handleAnimationComplete = () => {
-    isVideoReadyRef.current = true;
   };
 
   // Play/pause based on video active state (hover, focus, or viewport on touch)
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !isVideoReadyRef.current) return;
+    if (!video) return;
 
     // Cancel any ongoing rewind animation
     if (rewindAnimationRef.current) {
@@ -90,46 +79,36 @@ export default function NavBlock({
     }
 
     if (isVideoActive) {
-      video.currentTime = 0;
       hasPlayedRef.current = false;
       video.play().catch(() => {
         // Ignore autoplay errors
       });
     } else {
       video.pause();
-
       // Rewind effect: animate backwards to first frame
-      // Use hasPlayedRef as the source of truth since currentTime might not update immediately
       const startTime = video.currentTime;
 
-      // Only rewind if video has actually played
-      if (hasPlayedRef.current && startTime > 0.05) {
-        const rewindDuration = 1000; // milliseconds
-        const startTimestamp = performance.now();
+      const rewindDuration = 1000; // milliseconds
+      const startTimestamp = performance.now();
 
-        const rewind = (currentTimestamp: number) => {
-          const elapsed = currentTimestamp - startTimestamp;
-          const progress = Math.min(elapsed / rewindDuration, 1);
+      const rewind = (currentTimestamp: number) => {
+        const elapsed = currentTimestamp - startTimestamp;
+        const progress = Math.min(elapsed / rewindDuration, 1);
 
-          // Ease out for smoother motion
-          const easeProgress = 1 - (1 - progress) ** 3;
+        // Ease out for smoother motion
+        const easeProgress = 1 - (1 - progress) ** 3;
 
-          video.currentTime = startTime * (1 - easeProgress);
+        video.currentTime = startTime * (1 - easeProgress);
 
-          if (progress < 1) {
-            rewindAnimationRef.current = requestAnimationFrame(rewind);
-          } else {
-            rewindAnimationRef.current = null;
-            hasPlayedRef.current = false;
-          }
-        };
+        if (progress < 1) {
+          rewindAnimationRef.current = requestAnimationFrame(rewind);
+        } else {
+          rewindAnimationRef.current = null;
+          hasPlayedRef.current = false;
+        }
+      };
 
-        rewindAnimationRef.current = requestAnimationFrame(rewind);
-      } else {
-        // If video hasn't played much, just jump to start
-        video.currentTime = 0;
-        hasPlayedRef.current = false;
-      }
+      rewindAnimationRef.current = requestAnimationFrame(rewind);
     }
 
     // Cleanup function to cancel animation on unmount
@@ -210,7 +189,6 @@ export default function NavBlock({
           onEnded={handleVideoEnded}
           onLoadedData={handleVideoLoad}
           onPlaying={handleVideoPlaying}
-          onAnimationComplete={handleAnimationComplete}
           className="size-full object-cover"
           initial={{
             filter:

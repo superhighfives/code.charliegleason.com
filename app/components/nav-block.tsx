@@ -88,7 +88,7 @@ export default function NavBlock({
       // Rewind effect: animate backwards to first frame
       const startTime = video.currentTime;
 
-      const rewindDuration = 1500; // milliseconds
+      const rewindDuration = 1000; // milliseconds
       const startTimestamp = performance.now();
 
       const rewind = (currentTimestamp: number) => {
@@ -96,7 +96,7 @@ export default function NavBlock({
         const progress = Math.min(elapsed / rewindDuration, 1);
 
         // Ease out for smoother motion
-        const easeProgress = 1 - (1 - progress) ** 2;
+        const easeProgress = 1 - (1 - progress) ** (rewindDuration / 100);
 
         video.currentTime = startTime * (1 - easeProgress);
 

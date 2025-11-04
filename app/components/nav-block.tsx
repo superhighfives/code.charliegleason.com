@@ -96,7 +96,7 @@ export default function NavBlock({
         const progress = Math.min(elapsed / rewindDuration, 1);
 
         // Ease out for smoother motion
-        const easeProgress = 1 - (1 - progress) ** 3;
+        const easeProgress = 1 - (1 - progress) ** 2;
 
         video.currentTime = startTime * (1 - easeProgress);
 

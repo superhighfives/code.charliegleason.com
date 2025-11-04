@@ -184,7 +184,7 @@ export default function NavBlock({
           src={`/posts/${slug}/${currentVideo}.mp4`}
           muted
           playsInline
-          preload="metadata"
+          preload="auto"
           loop={false}
           onEnded={handleVideoEnded}
           onLoadedData={handleVideoLoad}

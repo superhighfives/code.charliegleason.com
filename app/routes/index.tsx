@@ -1,5 +1,4 @@
 import { differenceInMonths, formatDistanceToNow } from "date-fns";
-import { useEffect } from "react";
 import type { MetaFunction } from "react-router";
 import { useLoaderData } from "react-router";
 import { About } from "~/components/about";
@@ -34,16 +33,6 @@ export async function loader() {
 
 export default function Index() {
   const { posts, initialVideos } = useLoaderData<typeof loader>();
-
-  // Preload initial videos for first 5 visible posts with high priority
-  useEffect(() => {
-    const visiblePosts = posts.slice(0, 5);
-    visiblePosts.forEach((post) => {
-      fetch(`/posts/${post.slug}/${initialVideos[post.slug]}.mp4`, {
-        priority: "high",
-      } as RequestInit).catch(() => {});
-    });
-  }, [posts, initialVideos]);
 
   return (
     <div className="grid gap-4 sm:gap-8 max-w-[65ch] content-end h-full">

@@ -73,21 +73,21 @@ export default function VideoMasthead({
       </div>
       <div className="space-y-3">
         <div className="space-y-2">
-          <p className="text-gray-500 dark:text-gray-400 text-xs text-pretty">
+          <p className="text-gray-500 dark:text-gray-400 text-xs text-pretty leading-5">
             "{visual.prompt}"
           </p>
-          <p className="text-gray-400 dark:text-gray-500 text-2xs max-w-48">
+          <p className="text-gray-400 dark:text-gray-500 text-2xs max-w-48 leading-4">
             Generated with{" "}
             <a
               href={visual.image.url}
-              className="underline underline-offset-2 hover:text-gray-600 dark:hover:text-gray-300 outline-none focus:text-gray-600 dark:focus:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
+              className="underline underline-offset-1 hover:text-gray-600 dark:hover:text-gray-300 outline-none focus:text-gray-600 dark:focus:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
             >
               {extractModelName(visual.image.url)}
             </a>
             {" and "}
             <a
               href={visual.video.url}
-              className="underline underline-offset-2  hover:text-gray-600 dark:hover:text-gray-300 outline-none focus:text-gray-600 dark:focus:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
+              className="underline underline-offset-1  hover:text-gray-600 dark:hover:text-gray-300 outline-none focus:text-gray-600 dark:focus:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
             >
               {extractModelName(visual.video.url)}
             </a>
@@ -98,7 +98,7 @@ export default function VideoMasthead({
           <button
             type="button"
             onClick={changeVideo}
-            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
           >
             <motion.div
               animate={{ rotate: rotationCount * 180 }}
@@ -118,7 +118,7 @@ export default function VideoMasthead({
           <button
             type="button"
             onClick={shareUrl}
-            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-2xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+            className="flex -mx-1 hover:cursor-pointer items-center gap-1.5 text-xs rounded-full px-2 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
           >
             <IconSwapAnimation condition={copied}>
               <Check

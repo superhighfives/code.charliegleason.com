@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
 import GeneralErrorBoundary from "../error-boundary";
 
@@ -11,7 +12,14 @@ describe("GeneralErrorBoundary", () => {
       internal: false,
     };
 
-    render(<GeneralErrorBoundary error={error} />);
+    const RemixStub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => <GeneralErrorBoundary error={error} />,
+      },
+    ]);
+
+    render(<RemixStub />);
 
     expect(screen.getByText("404: Not Found")).toBeInTheDocument();
   });
@@ -19,7 +27,14 @@ describe("GeneralErrorBoundary", () => {
   it("should render Error instance message", () => {
     const error = new Error("Something went wrong");
 
-    render(<GeneralErrorBoundary error={error} />);
+    const RemixStub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => <GeneralErrorBoundary error={error} />,
+      },
+    ]);
+
+    render(<RemixStub />);
 
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
   });
@@ -27,7 +42,14 @@ describe("GeneralErrorBoundary", () => {
   it("should render unknown error message", () => {
     const error = "string error";
 
-    render(<GeneralErrorBoundary error={error} />);
+    const RemixStub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => <GeneralErrorBoundary error={error} />,
+      },
+    ]);
+
+    render(<RemixStub />);
 
     expect(screen.getByText("Unknown Error")).toBeInTheDocument();
   });
@@ -35,7 +57,14 @@ describe("GeneralErrorBoundary", () => {
   it("should render heading and skull icon", () => {
     const error = new Error("Test error");
 
-    const { container } = render(<GeneralErrorBoundary error={error} />);
+    const RemixStub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => <GeneralErrorBoundary error={error} />,
+      },
+    ]);
+
+    const { container } = render(<RemixStub />);
 
     expect(
       screen.getByText(/cd ~\/code.charliegleason.com/),
@@ -47,13 +76,27 @@ describe("GeneralErrorBoundary", () => {
   });
 
   it("should handle null error", () => {
-    render(<GeneralErrorBoundary error={null} />);
+    const RemixStub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => <GeneralErrorBoundary error={null} />,
+      },
+    ]);
+
+    render(<RemixStub />);
 
     expect(screen.getByText("Unknown Error")).toBeInTheDocument();
   });
 
   it("should handle undefined error", () => {
-    render(<GeneralErrorBoundary error={undefined} />);
+    const RemixStub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => <GeneralErrorBoundary error={undefined} />,
+      },
+    ]);
+
+    render(<RemixStub />);
 
     expect(screen.getByText("Unknown Error")).toBeInTheDocument();
   });

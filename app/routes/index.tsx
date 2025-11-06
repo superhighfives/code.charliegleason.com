@@ -35,13 +35,13 @@ export default function Index() {
   const { posts, initialVideos } = useLoaderData<typeof loader>();
 
   return (
-    <div className="grid gap-4 sm:gap-8 max-w-[65ch] content-end h-full">
+    <div className="grid gap-4 sm:gap-8 content-end h-full">
       <h1 className="text-gray-400 dark:text-gray-500">
         ❯ cd ~/code.charliegleason.com
       </h1>
       <About />
       <div className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 grid gap-4">
-        <div className="rounded-md overflow-hidden shadow-sm divide-y divide-gray-100 dark:divide-gray-900 border border-gray-200 dark:border-gray-800">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 max-w-[65ch] lg:max-w-none xl:max-w-[1440px]">
           {posts.length ? (
             posts.map((post, index) => {
               const dateCaption =

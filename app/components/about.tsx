@@ -3,11 +3,11 @@ import { Link } from "react-router";
 
 export function About() {
   return (
-    <div className="flex flex-wrap sm:flex-nowrap gap-6 dark:text-white">
-      <div className="sm:border border-indigo-500 text-indigo-500 sm:h-full flex sm:items-center sm:justify-center sm:w-92 rounded">
+    <div className="flex flex-wrap sm:flex-nowrap gap-6 dark:text-white max-w-[65ch] m-2§">
+      <div className="sm:border border-indigo-500 text-indigo-500 sm:h-full flex sm:items-center sm:justify-center sm:w-92 rounded aspect-square">
         <Hand size="48" className="rotate-45" />
       </div>
-      <div className="flex flex-col gap-2 items-start">
+      <div className="flex flex-col gap-2 items-start justify-end">
         <h2 className="border-b border-indigo-500 pb-2 font-semibold">
           Hello, I'm Charlie.
         </h2>

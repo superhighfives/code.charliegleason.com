@@ -192,11 +192,13 @@ export default function NavBlock({
     hasPlayedRef.current = true;
   };
 
+  const firstItem = index === 0;
+
   return (
     <a
       ref={elementRef}
       href={`${href}/${toUserIndex(currentVideo)}`}
-      className="p-2 flex flex-col xs:flex-row group hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-gray-900 dark:focus:bg-gray-900 relative before:content-[''] before:rounded-r-sm before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 focus:before:bg-indigo-500 before:z-10 gap-2 outline-none focus-visible:ring-0"
+      className={`overflow-hidden p-2 flex flex-col xs:flex-row group lg:border border border-gray-100 dark:border-gray-900 rounded-md hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-gray-900 dark:focus:bg-gray-900 relative before:content-[''] before:rounded-r-sm before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 focus:before:bg-indigo-500 before:z-10 gap-2 outline-none focus-visible:ring-0 ${firstItem ? "lg:col-span-2" : ""}`}
       rel="noreferrer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -204,7 +206,7 @@ export default function NavBlock({
       onBlur={handleBlur}
     >
       {/* Video container */}
-      <div className="relative w-full xs:size-32 aspect-square shrink-0 overflow-hidden rounded-md ml-[3px]">
+      <div className="relative w-full xs:size-48 aspect-square shrink-0 overflow-hidden rounded-md xs:ml-[3px]">
         <motion.video
           ref={videoRef}
           src={`/posts/${slug}/${currentVideo}.mp4`}
@@ -234,16 +236,18 @@ export default function NavBlock({
       </div>
 
       <div className="@container flex flex-col gap-2 px-4 py-3 flex-1">
-        <div className="flex justify-between leading-6 relative z-10">
+        <div className="flex justify-between relative z-10">
           <div
-            className={`flex w-0 flex-1 flex-col @md:flex-row items-start @md:justify-between flex-wrap @lg:flex-nowrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
+            className={`max-w-[65ch] flex w-0 flex-1 flex-col @md:flex-row items-start @md:justify-between flex-wrap @lg:flex-nowrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
           >
-            <span className="font-semibold dark:text-gray-200 text-pretty space-x-2">
-              <span className="pb-2 xs:pb-0 inline-block xs:inline">
+            <span className="dark:text-gray-200 text-pretty space-x-2 flex flex-col items-start xs:inline">
+              <span
+                className={`pb-2 xs:pb-0 inline-block xs:inline font-semibold text-lg sm:text-base ${firstItem ? "text-indigo-700 dark:text-indigo-300" : ""}`}
+              >
                 {title}
               </span>
               {caption ? (
-                <span className="inline-block shrink-0 text-gray-400 dark:text-gray-500 text-xs font-sans border px-2 rounded-full border-gray-200 dark:border-gray-700">
+                <span className="font-semibold inline-block shrink-0 text-gray-400 dark:text-gray-500 text-xs font-sans border px-2 rounded-full border-gray-200 dark:border-gray-700">
                   {caption}
                 </span>
               ) : null}
@@ -257,8 +261,8 @@ export default function NavBlock({
           </div>
         </div>
         {description ? (
-          <div className="text-xs leading-5 relative z-10">
-            <div className="overflow-hidden text-gray-400 dark:text-gray-500 leading-5">
+          <div className="relative z-10">
+            <div className="overflow-hidden text-gray-400 dark:text-gray-500 text-sm max-w-[65ch]">
               {description}
             </div>
           </div>

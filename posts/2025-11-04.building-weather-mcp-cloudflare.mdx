@@ -74,19 +74,34 @@ Start by creating a new directory and initializing a Node.js project:
 ```bash command
 mkdir weather-mcp-server
 cd weather-mcp-server
-npm init -y
+npx wrangler init
 ```
 
-Install the runtime dependencies:
+[Wrangler](https://developers.cloudflare.com/workers/wrangler/) is Cloudflare's CLI for deploying Workers. You'll need to select a directory. Choose the `Hello World example`, and then `Worker only`, with the language set to `TypeScript`.
 
-```bash command
-npm install @modelcontextprotocol/sdk
+Maybe grab a coffee while you wait. 
+
+---
+
+Update the `wrangler.jsonc` file with `"compatibility_flags": ["nodejs_compat"]`. The `nodejs_compat` flag enables Node.js APIs in the Workers runtime.
+
+```json
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "weather-mcp-example",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-11-06",
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"enabled": true
+	}
+}
 ```
 
-Then the development dependencies:
+Once that's done, install your dependencies:
 
 ```bash command
-npm install -D @types/node agents typescript wrangler zod
+npm install @modelcontextprotocol/sdk @types/node agents typescript zod
 ```
 
 Here's what each package does:
@@ -94,76 +109,12 @@ Here's what each package does:
 - `@types/node` - TypeScript type definitions for Node.js
 - `agents` - Cloudflare's MCP framework that handles HTTP transport
 - `typescript` - Type safety and compilation
-- `wrangler` - Cloudflare's CLI for deploying Workers
 - `zod` - Runtime schema validation for tool inputs
 
-Update your `package.json` to use ES modules by adding `"type": "module"` and configuring the main entry point:
-
-```json
-{
-  "name": "weather-mcp-server",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "build/index.js",
-  "scripts": {
-    "build": "tsc",
-    "dev": "npm run build && wrangler dev",
-    "deploy": "npm run build && wrangler deploy"
-  }
-}
-```
-
-The `"type": "module"` field is crucial - it tells Node.js to treat `.js` files as ES modules, which is required for the MCP SDK.
-
-Set up TypeScript by creating `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "lib": ["ES2022"],
-    "outDir": "./build",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "types": ["@cloudflare/workers-types"]
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "build"]
-}
-```
-
-We're using `"moduleResolution": "Bundler"` because Cloudflare Workers uses Wrangler with esbuild for bundling. This is the recommended configuration for bundled environments and provides better type checking than Node16 resolution. The `types` field references Cloudflare Workers types, which are automatically included with Wrangler.
-
-Configure Cloudflare Workers with `wrangler.toml`:
-
-```toml
-name = "weather-mcp-server"
-main = "build/index.js"
-compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
-
-[observability]
-enabled = true
-```
-
-The `compatibility_date` should be set to a recent date (at least `"2024-09-23"`) to ensure proper Node.js built-in module resolution. The `nodejs_compat` flag enables Node.js APIs in the Workers runtime. The `observability` section enables logging and metrics for debugging.
-
-Now create a `src` directory for your code:
-
-```bash command
-mkdir src
-```
 
 ## Building the MCP server
 
-Create `src/index.ts` and start with the imports:
+Jump into `src/index.ts` and delete whatever code is there. You can then start with the imports:
 
 ```ts
 import { createMcpHandler } from "agents/mcp";
@@ -174,6 +125,38 @@ import { z } from "zod";
 The MCP SDK provides the core server functionality, `agents/mcp` handles the HTTP transport for Cloudflare Workers, and Zod lets us define type-safe schemas for tool inputs.
 
 ### Weather codes and helper functions
+
+We'll need to add some types for the weather data. Open-Meteo returns data with the following structure:
+
+```ts
+interface GeocodingResponse {
+  results?: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+  }>;
+}
+
+interface WeatherResponse {
+  current: {
+    temperature_2m: number;
+    relative_humidity_2m: number;
+    weathercode: number;
+    windspeed_10m: number;
+    winddirection_10m: number;
+  };
+}
+
+interface ForecastResponse {
+  daily: {
+    time: string[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    weathercode: number[];
+    precipitation_probability_max: number[];
+  };
+}
+```
 
 Open-Meteo returns numeric weather codes (part of the WMO standard), so we need to map them to readable descriptions:
 
@@ -228,7 +211,7 @@ async function geocodeCity(cityName: string): Promise<{
     throw new Error(`Geocoding API error: ${response.statusText}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as GeocodingResponse;
 
   if (!data.results || data.results.length === 0) {
     throw new Error(`City "${cityName}" not found`);
@@ -257,7 +240,7 @@ async function getCurrentWeather(latitude: number, longitude: number) {
     throw new Error(`Weather API error: ${response.statusText}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as WeatherResponse;
   const current = data.current;
 
   return {
@@ -289,7 +272,7 @@ async function getWeatherForecast(
     throw new Error(`Weather API error: ${response.statusText}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as ForecastResponse;
   const daily = data.daily;
 
   const forecast = [];
@@ -577,14 +560,6 @@ We're setting up three routes:
 This makes it easy to verify the server is running and see how to connect to it.
 
 ## Deploying to Cloudflare Workers
-
-Build the TypeScript:
-
-```bash command
-npm run build
-```
-
-This compiles `src/index.ts` to `build/index.js`, which is what Wrangler will deploy.
 
 If you haven't already, authenticate with Cloudflare:
 

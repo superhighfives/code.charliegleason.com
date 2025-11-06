@@ -50,6 +50,23 @@ A simple weather MCP server that can be used to get the current weather and fore
 
 We'll use the [Open-Meteo API](https://open-meteo.com/) for weather data (it's free and doesn't require authentication), TypeScript for type safety, and [Cloudflare Workers](https://developers.cloudflare.com/workers/) for deployment. The whole thing will run on the edge with sub-100ms response times globally.
 
+## Prerequisites
+
+Before starting, make sure you have:
+
+- **Node.js 18 or later** - The MCP SDK and Wrangler require modern Node.js features
+- **npm or yarn** - For installing dependencies
+- **A Cloudflare account** - Free tier is sufficient ([sign up here](https://dash.cloudflare.com/sign-up))
+- **Claude Desktop** - To test your MCP server ([download here](https://claude.ai/download))
+
+You can verify your Node.js version with:
+
+```bash command
+node --version
+```
+
+If you're on an older version, update Node.js before proceeding.
+
 ## Setting up the project
 
 Start by creating a new directory and initializing a Node.js project:
@@ -60,19 +77,43 @@ cd weather-mcp-server
 npm init -y
 ```
 
-Install the dependencies we need:
+Install the runtime dependencies:
 
 ```bash command
 npm install @modelcontextprotocol/sdk
-npm install -D agents typescript wrangler zod @types/node
+```
+
+Then the development dependencies:
+
+```bash command
+npm install -D @types/node agents typescript wrangler zod
 ```
 
 Here's what each package does:
 - `@modelcontextprotocol/sdk` - The official MCP SDK for building servers
+- `@types/node` - TypeScript type definitions for Node.js
 - `agents` - Cloudflare's MCP framework that handles HTTP transport
 - `typescript` - Type safety and compilation
 - `wrangler` - Cloudflare's CLI for deploying Workers
 - `zod` - Runtime schema validation for tool inputs
+
+Update your `package.json` to use ES modules by adding `"type": "module"` and configuring the main entry point:
+
+```json
+{
+  "name": "weather-mcp-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
+  }
+}
+```
+
+The `"type": "module"` field is crucial - it tells Node.js to treat `.js` files as ES modules, which is required for the MCP SDK.
 
 Set up TypeScript by creating `tsconfig.json`:
 
@@ -80,44 +121,39 @@ Set up TypeScript by creating `tsconfig.json`:
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "Node16",
-    "moduleResolution": "Node16",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022"],
     "outDir": "./build",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "sourceMap": true
+    "isolatedModules": true,
+    "types": ["@cloudflare/workers-types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "build"]
 }
 ```
 
+We're using `"moduleResolution": "Bundler"` because Cloudflare Workers uses Wrangler with esbuild for bundling. This is the recommended configuration for bundled environments and provides better type checking than Node16 resolution. The `types` field references Cloudflare Workers types, which are automatically included with Wrangler.
+
 Configure Cloudflare Workers with `wrangler.toml`:
 
 ```toml
 name = "weather-mcp-server"
 main = "build/index.js"
-compatibility_date = "2024-11-01"
+compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
 [observability]
 enabled = true
 ```
 
-The `nodejs_compat` flag is important - it enables Node.js APIs like `fetch` in the Workers runtime.
-
-Add build scripts to your `package.json`:
-
-```json
-"scripts": {
-  "build": "tsc",
-  "dev": "npm run build && wrangler dev",
-  "deploy": "npm run build && wrangler deploy"
-}
-```
+The `compatibility_date` should be set to a recent date (at least `"2024-09-23"`) to ensure proper Node.js built-in module resolution. The `nodejs_compat` flag enables Node.js APIs in the Workers runtime. The `observability` section enables logging and metrics for debugging.
 
 Now create a `src` directory for your code:
 

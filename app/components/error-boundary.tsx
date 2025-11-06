@@ -9,7 +9,7 @@ export default function GeneralErrorBoundary({ error }: { error: unknown }) {
         <h1 className="text-gray-400 dark:text-gray-500">
           ❯ cd ~/code.charliegleason.com
         </h1>
-        <div className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 flex gap-3 max-w-[65ch]">
+        <div className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 flex gap-3 max-w-xl">
           <Skull size={20} className="shrink-0" />
           <h2>
             {isRouteErrorResponse(error)

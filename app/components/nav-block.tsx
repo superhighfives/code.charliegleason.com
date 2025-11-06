@@ -1,15 +1,16 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "~/routes/resources/theme-switch";
 import { toUserIndex } from "~/utils/video-index";
 
 export default function NavBlock({
   title,
-  caption,
   href,
   description,
   slug,
   initialVideo,
   index = 0,
+  tags,
 }: {
   title: string;
   caption?: string | null;
@@ -18,6 +19,7 @@ export default function NavBlock({
   slug: string;
   initialVideo: number;
   index?: number;
+  tags?: string[];
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -194,11 +196,19 @@ export default function NavBlock({
 
   const firstItem = index === 0;
 
+  const theme = useTheme();
+  const activeFilter =
+    "grayscale(0) hue-rotate(360deg) contrast(1) brightness(1)";
+  const inactiveFilter =
+    theme === "dark"
+      ? "grayscale(1) hue-rotate(200deg) contrast(1.25) brightness(0.5) opacity(0.5)"
+      : "grayscale(1) hue-rotate(200deg) contrast(1.25) brightness(1.2) opacity(0.5)";
+
   return (
     <a
       ref={elementRef}
       href={`${href}/${toUserIndex(currentVideo)}`}
-      className={`overflow-hidden p-2 flex flex-col xs:flex-row group lg:border border border-gray-100 dark:border-gray-900 rounded-md hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-gray-900 dark:focus:bg-gray-900 relative before:content-[''] before:rounded-r-sm before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 focus:before:bg-indigo-500 before:z-10 gap-2 outline-none focus-visible:ring-0 ${firstItem ? "lg:col-span-2" : ""}`}
+      className={`overflow-hidden p-2 flex flex-col xs:flex-row group lg:border border border-gray-200 dark:border-gray-900 rounded-md hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-gray-900 dark:focus:bg-gray-900 relative before:content-[''] before:rounded-r-sm before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 focus:before:bg-indigo-500 before:z-10 gap-2 outline-none focus-visible:ring-0 ${firstItem ? "lg:col-span-2" : ""}`}
       rel="noreferrer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -219,13 +229,10 @@ export default function NavBlock({
           onPlaying={handleVideoPlaying}
           className="size-full object-cover"
           initial={{
-            filter:
-              "sepia(1) hue-rotate(200deg) contrast(1.25) brightness(0.2)",
+            filter: inactiveFilter,
           }}
           animate={{
-            filter: isVideoActive
-              ? "sepia(0) hue-rotate(360deg) contrast(1) brightness(1)"
-              : "sepia(1) hue-rotate(200deg) contrast(1.25) brightness(0.2)",
+            filter: isVideoActive ? activeFilter : inactiveFilter,
           }}
           transition={{
             duration: 0.3,
@@ -235,36 +242,45 @@ export default function NavBlock({
         />
       </div>
 
-      <div className="@container flex flex-col gap-2 px-4 py-3 flex-1">
-        <div className="flex justify-between relative z-10">
-          <div
-            className={`max-w-[65ch] flex w-0 flex-1 flex-col @md:flex-row items-start @md:justify-between flex-wrap @lg:flex-nowrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
-          >
-            <span className="dark:text-gray-200 text-pretty space-x-2 flex flex-col items-start xs:inline">
-              <span
-                className={`pb-2 xs:pb-0 inline-block xs:inline font-semibold text-lg sm:text-base ${firstItem ? "text-indigo-700 dark:text-indigo-300" : ""}`}
-              >
-                {title}
-              </span>
-              {caption ? (
-                <span className="font-semibold inline-block shrink-0 text-gray-400 dark:text-gray-500 text-xs font-sans border px-2 rounded-full border-gray-200 dark:border-gray-700">
-                  {caption}
+      <div className="@container flex flex-col gap-4 justify-between px-4 py-3 flex-1">
+        <div className="space-y-2">
+          <div className="flex justify-between relative z-10">
+            <div
+              className={`max-w-lg flex w-0 flex-1 flex-col @md:flex-row items-start @md:justify-between flex-wrap @lg:flex-nowrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
+            >
+              <span className="dark:text-gray-200 text-pretty space-x-2 flex flex-col items-start xs:inline">
+                <span
+                  className={`pb-2 xs:pb-0 inline-block xs:inline font-semibold text-lg sm:text-base ${firstItem ? "text-indigo-700 dark:text-indigo-300" : ""}`}
+                >
+                  {title}
                 </span>
-              ) : null}
-            </span>
-          </div>
-          <div className="ml-4 shrink-0">
-            <span className="mt-1 font-semibold text-indigo-600 group-hover:text-indigo-700 group-focus:text-indigo-700 dark:text-indigo-400 dark:group-hover:text-indigo-300 dark:group-focus:text-indigo-300 flex gap-1 items-center">
-              <span className="@max-lg:hidden text-xs">View</span>
-              <span className="leading-none -mt-px">❯</span>
-            </span>
-          </div>
-        </div>
-        {description ? (
-          <div className="relative z-10">
-            <div className="overflow-hidden text-gray-400 dark:text-gray-500 text-sm max-w-[65ch]">
-              {description}
+              </span>
             </div>
+            <div className="ml-4 shrink-0">
+              <span className="mt-1 font-semibold text-indigo-600 group-hover:text-indigo-700 group-focus:text-indigo-700 dark:text-indigo-400 dark:group-hover:text-indigo-300 dark:group-focus:text-indigo-300 flex gap-1 items-center">
+                <span className="@max-lg:hidden text-xs">View</span>
+                <span className="leading-none -mt-px">❯</span>
+              </span>
+            </div>
+          </div>
+          {description ? (
+            <div className="relative z-10">
+              <div className="overflow-hidden text-gray-400 dark:text-gray-500 text-sm max-w-lg">
+                {description}
+              </div>
+            </div>
+          ) : null}
+        </div>
+        {tags && tags.length > 0 ? (
+          <div className="relative z-10 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-block shrink-0 text-gray-400 dark:text-gray-500 text-xs font-sans border px-2 py-0.5 rounded-full border-gray-200 dark:border-gray-700"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
         ) : null}
       </div>

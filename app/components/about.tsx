@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 export function About() {
   return (
-    <div className="flex flex-wrap sm:flex-nowrap gap-6 dark:text-white max-w-[65ch] m-2§">
+    <div className="flex flex-wrap sm:flex-nowrap gap-6 dark:text-white max-w-xl m-2§">
       <div className="sm:border border-indigo-500 text-indigo-500 sm:h-full flex sm:items-center sm:justify-center sm:w-92 rounded aspect-square">
         <Hand size="48" className="rotate-45" />
       </div>

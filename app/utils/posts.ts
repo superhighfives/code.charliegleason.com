@@ -1,25 +1,44 @@
 import { differenceInMonths, format, parseISO } from "date-fns";
-import type { MetaData } from "~/mdx/types";
+import type { MetaData, PostFrontmatter } from "~/mdx/types";
 
-export function processArticleDate(
-  data: MetaData[] = [],
-  date?: string,
-  currentDate: Date = new Date(),
-) {
-  if (!date) {
-    return { metadata: data, isOldArticle: false };
+export function processArticleData({
+  frontmatter,
+  currentDate = new Date(),
+}: {
+  frontmatter?: PostFrontmatter;
+  currentDate?: Date;
+}) {
+  const metadata: MetaData[] = [];
+
+  if (frontmatter?.description) {
+    metadata.push({
+      key: "Overview",
+      value: frontmatter.description,
+    });
   }
 
-  const dateObject = parseISO(date);
-  const metadata = [
-    {
+  // Add date if provided
+  if (frontmatter?.date) {
+    const dateObject = parseISO(frontmatter.date);
+    metadata.push({
       key: "Last Updated",
       value: format(dateObject, "dd/MM/yyyy"),
-    },
-    ...data,
-  ];
+    });
+  }
 
-  const isOldArticle = differenceInMonths(currentDate, dateObject) >= 3;
+  if (frontmatter?.tags) {
+    metadata.push({
+      key: "Tags",
+      value: frontmatter.tags.join(", "),
+    });
+  }
+
+  // Add existing data
+  metadata.push(...(frontmatter?.data || []));
+
+  const isOldArticle = frontmatter?.date
+    ? differenceInMonths(currentDate, parseISO(frontmatter.date)) >= 3
+    : false;
 
   return { metadata, isOldArticle };
 }

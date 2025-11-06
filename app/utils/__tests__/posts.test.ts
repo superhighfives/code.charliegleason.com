@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { processArticleDate } from "../posts";
+import { processArticleData } from "../posts";
 
-describe("processArticleDate", () => {
+describe("processArticleData", () => {
   it("should return empty metadata and false for old article when no date provided", () => {
-    const result = processArticleDate([], undefined);
+    const result = processArticleData({ frontmatter: { data: [] } });
 
     expect(result.metadata).toEqual([]);
     expect(result.isOldArticle).toBe(false);
@@ -13,7 +13,12 @@ describe("processArticleDate", () => {
     const testDate = "2024-01-15";
     const existingMetadata = [{ key: "Author", value: "Charlie" }];
 
-    const result = processArticleDate(existingMetadata, testDate);
+    const result = processArticleData({
+      frontmatter: {
+        data: existingMetadata,
+        date: testDate,
+      },
+    });
 
     expect(result.metadata).toHaveLength(2);
     expect(result.metadata[0]).toEqual({
@@ -30,7 +35,9 @@ describe("processArticleDate", () => {
     // Use a date that's definitely more than 3 months old
     const oldDate = "2024-01-01";
 
-    const result = processArticleDate([], oldDate);
+    const result = processArticleData({
+      frontmatter: { data: [], date: oldDate },
+    });
 
     expect(result.isOldArticle).toBe(true);
   });
@@ -41,7 +48,9 @@ describe("processArticleDate", () => {
     recentDate.setMonth(recentDate.getMonth() - 1); // 1 month ago
     const dateString = recentDate.toISOString().split("T")[0];
 
-    const result = processArticleDate([], dateString);
+    const result = processArticleData({
+      frontmatter: { data: [], date: dateString },
+    });
 
     expect(result.isOldArticle).toBe(false);
   });
@@ -53,9 +62,28 @@ describe("processArticleDate", () => {
     threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 1);
     const dateString = threeMonthsAgo.toISOString().split("T")[0];
 
-    const result = processArticleDate([], dateString);
+    const result = processArticleData({
+      frontmatter: { data: [], date: dateString },
+    });
 
     // Should be marked as old when >= 3 months
     expect(result.isOldArticle).toBe(true);
+  });
+
+  it("should handle all parameters together", () => {
+    const testDate = "2024-01-15";
+    const existingMetadata = [{ key: "Author", value: "Charlie" }];
+    const tags = ["tutorial", "ai"];
+
+    const result = processArticleData({
+      frontmatter: {
+        data: existingMetadata,
+        date: testDate,
+        tags,
+      },
+    });
+
+    expect(result.metadata).toHaveLength(3);
+    expect(result.metadata[0].key).toBe("Last Updated");
   });
 });

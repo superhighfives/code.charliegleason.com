@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useLoaderData } from "react-router";
-import tags from "~/components/utils/tags";
+import metatags from "~/components/utils/metatags";
 import { VISUAL_COUNT } from "~/config/constants";
 import { loadMdxRuntime } from "~/mdx/mdx-runtime";
 import type { Route } from "./+types/social-grid";
@@ -13,9 +13,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export function meta({ data }: Route.MetaArgs) {
-  if (!data) return tags();
+  if (!data) return metatags();
   const { frontmatter } = data;
-  return tags({
+  return metatags({
     ...frontmatter,
     title: `Social Grid for ${frontmatter.title}`,
   });

@@ -21,10 +21,15 @@ vi.mock("~/utils/video-index", () => ({
   toUserIndex: vi.fn((internal: number) => internal + 1),
 }));
 
+// Mock the theme module to avoid React Router dependencies
+vi.mock("~/routes/resources/theme-switch", () => ({
+  useTheme: () => "light",
+  useOptionalTheme: () => "light",
+}));
+
 describe("NavBlock", () => {
   const defaultProps = {
     title: "Test Post Title",
-    caption: "2 days ago",
     href: "/test-post",
     description: "This is a test description",
     slug: "test-post",
@@ -50,23 +55,14 @@ describe("NavBlock", () => {
     render(<NavBlock {...defaultProps} />);
 
     expect(screen.getByText("Test Post Title")).toBeInTheDocument();
-    expect(screen.getByText("2 days ago")).toBeInTheDocument();
     expect(screen.getByText("This is a test description")).toBeInTheDocument();
   });
 
-  it("should render without optional caption", () => {
-    render(<NavBlock {...defaultProps} caption={null} />);
-
-    expect(screen.getByText("Test Post Title")).toBeInTheDocument();
-    expect(screen.queryByText("2 days ago")).not.toBeInTheDocument();
-  });
-
   it("should render without optional description", () => {
-    const { title, caption, href, slug, initialVideo } = defaultProps;
+    const { title, href, slug, initialVideo } = defaultProps;
     render(
       <NavBlock
         title={title}
-        caption={caption}
         href={href}
         slug={slug}
         initialVideo={initialVideo}

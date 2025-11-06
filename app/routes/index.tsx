@@ -3,12 +3,12 @@ import type { MetaFunction } from "react-router";
 import { useLoaderData } from "react-router";
 import { About } from "~/components/about";
 import NavBlock from "~/components/nav-block";
-import tags from "~/components/utils/tags";
+import metatags from "~/components/utils/metatags";
 import { loadAllMdxRuntime } from "~/mdx/mdx-runtime";
 import type { Post } from "~/mdx/types";
 import { randomVideoIndex } from "~/utils/video-index";
 
-export const meta: MetaFunction = () => tags();
+export const meta: MetaFunction = () => metatags();
 
 export async function loader() {
   const posts = await loadAllMdxRuntime();
@@ -41,7 +41,7 @@ export default function Index() {
       </h1>
       <About />
       <div className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 grid gap-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 max-w-[65ch] lg:max-w-none xl:max-w-[1440px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 container">
           {posts.length ? (
             posts.map((post, index) => {
               const dateCaption =
@@ -58,6 +58,7 @@ export default function Index() {
                   slug={post.slug}
                   initialVideo={initialVideos[post.slug]}
                   index={index}
+                  tags={post.tags}
                 />
               );
             })

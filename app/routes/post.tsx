@@ -151,7 +151,7 @@ export default function Post() {
   const {
     kudosTotal,
     kudosYou,
-    randomVideo: initialVideo,
+    randomVideo: video,
     nextVideo,
     isOldArticle,
   } = useLoaderData<typeof loader>();
@@ -163,17 +163,14 @@ export default function Post() {
 
   return (
     <div className="grid gap-y-4 relative">
-      {slug &&
-        initialVideo !== undefined &&
-        nextVideo !== undefined &&
-        visual && (
-          <VideoMasthead
-            slug={slug}
-            initialVideo={initialVideo}
-            nextVideo={nextVideo}
-            visual={visual}
-          />
-        )}
+      {slug && video !== undefined && nextVideo !== undefined && visual && (
+        <VideoMasthead
+          slug={slug}
+          video={video}
+          nextVideo={nextVideo}
+          visual={visual}
+        />
+      )}
       <div className="flex flex-wrap gap-y-2 font-semibold max-w-xl">
         <Link
           to="/"

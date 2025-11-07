@@ -33,7 +33,7 @@ describe("NavBlock", () => {
     href: "/test-post",
     description: "This is a test description",
     slug: "test-post",
-    initialVideo: 5,
+    video: 5,
   };
 
   beforeEach(() => {
@@ -59,15 +59,8 @@ describe("NavBlock", () => {
   });
 
   it("should render without optional description", () => {
-    const { title, href, slug, initialVideo } = defaultProps;
-    render(
-      <NavBlock
-        title={title}
-        href={href}
-        slug={slug}
-        initialVideo={initialVideo}
-      />,
-    );
+    const { title, href, slug, video } = defaultProps;
+    render(<NavBlock title={title} href={href} slug={slug} video={video} />);
 
     expect(screen.getByText("Test Post Title")).toBeInTheDocument();
     expect(
@@ -87,7 +80,7 @@ describe("NavBlock", () => {
     render(<NavBlock {...defaultProps} />);
 
     const link = screen.getByRole("link");
-    // Should include video index (initialVideo 5 + 1 = 6 in user-facing format)
+    // Should include video index (video 5 + 1 = 6 in user-facing format)
     expect(link).toHaveAttribute("href", "/test-post/6");
   });
 
@@ -114,8 +107,8 @@ describe("NavBlock", () => {
     const link = screen.getByRole("link");
 
     // Get initial video src
-    const initialVideo = container.querySelector("video") as HTMLVideoElement;
-    expect(initialVideo.src).toContain("/posts/test-post/5.mp4");
+    const video = container.querySelector("video") as HTMLVideoElement;
+    expect(video.src).toContain("/posts/test-post/5.mp4");
 
     // Enter and leave - video should NOT change
     fireEvent.mouseEnter(link);

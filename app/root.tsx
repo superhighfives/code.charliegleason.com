@@ -1,10 +1,8 @@
 import { getSandpackCssText } from "@codesandbox/sandpack-react";
 import { createContext, useContext } from "react";
 import {
-  Link,
   Links,
   Meta,
-  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,

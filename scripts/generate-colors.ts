@@ -2,12 +2,15 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { glob } from "glob";
 import matter from "gray-matter";
-import { detectImageColors } from "../app/utils/edge-colors.js";
+import {
+  detectEdgeColors,
+  detectImageColors,
+} from "../app/utils/edge-colors.js";
 import { IMAGES_PER_POST, OUTPUT_DIR, POSTS_DIR } from "./utils.js";
 
 interface ColorData {
-  dominant: string;
-  average: string;
+  text: string;
+  background: string;
 }
 
 /**
@@ -36,16 +39,27 @@ async function extractColorsForPost(
       // Convert image to base64
       const base64Image = await imageToBase64(imagePath);
 
-      // Extract colors using existing edge-colors logic
-      const imageColors = await detectImageColors(base64Image);
+      // Step 1: Get edge colors (for background)
+      const edgeColors = await detectEdgeColors(base64Image, {
+        sampleRate: 10,
+        edgeDepth: 10,
+      });
+
+      // Step 2: Get dominant image color (for text), excluding edge colors and boosting contrast
+      const imageColors = await detectImageColors(base64Image, {
+        sampleRate: 10,
+        excludeColor: edgeColors.left,
+        colorTolerance: 30, // How similar colors need to be to edge color to be excluded
+        contrastBoost: 4, // Boost colors that contrast with edge (0-10, higher = more contrast)
+      });
 
       colors.push({
-        dominant: imageColors.dominant,
-        average: imageColors.average,
+        text: imageColors.dominant,
+        background: edgeColors.left,
       });
 
       console.log(
-        `      ✓ Image ${i}: dominant=${imageColors.dominant} average=${imageColors.average}`,
+        `      ✓ Image ${i}: text=${imageColors.dominant} background=${edgeColors.left}`,
       );
     } catch (error) {
       console.error(

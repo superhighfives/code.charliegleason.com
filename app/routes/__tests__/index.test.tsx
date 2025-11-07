@@ -46,16 +46,16 @@ vi.mock("~/components/nav-block", () => ({
     description,
     caption,
     href,
-    initialVideo,
+    video,
   }: {
     title: string;
     description?: string;
     caption?: string | null;
     href: string;
-    initialVideo: number;
+    video: number;
   }) => (
     <div data-testid="nav-block">
-      <a href={`${href}/${initialVideo + 1}`}>{title}</a>
+      <a href={`${href}/${video + 1}`}>{title}</a>
       {description && <p>{description}</p>}
       {caption && <span>{caption}</span>}
     </div>

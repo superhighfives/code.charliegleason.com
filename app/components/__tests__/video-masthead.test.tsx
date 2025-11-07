@@ -57,7 +57,7 @@ describe("VideoMasthead", () => {
 
   const defaultProps = {
     slug: "test-post",
-    initialVideo: 5,
+    video: 5,
     nextVideo: 10,
     visual: mockVisual,
   };
@@ -127,7 +127,7 @@ describe("VideoMasthead", () => {
   it("should display current video index", () => {
     render(<VideoMasthead {...defaultProps} />);
 
-    // initialVideo is 5, so user-facing index is 6 (5+1)
+    // video is 5, so user-facing index is 6 (5+1)
     const expectedText = `6/${VISUAL_COUNT}`;
     expect(screen.getByText(expectedText)).toBeInTheDocument();
   });
@@ -150,8 +150,8 @@ describe("VideoMasthead", () => {
     });
 
     // Initial video should be 5
-    const initialVideo = container.querySelector("video") as HTMLVideoElement;
-    expect(initialVideo.src).toContain("/posts/test-post/5.mp4");
+    const video = container.querySelector("video") as HTMLVideoElement;
+    expect(video.src).toContain("/posts/test-post/5.mp4");
 
     fireEvent.click(refreshButton);
 
@@ -177,7 +177,7 @@ describe("VideoMasthead", () => {
 
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        "http://localhost:3000/test-post/6", // initialVideo 5 + 1 = 6
+        "http://localhost:3000/test-post/6", // video 5 + 1 = 6
       );
     });
 

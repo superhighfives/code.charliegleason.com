@@ -37,7 +37,8 @@
       "Bash(sips --help:*)",
       "Bash(brew install:*)",
       "Bash(pngquant:*)",
-      "Bash(oxipng --version:*)"
+      "Bash(oxipng --version:*)",
+      "Bash(./scripts/optimize-pngs.sh:*)"
     ],
     "deny": [],
     "ask": []

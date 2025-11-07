@@ -23,25 +23,25 @@ export async function loader() {
 
   // Generate random initial videos for each post
   // These are just for display; the redirect handler will set cookies on click
-  const initialVideos: Record<string, number> = {};
+  const videos: Record<string, number> = {};
   for (const post of sortedPosts) {
-    initialVideos[post.slug] = randomVideoIndex();
+    videos[post.slug] = randomVideoIndex();
   }
 
-  return { posts: sortedPosts, initialVideos };
+  return { posts: sortedPosts, videos };
 }
 
 export default function Index() {
-  const { posts, initialVideos } = useLoaderData<typeof loader>();
+  const { posts, videos } = useLoaderData<typeof loader>();
 
   return (
-    <div className="grid gap-4 sm:gap-8 content-end h-full">
+    <div className="grid gap-4 content-end h-full">
       <h1 className="text-gray-400 dark:text-gray-500">
         ❯ cd ~/code.charliegleason.com
       </h1>
       <About />
       <div className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 grid gap-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 container">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {posts.length ? (
             posts.map((post, index) => {
               const dateCaption =
@@ -56,9 +56,10 @@ export default function Index() {
                   caption={dateCaption}
                   href={post.url}
                   slug={post.slug}
-                  initialVideo={initialVideos[post.slug]}
+                  video={videos[post.slug]}
                   index={index}
                   tags={post.tags}
+                  visual={post.frontmatter.visual}
                 />
               );
             })

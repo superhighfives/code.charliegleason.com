@@ -1,20 +1,6 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import NavBlock from "../nav-block";
-
-// Mock framer-motion to avoid animation complexity in tests
-vi.mock("framer-motion", () => ({
-  motion: {
-    video: ({
-      children,
-      animate,
-      transition,
-      onAnimationComplete,
-      ...props
-      // biome-ignore lint/suspicious/noExplicitAny: test environment
-    }: any) => <video {...props}>{children}</video>,
-  },
-}));
 
 // Mock video index utilities
 vi.mock("~/utils/video-index", () => ({
@@ -35,17 +21,6 @@ describe("NavBlock", () => {
     slug: "test-post",
     video: 5,
   };
-
-  beforeEach(() => {
-    // Mock video element methods
-    window.HTMLMediaElement.prototype.play = vi.fn(() => Promise.resolve());
-    window.HTMLMediaElement.prototype.pause = vi.fn();
-
-    // Clear cookies before each test
-    // biome-ignore lint/suspicious/noDocumentCookie: test environment
-    document.cookie =
-      "visual-index-test-post=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  });
 
   afterEach(() => {
     vi.clearAllMocks();
@@ -68,12 +43,12 @@ describe("NavBlock", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("should render video with correct src", () => {
+  it("should render image with correct src", () => {
     const { container } = render(<NavBlock {...defaultProps} />);
 
-    const video = container.querySelector("video") as HTMLVideoElement;
-    expect(video).toBeInTheDocument();
-    expect(video.src).toContain("/posts/test-post/5.mp4");
+    const img = container.querySelector("img") as HTMLImageElement;
+    expect(img).toBeInTheDocument();
+    expect(img.src).toContain("/posts/test-post/5.png");
   });
 
   it("should render link with correct href including video index", () => {
@@ -84,98 +59,12 @@ describe("NavBlock", () => {
     expect(link).toHaveAttribute("href", "/test-post/6");
   });
 
-  it("should display View action text", () => {
-    render(<NavBlock {...defaultProps} />);
-
-    expect(screen.getByText("View")).toBeInTheDocument();
-  });
-
-  it("should handle mouse enter event", () => {
-    const { container } = render(<NavBlock {...defaultProps} />);
-
-    const link = screen.getByRole("link");
-    fireEvent.mouseEnter(link);
-
-    // Video should remain (no video switching on hover)
-    const video = container.querySelector("video");
-    expect(video).toBeInTheDocument();
-  });
-
-  it("should not change video on mouse leave", async () => {
-    const { container } = render(<NavBlock {...defaultProps} />);
-
-    const link = screen.getByRole("link");
-
-    // Get initial video src
-    const video = container.querySelector("video") as HTMLVideoElement;
-    expect(video.src).toContain("/posts/test-post/5.mp4");
-
-    // Enter and leave - video should NOT change
-    fireEvent.mouseEnter(link);
-    fireEvent.mouseLeave(link);
-
-    await waitFor(() => {
-      // Video should remain the same (no switching)
-      const updatedVideo = container.querySelector("video") as HTMLVideoElement;
-      expect(updatedVideo.src).toContain("/posts/test-post/5.mp4");
-    });
-  });
-
-  it("should display video element with correct attributes", () => {
-    const { container } = render(<NavBlock {...defaultProps} />);
-
-    const video = container.querySelector("video") as HTMLVideoElement;
-    expect(video).toBeInTheDocument();
-    expect(video).toHaveAttribute("muted");
-    expect(video).toHaveAttribute("playsInline");
-  });
-
   it("should have hover effect classes on link", () => {
     render(<NavBlock {...defaultProps} />);
 
     const link = screen.getByRole("link");
     expect(link).toHaveClass("group");
     expect(link).toHaveClass("hover:bg-gray-50");
-  });
-
-  it("should maintain same href (video does not change)", async () => {
-    render(<NavBlock {...defaultProps} />);
-
-    const link = screen.getByRole("link");
-
-    // Initial href should include initial video (5 + 1 = 6)
-    expect(link).toHaveAttribute("href", "/test-post/6");
-
-    // Hover to trigger interaction - href should remain the same
-    fireEvent.mouseEnter(link);
-    fireEvent.mouseLeave(link);
-
-    await waitFor(() => {
-      // Href should remain the same (no video switching)
-      expect(link).toHaveAttribute("href", "/test-post/6");
-    });
-  });
-
-  it("should keep video static across multiple interactions", async () => {
-    const { container } = render(<NavBlock {...defaultProps} />);
-
-    const link = screen.getByRole("link");
-    const video = container.querySelector("video") as HTMLVideoElement;
-
-    // Initial video
-    expect(video.src).toContain("/posts/test-post/5.mp4");
-
-    // Multiple hover cycles
-    fireEvent.mouseEnter(link);
-    fireEvent.mouseLeave(link);
-    fireEvent.mouseEnter(link);
-    fireEvent.mouseLeave(link);
-
-    await waitFor(() => {
-      // Video should still be the same
-      const updatedVideo = container.querySelector("video") as HTMLVideoElement;
-      expect(updatedVideo.src).toContain("/posts/test-post/5.mp4");
-    });
   });
 
   it("should render all content within link element", () => {
@@ -186,6 +75,65 @@ describe("NavBlock", () => {
     expect(link).toContainElement(
       screen.getByText("This is a test description"),
     );
-    expect(link).toContainElement(screen.getByText("View"));
+  });
+
+  it("should render with tags when provided", () => {
+    const propsWithTags = {
+      ...defaultProps,
+      tags: ["react", "typescript"],
+    };
+    render(<NavBlock {...propsWithTags} />);
+
+    expect(screen.getByText("react")).toBeInTheDocument();
+    expect(screen.getByText("typescript")).toBeInTheDocument();
+  });
+
+  it("should not render tags section when tags are empty", () => {
+    const { container } = render(<NavBlock {...defaultProps} />);
+
+    // Tags container should not be present
+    expect(container.querySelector(".flex-wrap.gap-2")).not.toBeInTheDocument();
+  });
+
+  it("should apply first item styles when index is 0", () => {
+    render(<NavBlock {...defaultProps} index={0} />);
+
+    const link = screen.getByRole("link");
+    expect(link).toHaveClass("lg:col-span-2");
+    expect(link).toHaveClass("lg:row-span-2");
+  });
+
+  it("should not apply first item styles when index is not 0", () => {
+    render(<NavBlock {...defaultProps} index={1} />);
+
+    const link = screen.getByRole("link");
+    expect(link).not.toHaveClass("lg:col-span-2");
+    expect(link).not.toHaveClass("lg:row-span-2");
+  });
+
+  it("should apply background and text color from visual colors", () => {
+    const propsWithColors = {
+      ...defaultProps,
+      visual: {
+        prompt: "test",
+        image: { url: "test", version: "test" },
+        video: { url: "test", version: "test" },
+        colors: [
+          { text: "#000000", background: "#ffffff" },
+          { text: "#111111", background: "#eeeeee" },
+          { text: "#222222", background: "#dddddd" },
+          { text: "#333333", background: "#cccccc" },
+          { text: "#444444", background: "#bbbbbb" },
+          { text: "#555555", background: "#aaaaaa" },
+        ],
+      },
+    };
+    render(<NavBlock {...propsWithColors} />);
+
+    const link = screen.getByRole("link");
+    expect(link).toHaveStyle({
+      backgroundColor: "#aaaaaa",
+      color: "#555555",
+    });
   });
 });

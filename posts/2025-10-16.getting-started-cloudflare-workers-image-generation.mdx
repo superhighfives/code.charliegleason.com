@@ -1,22 +1,47 @@
 ---
 slug: getting-started-cloudflare-workers-image-generation
 title: Getting started with Cloudflare Workers for image generation
-description: A quick guide to building dynamic Open Graph images on the edge with Cloudflare Workers.
-tags: ["cloudflare", "satori", "tutorial"]
+description: >-
+  A quick guide to building dynamic Open Graph images on the edge with
+  Cloudflare Workers.
+tags:
+  - cloudflare
+  - satori
+  - tutorial
 visual:
   prompt: The sun coming out from behind the clouds
   image:
-    url: https://replicate.com/jakedahn/flux-latentpop
-    version: jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
-    guidance: solid background, t-shirt design, LTNP style
+    url: 'https://replicate.com/jakedahn/flux-latentpop'
+    version: >-
+      jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: 'solid background, t-shirt design, LTNP style'
   video:
-    url: https://replicate.com/bytedance/seedance-1-pro-fast
+    url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
     version: bytedance/seedance-1-pro-fast
     guidance: reflected in the water
+  colors:
+    - dominant: '#202030'
+      average: '#3c3140'
+    - dominant: '#203040'
+      average: '#55373f'
+    - dominant: '#303030'
+      average: '#5c3532'
+    - dominant: '#203030'
+      average: '#754934'
+    - dominant: '#303040'
+      average: '#503d3f'
+    - dominant: '#303040'
+      average: '#7b4439'
+    - dominant: '#202040'
+      average: '#543641'
+    - dominant: '#302040'
+      average: '#543745'
+    - dominant: '#304040'
+      average: '#5b4742'
 links:
-  workers-og: https://github.com/kvnang/workers-og
-  Cloudflare Workers: https://developers.cloudflare.com/workers/
-  Wrangler: https://developers.cloudflare.com/workers/wrangler/
+  workers-og: 'https://github.com/kvnang/workers-og'
+  Cloudflare Workers: 'https://developers.cloudflare.com/workers/'
+  Wrangler: 'https://developers.cloudflare.com/workers/wrangler/'
 ---
 
 I've been working on generating dynamic social card images for this site, and Cloudflare Workers turned out to be perfect for the job. They run on the edge, they're fast, and they don't require spinning up a browser with Puppeteer just to render some text on a colored background.

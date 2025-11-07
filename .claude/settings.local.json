@@ -32,7 +32,12 @@
       "Bash(npx wrangler --help:*)",
       "Bash(npx wrangler deployments --help:*)",
       "Bash(npx wrangler:*)",
-      "Bash(./scripts/upload-assets.sh)"
+      "Bash(./scripts/upload-assets.sh)",
+      "Bash(npm run generate:colors:*)",
+      "Bash(sips --help:*)",
+      "Bash(brew install:*)",
+      "Bash(pngquant:*)",
+      "Bash(oxipng --version:*)"
     ],
     "deny": [],
     "ask": []

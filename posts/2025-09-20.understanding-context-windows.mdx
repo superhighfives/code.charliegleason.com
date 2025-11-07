@@ -2,16 +2,39 @@
 slug: understanding-context-windows
 title: Understanding context windows in Claude Code
 description: Or how to make the most of your tokens.
-tags: ["ai", "claude", "tutorial"]
+tags:
+  - ai
+  - claude
+  - tutorial
 visual:
   prompt: An eclectic image depicting AI
   image:
-    url: https://replicate.com/jakedahn/flux-latentpop
-    version: jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
-    guidance: solid background, t-shirt design, LTNP style
+    url: 'https://replicate.com/jakedahn/flux-latentpop'
+    version: >-
+      jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: 'solid background, t-shirt design, LTNP style'
   video:
-    url: https://replicate.com/bytedance/seedance-1-pro-fast
+    url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
     version: bytedance/seedance-1-pro-fast
+  colors:
+    - dominant: '#ff7030'
+      average: '#cc6733'
+    - dominant: '#ff5050'
+      average: '#b6564b'
+    - dominant: '#80c070'
+      average: '#858e61'
+    - dominant: '#ff5020'
+      average: '#b75037'
+    - dominant: '#ff6040'
+      average: '#a65847'
+    - dominant: '#ff4070'
+      average: '#a33b58'
+    - dominant: '#ff7040'
+      average: '#c16444'
+    - dominant: '#ff6040'
+      average: '#a6593f'
+    - dominant: '#ff6040'
+      average: '#bd583f'
 ---
 
 I've been using Claude Code for a while and thought I understood context windows - something about memory limits, and, uh, token usage. When I started actually paying attention to the `/context` command output, I realized there was a bunch of complexity I'd been glossing over.

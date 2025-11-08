@@ -171,10 +171,10 @@ export default function Post() {
           visual={visual}
         />
       )}
-      <div className="flex flex-wrap gap-y-2 font-semibold max-w-xl">
+      <div className="flex flex-wrap gap-y-2 max-w-xl">
         <Link
           to="/"
-          className="group text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"
+          className="font-mono font-semibold group text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"
         >
           ❯ cd ~/code
           <span className="hidden sm:inline">.</span>
@@ -182,7 +182,7 @@ export default function Post() {
           <span className="hidden sm:inline">.com</span>
         </Link>
         <span className="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
-        <h1 className="text-gray-900 dark:text-gray-100 leading-relaxed sm:pl-4 text-xl w-full">
+        <h1 className="font-medium text-gray-900 dark:text-gray-100 leading-relaxed sm:pl-4 text-xl w-full">
           {title}
         </h1>
       </div>
@@ -190,7 +190,7 @@ export default function Post() {
       <Metadata data={metadata} />
 
       {isOldArticle ? (
-        <p className="rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-xl">
+        <p className="font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-xl">
           This has not been updated in the last three months, so this
           information miiiiiight be out of date. Here be dragons, etc.
         </p>

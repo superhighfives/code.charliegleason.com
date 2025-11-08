@@ -35,13 +35,13 @@ export default function Index() {
   const { posts, videos } = useLoaderData<typeof loader>();
 
   return (
-    <div className="grid gap-4 content-end h-full">
-      <h1 className="text-gray-400 dark:text-gray-500">
+    <div className="grid gap-4 sm:gap-8 content-end h-full">
+      <h1 className="text-gray-400 dark:text-gray-500 font-mono">
         ❯ cd ~/code.charliegleason.com
       </h1>
       <About />
       <div className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 grid gap-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-4">
           {posts.length ? (
             posts.map((post, index) => {
               const dateCaption =
@@ -51,15 +51,16 @@ export default function Index() {
               return (
                 <NavBlock
                   key={post.slug}
-                  title={post.title}
-                  description={post.description}
+                  post={post}
                   caption={dateCaption}
-                  href={post.url}
-                  slug={post.slug}
-                  video={videos[post.slug]}
-                  index={index}
-                  tags={post.tags}
+                  index={videos[post.slug]}
                   visual={post.frontmatter.visual}
+                  hero={index === 0}
+                  className={
+                    index === 0
+                      ? "sm:col-span-2 3xl:col-span-3 sm:row-span-1 lg:row-span-2 flex-col-reverse"
+                      : ""
+                  }
                 />
               );
             })

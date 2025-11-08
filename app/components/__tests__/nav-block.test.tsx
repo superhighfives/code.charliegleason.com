@@ -95,20 +95,11 @@ describe("NavBlock", () => {
     expect(container.querySelector(".flex-wrap.gap-2")).not.toBeInTheDocument();
   });
 
-  it("should apply first item styles when index is 0", () => {
-    render(<NavBlock {...defaultProps} index={0} />);
+  it("should apply className", () => {
+    render(<NavBlock {...defaultProps} className="puppies" />);
 
     const link = screen.getByRole("link");
-    expect(link).toHaveClass("lg:col-span-2");
-    expect(link).toHaveClass("lg:row-span-2");
-  });
-
-  it("should not apply first item styles when index is not 0", () => {
-    render(<NavBlock {...defaultProps} index={1} />);
-
-    const link = screen.getByRole("link");
-    expect(link).not.toHaveClass("lg:col-span-2");
-    expect(link).not.toHaveClass("lg:row-span-2");
+    expect(link).toHaveClass("puppies");
   });
 
   it("should apply background and text color from visual colors", () => {

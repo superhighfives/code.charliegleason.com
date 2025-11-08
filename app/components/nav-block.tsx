@@ -1,59 +1,56 @@
 import { useRef } from "react";
-import type { VisualConfig } from "~/mdx/types";
+import type { Post, VisualConfig } from "~/mdx/types";
 import { toUserIndex } from "~/utils/video-index";
 
 export default function NavBlock({
-  title,
-  href,
-  description,
-  slug,
-  video,
-  index = 0,
-  tags,
+  post,
+  index,
   visual,
+  caption,
+  className,
+  hero,
 }: {
-  title: string;
-  caption?: string | null;
-  href: string;
-  description?: string;
-  slug: string;
-  video: number;
-  index?: number;
-  tags?: string[];
+  post: Post;
+  index: number;
   visual?: VisualConfig;
+  caption?: string | null;
+  className?: string;
+  hero?: boolean;
 }) {
+  const { title, description, url, slug, tags } = post;
+
   // Viewport intersection state (starts false to match SSR)
   const elementRef = useRef<HTMLAnchorElement>(null);
-
-  const firstItem = index === 0;
 
   return (
     <a
       ref={elementRef}
-      href={`${href}/${toUserIndex(video)}`}
-      style={{
-        backgroundColor: visual?.colors?.[video]?.background || "inherit",
-        color: visual?.colors?.[video]?.text || "inherit",
-      }}
-      className={`overflow-hidden flex flex-col group lg:border border border-gray-200 dark:border-gray-900 rounded-md hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-gray-900 dark:focus:bg-gray-900 relative before:content-[''] before:rounded-r-sm before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-transparent hover:before:bg-indigo-500 focus:before:bg-indigo-500 before:z-10 gap-2 outline-none focus-visible:ring-0 ${firstItem ? "lg:col-span-2 lg:row-span-2" : ""}`}
+      href={`${url}/${toUserIndex(index)}`}
+      style={
+        {
+          "--background": visual?.colors?.[index]?.background || "inherit",
+          "--text": visual?.colors?.[index]?.text || "inherit",
+        } as React.CSSProperties
+      }
+      className={`text-[var(--text)] bg-[var(--background)] overflow-hidden flex flex-col group justify-between rounded-md relative ring-transparent ring-offset-4 dark:ring-offset-gray-950 hover:ring-[var(--background)] hover:ring-2 focus:ring-2 gap-2 outline-none ${className}`}
       rel="noreferrer"
     >
-      <div className="@container flex flex-col gap-4 px-4 py-3 flex-1">
+      <div
+        className={`flex flex-col gap-4 px-4 py-3 ${hero ? "flex-0" : "h-auto"}`}
+      >
         <div className="space-y-2">
           <div className="flex justify-between relative z-10">
             <div
-              className={`max-w-lg flex w-0 flex-1 flex-col items-start @md:justify-between flex-wrap @lg:flex-nowrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
+              className={`max-w-lg flex w-0 flex-1 flex-col items-start flex-wrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
             >
-              <span className="text-pretty space-x-2 flex flex-col items-start xs:inline">
-                <span className="pb-2 xs:pb-0 inline-block xs:inline font-semibold text-lg sm:text-base">
-                  {title}
-                </span>
+              <span className="text-pretty space-x-2 flex flex-col items-start font-semibold text-lg sm:text-2xl">
+                {title}
               </span>
             </div>
           </div>
           {description ? (
             <div className="relative z-10">
-              <div className="overflow-hidden text-sm max-w-lg text-current/80">
+              <div className="overflow-hidden text-sm max-w-lg text-current/80 font-mono font-semibold">
                 {description}
               </div>
             </div>
@@ -72,11 +69,16 @@ export default function NavBlock({
           </div>
         ) : null}
       </div>
-      <div className="relative w-full aspect-square shrink-0 overflow-hidden rounded-md xs:ml-[3px]">
+      <div
+        className={`relative w-full aspect-square shrink-0 overflow-hidden rounded-md ${hero ? "-mb-16 h-full" : "-mt-4"}`}
+      >
         <img
-          src={`/posts/${slug}/${video}.png`}
+          // style={{
+          //   mask: "linear-gradient(to bottom, transparent 0%, black 10%)",
+          // }}
+          src={`/posts/${slug}/${index}.png`}
           alt={title}
-          className="size-full object-cover"
+          className={`size-full object-cover ${hero ? "mask-b-from-40% mask-b-to-100%" : "mask-t-from-95% mask-t-to-100%"}`}
         />
       </div>
     </a>

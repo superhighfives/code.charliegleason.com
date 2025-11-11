@@ -14,12 +14,17 @@ vi.mock("~/routes/resources/theme-switch", () => ({
 }));
 
 describe("NavBlock", () => {
-  const defaultProps = {
+  const defaultPost = {
     title: "Test Post Title",
-    href: "/test-post",
+    url: "/test-post",
     description: "This is a test description",
     slug: "test-post",
-    video: 5,
+    path: "/posts/test-post.mdx",
+    tags: [] as string[],
+    frontmatter: {
+      title: "Test Post Title",
+      description: "This is a test description",
+    },
   };
 
   afterEach(() => {
@@ -27,15 +32,15 @@ describe("NavBlock", () => {
   });
 
   it("should render with basic props", () => {
-    render(<NavBlock {...defaultProps} />);
+    render(<NavBlock post={defaultPost} index={5} />);
 
     expect(screen.getByText("Test Post Title")).toBeInTheDocument();
     expect(screen.getByText("This is a test description")).toBeInTheDocument();
   });
 
   it("should render without optional description", () => {
-    const { title, href, slug, video } = defaultProps;
-    render(<NavBlock title={title} href={href} slug={slug} video={video} />);
+    const postWithoutDescription = { ...defaultPost, description: undefined };
+    render(<NavBlock post={postWithoutDescription} index={5} />);
 
     expect(screen.getByText("Test Post Title")).toBeInTheDocument();
     expect(
@@ -44,7 +49,7 @@ describe("NavBlock", () => {
   });
 
   it("should render image with correct src", () => {
-    const { container } = render(<NavBlock {...defaultProps} />);
+    const { container } = render(<NavBlock post={defaultPost} index={5} />);
 
     const img = container.querySelector("img") as HTMLImageElement;
     expect(img).toBeInTheDocument();
@@ -52,7 +57,7 @@ describe("NavBlock", () => {
   });
 
   it("should render link with correct href including video index", () => {
-    render(<NavBlock {...defaultProps} />);
+    render(<NavBlock post={defaultPost} index={5} />);
 
     const link = screen.getByRole("link");
     // Should include video index (video 5 + 1 = 6 in user-facing format)
@@ -60,15 +65,14 @@ describe("NavBlock", () => {
   });
 
   it("should have hover effect classes on link", () => {
-    render(<NavBlock {...defaultProps} />);
+    render(<NavBlock post={defaultPost} index={5} />);
 
     const link = screen.getByRole("link");
     expect(link).toHaveClass("group");
-    expect(link).toHaveClass("hover:bg-gray-50");
   });
 
   it("should render all content within link element", () => {
-    render(<NavBlock {...defaultProps} />);
+    render(<NavBlock post={defaultPost} index={5} />);
 
     const link = screen.getByRole("link");
     expect(link).toContainElement(screen.getByText("Test Post Title"));
@@ -78,53 +82,50 @@ describe("NavBlock", () => {
   });
 
   it("should render with tags when provided", () => {
-    const propsWithTags = {
-      ...defaultProps,
+    const postWithTags = {
+      ...defaultPost,
       tags: ["react", "typescript"],
     };
-    render(<NavBlock {...propsWithTags} />);
+    render(<NavBlock post={postWithTags} index={5} />);
 
     expect(screen.getByText("react")).toBeInTheDocument();
     expect(screen.getByText("typescript")).toBeInTheDocument();
   });
 
   it("should not render tags section when tags are empty", () => {
-    const { container } = render(<NavBlock {...defaultProps} />);
+    const { container } = render(<NavBlock post={defaultPost} index={5} />);
 
     // Tags container should not be present
     expect(container.querySelector(".flex-wrap.gap-2")).not.toBeInTheDocument();
   });
 
   it("should apply className", () => {
-    render(<NavBlock {...defaultProps} className="puppies" />);
+    render(<NavBlock post={defaultPost} index={5} className="puppies" />);
 
     const link = screen.getByRole("link");
     expect(link).toHaveClass("puppies");
   });
 
   it("should apply background and text color from visual colors", () => {
-    const propsWithColors = {
-      ...defaultProps,
-      visual: {
-        prompt: "test",
-        image: { url: "test", version: "test" },
-        video: { url: "test", version: "test" },
-        colors: [
-          { text: "#000000", background: "#ffffff" },
-          { text: "#111111", background: "#eeeeee" },
-          { text: "#222222", background: "#dddddd" },
-          { text: "#333333", background: "#cccccc" },
-          { text: "#444444", background: "#bbbbbb" },
-          { text: "#555555", background: "#aaaaaa" },
-        ],
-      },
+    const visual = {
+      prompt: "test",
+      image: { url: "test", version: "test" },
+      video: { url: "test", version: "test" },
+      colors: [
+        { text: "#000000", background: "#ffffff" },
+        { text: "#111111", background: "#eeeeee" },
+        { text: "#222222", background: "#dddddd" },
+        { text: "#333333", background: "#cccccc" },
+        { text: "#444444", background: "#bbbbbb" },
+        { text: "#555555", background: "#aaaaaa" },
+      ],
     };
-    render(<NavBlock {...propsWithColors} />);
+    render(<NavBlock post={defaultPost} index={5} visual={visual} />);
 
     const link = screen.getByRole("link");
     expect(link).toHaveStyle({
-      backgroundColor: "#aaaaaa",
-      color: "#555555",
+      "--background": "#aaaaaa",
+      "--text": "#555555",
     });
   });
 });

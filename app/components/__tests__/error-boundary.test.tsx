@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
-import GeneralErrorBoundary from "../error-boundary";
+import { GeneralErrorBoundary } from "../error-boundary";
 
 describe("GeneralErrorBoundary", () => {
   it("should render route error response", () => {

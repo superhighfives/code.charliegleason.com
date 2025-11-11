@@ -13,7 +13,7 @@ import { ThemeSwitch, useOptionalTheme } from "~/routes/resources/theme-switch";
 import type { Theme } from "~/utils/theme.server";
 import { getTheme } from "~/utils/theme.server";
 import type { Route } from "./+types/root";
-import GeneralErrorBoundary from "./components/error-boundary";
+import { GeneralErrorBoundary } from "./components/error-boundary";
 import { Frame } from "./components/frame";
 import { ClientHintCheck, getHints } from "./utils/client-hints";
 import { ClientIdCheck } from "./utils/fingerprint";

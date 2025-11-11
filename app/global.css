@@ -184,9 +184,12 @@ html.dark .shiki span {
 }
 
 .markdown-alert {
-  padding: 0.5rem 1rem;
+  padding: 1rem;
   margin: 1rem 0;
-  border-left: 0.25em solid var(--github-alert-default-color);
+  border: 1px solid var(--github-alert-default-color);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  @apply rounded-sm;
 }
 
 .markdown-alert .octicon {
@@ -207,24 +210,29 @@ html.dark .shiki span {
 }
 
 .markdown-alert-note {
-  border-left-color: var(--github-alert-note-color);
+  border-color: color-mix(in srgb, var(--github-alert-note-color) 30%, transparent);
+  color: var(--github-alert-note-color);
   background-color: color-mix(in srgb, var(--github-alert-note-color) 10%, transparent);
 }
 
 .markdown-alert-tip {
-  border-left-color: var(--github-alert-tip-color);
+  border-color: color-mix(in srgb, var(--github-alert-tip-color) 30%, transparent);
+  color: var(--github-alert-tip-color);
 }
 
 .markdown-alert-important {
-  border-left-color: var(--github-alert-important-color);
+  border-color: color-mix(in srgb, var(--github-alert-important-color) 30%, transparent);
+  color: var(--github-alert-important-color);
 }
 
 .markdown-alert-warning {
-  border-left-color: var(--github-alert-warning-color);
+  border-color: color-mix(in srgb, var(--github-alert-warning-color) 30%, transparent);
+  color: var(--github-alert-warning-color);
 }
 
 .markdown-alert-caution {
-  border-left-color: var(--github-alert-caution-color);
+  border-color: var(--github-alert-caution-color);
+  color: var(--github-alert-caution-color);
 }
 
 .markdown-alert-title {
@@ -342,5 +350,5 @@ strong {
 /*************************************************************/
 
 .command + .markdown-alert {
-  @apply -mt-2 pt-4;
+  @apply mt-0.5;
 }

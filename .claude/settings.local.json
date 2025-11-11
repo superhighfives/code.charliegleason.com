@@ -38,7 +38,8 @@
       "Bash(brew install:*)",
       "Bash(pngquant:*)",
       "Bash(oxipng --version:*)",
-      "Bash(./scripts/optimize-pngs.sh:*)"
+      "Bash(./scripts/optimize-pngs.sh:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

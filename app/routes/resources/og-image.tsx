@@ -203,6 +203,15 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
               }}
               alt=""
             />
+            <div
+              style={{
+                width: "20px",
+                height: "630px",
+                position: "absolute",
+                left: "-10px",
+                background: `linear-gradient(to right, ${backgroundColor}ff 10px, ${backgroundColor}ff, ${backgroundColor}00)`,
+              }}
+            />
           </div>
         ) : null}
 

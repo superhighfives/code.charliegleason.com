@@ -49,12 +49,45 @@ echo "0 0" > "$stats_file"
 cache_updates=$(mktemp)
 echo "{}" > "$cache_updates"
 
+# Function to optimize PNG files before upload
+optimize_png() {
+  local file="$1"
+
+  # Check if optimization tools are available
+  if ! command -v pngquant &> /dev/null || ! command -v oxipng &> /dev/null; then
+    # Tools not available, skip optimization
+    return 0
+  fi
+
+  # Check if file needs resizing (macOS only)
+  if command -v sips &> /dev/null; then
+    dimensions=$(sips -g pixelWidth -g pixelHeight "$file" 2>/dev/null | tail -2 | awk '{print $2}')
+    width=$(echo "$dimensions" | head -1)
+    height=$(echo "$dimensions" | tail -1)
+
+    if [ "$width" -gt 512 ] || [ "$height" -gt 512 ]; then
+      sips -z 512 512 "$file" --out "$file" > /dev/null 2>&1
+    fi
+  fi
+
+  # Compress with pngquant (suppress output)
+  pngquant --quality=75-85 --ext .png --force "$file" 2>&1 | grep -v "error" > /dev/null || true
+
+  # Optimize with oxipng (suppress output)
+  oxipng -o 4 --strip safe "$file" > /dev/null 2>&1 || true
+}
+
 # Find and upload changed visual assets
 count=0
 find public/posts -type f \( -name "*.mp4" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.webp" \) | while read -r file; do
   # Get the relative path from public/
   relative_path="${file#public/}"
   count=$((count + 1))
+
+  # Optimize PNG files before upload (if tools are available)
+  if [[ "$file" == *.png ]]; then
+    optimize_png "$file"
+  fi
 
   # Calculate local file MD5
   if [[ "$OSTYPE" == "darwin"* ]]; then

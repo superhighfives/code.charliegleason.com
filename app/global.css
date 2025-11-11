@@ -4,6 +4,42 @@
 /* Font Face Declarations */
 /*************************************************************/
 
+/* Inter - Regular */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Inter-Regular.woff2") format("woff2");
+}
+
+/* Inter - Regular Italic */
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Inter-Italic.woff2") format("woff2");
+}
+
+/* Inter - SemiBold */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Inter-SemiBold.woff2") format("woff2");
+}
+
+/* Inter - SemiBold Italic */
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Inter-SemiBoldItalic.woff2") format("woff2");
+}
+
 /* JetBrains Mono - Regular */
 @font-face {
   font-family: "JetBrains Mono";
@@ -47,11 +83,16 @@
 @import "tailwindcss" source(".");
 
 @theme {
+  --font-sans:
+    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   --font-mono:
     "JetBrains Mono", "ui-monospace", "SFMono-Regular", '"Roboto Mono"',
     '"Courier New"', "monospace";
   --text-2xs: 0.625rem; 
   --breakpoint-xs: 30rem;
+  --breakpoint-3xl: 110rem;
+  --breakpoint-4xl: 120rem;
 
   @keyframes blink {
     0%,
@@ -83,8 +124,7 @@ body {
   overflow-x: hidden;
   overscroll-behavior-x: none;
   background-color: var(--color-white);
-  font-family: monospace;
-  @apply text-sm font-mono bg-white dark:bg-gray-950;
+  @apply font-sans text-sm bg-white dark:bg-gray-950;
 }
 
 /*************************************************************/
@@ -221,7 +261,7 @@ html.dark .shiki span {
 /*************************************************************/
 
 .post {
-  @apply prose [&>*:not(.code)]:max-w-[60ch] prose-headings:text-sm prose-sm dark:prose-invert prose-a:text-indigo-600 dark:prose-a:text-indigo-300 prose-a:underline prose-a:hover:underline prose-a:decoration-indigo-200 dark:prose-a:decoration-indigo-900 prose-a:hover:decoration-current prose-a:focus-visible:decoration-current prose-a:underline-offset-4 prose-a:outline-none prose-a:focus-visible:ring-2 prose-a:focus-visible:ring-indigo-500 prose-a:focus-visible:ring-offset-2 dark:prose-a:focus-visible:ring-offset-gray-950 prose-a:rounded-sm sm:px-4 border border-transparent max-w-none prose-h1:before:content-['#'] prose-h2:before:content-['##'] prose-h3:before:content-['###'] prose-h4:before:content-['####'] prose-h5:before:content-['#####'] prose-h6:before:content-['######'] prose-headings:before:mr-2 prose-headings:before:tracking-widest prose-headings:before:text-indigo-400 prose-h1:border-b-2 prose-h2:border-b prose-h1:border-indigo-500 prose-h2:border-indigo-500 prose-h2:pb-4 prose-h2:mb-4 prose-h1:mt-16 prose-h2:mt-12 prose-h3:mt-8 prose-h4:mt-4 prose-h5:mt-2 prose-h6:mt-2 prose-a:text-wrap prose-a:break-words prose-a:[word-break:break-word] [&>:first-child]:mt-0 [&>:last-child]:mb-0 text-pretty;
+  @apply prose [&>*:not(.code)]:max-w-[calc(35rem-2px)] prose-headings:text-sm prose-headings:font-mono prose-a:font-mono dark:prose-invert prose-a:text-indigo-600 dark:prose-a:text-indigo-300 prose-a:underline prose-a:hover:underline prose-a:decoration-indigo-200 dark:prose-a:decoration-indigo-900 prose-a:hover:decoration-current prose-a:focus-visible:decoration-current prose-a:underline-offset-4 prose-a:outline-none prose-a:focus-visible:ring-2 prose-a:focus-visible:ring-indigo-500 prose-a:focus-visible:ring-offset-2 dark:prose-a:focus-visible:ring-offset-gray-950 prose-a:rounded-sm sm:px-4 border border-transparent max-w-none prose-h1:before:content-['#'] prose-h2:before:content-['##'] prose-h3:before:content-['###'] prose-h4:before:content-['####'] prose-h5:before:content-['#####'] prose-h6:before:content-['######'] prose-headings:before:mr-2 prose-headings:before:tracking-widest prose-headings:before:text-indigo-400 prose-h1:border-b-2 prose-h2:border-b prose-h1:border-indigo-500 prose-h2:border-indigo-500 prose-h2:pb-4 prose-h2:mb-4 prose-h1:mt-16 prose-h2:mt-12 prose-h3:mt-8 prose-h4:mt-4 prose-h5:mt-2 prose-h6:mt-2 prose-a:text-wrap prose-a:break-words prose-a:[word-break:break-word] [&>:first-child]:mt-0 [&>:last-child]:mb-0 text-pretty;
 }
 
 @utility prose {

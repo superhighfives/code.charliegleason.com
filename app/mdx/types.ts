@@ -37,6 +37,10 @@ export interface VisualConfig {
   prompt: string;
   image: ModelConfig;
   video: ModelConfig;
+  colors?: {
+    background: string;
+    text: string;
+  }[];
 }
 
 export interface PostFrontmatter {

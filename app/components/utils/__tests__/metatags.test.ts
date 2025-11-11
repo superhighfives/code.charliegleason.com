@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import tags from "../tags";
+import metatags from "../metatags";
 
 describe("tags utility", () => {
   beforeEach(() => {
@@ -8,7 +8,7 @@ describe("tags utility", () => {
   });
 
   it("should return default tags when no attributes provided", () => {
-    const result = tags();
+    const result = metatags();
 
     expect(result).toContainEqual({ title: "❯ ~/code.charliegleason.com" });
     expect(result).toContainEqual({
@@ -23,7 +23,7 @@ describe("tags utility", () => {
   });
 
   it("should generate title with post title", () => {
-    const result = tags({
+    const result = metatags({
       title: "My Awesome Post",
       slug: "my-awesome-post",
     });
@@ -38,7 +38,7 @@ describe("tags utility", () => {
   });
 
   it("should use custom description when provided", () => {
-    const result = tags({
+    const result = metatags({
       title: "Test Post",
       description: "This is a custom description",
       slug: "test-post",
@@ -55,7 +55,7 @@ describe("tags utility", () => {
   });
 
   it("should generate OG image URL when visual is provided (development)", () => {
-    const result = tags(
+    const result = metatags(
       {
         title: "Visual Post",
         slug: "visual-post",
@@ -75,7 +75,7 @@ describe("tags utility", () => {
   });
 
   it("should generate OG image URL with index when provided (development)", () => {
-    const result = tags(
+    const result = metatags(
       {
         title: "Visual Post",
         slug: "visual-post",
@@ -102,7 +102,7 @@ describe("tags utility", () => {
   });
 
   it("should use default social image when no visual provided", () => {
-    const result = tags({
+    const result = metatags({
       title: "Regular Post",
       slug: "regular-post",
     });
@@ -114,7 +114,7 @@ describe("tags utility", () => {
   });
 
   it("should include og:title with just the title (no suffix)", () => {
-    const result = tags({
+    const result = metatags({
       title: "Just The Title",
       slug: "test",
     });
@@ -126,7 +126,7 @@ describe("tags utility", () => {
   });
 
   it("should set og:type to website", () => {
-    const result = tags();
+    const result = metatags();
 
     expect(result).toContainEqual({
       property: "og:type",
@@ -135,7 +135,7 @@ describe("tags utility", () => {
   });
 
   it("should return all required meta tags", () => {
-    const result = tags({
+    const result = metatags({
       title: "Complete Post",
       description: "Complete description",
       slug: "complete-post",
@@ -166,7 +166,7 @@ describe("tags utility", () => {
   });
 
   it("should handle partial attributes", () => {
-    const result = tags({
+    const result = metatags({
       slug: "partial-post",
     });
 
@@ -178,7 +178,7 @@ describe("tags utility", () => {
   });
 
   it("should handle undefined title in og:title", () => {
-    const result = tags({
+    const result = metatags({
       slug: "no-title-post",
     });
 

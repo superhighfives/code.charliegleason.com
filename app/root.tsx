@@ -1,10 +1,8 @@
 import { getSandpackCssText } from "@codesandbox/sandpack-react";
 import { createContext, useContext } from "react";
 import {
-  Link,
   Links,
   Meta,
-  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -26,6 +24,20 @@ import { useNonce } from "./utils/nonce-provider";
 export const links: Route.LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
   // Preload critical font weights for instant rendering
+  {
+    rel: "preload",
+    href: "/fonts/Inter-Regular.woff2",
+    as: "font",
+    type: "font/woff2",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "preload",
+    href: "/fonts/Inter-SemiBold.woff2",
+    as: "font",
+    type: "font/woff2",
+    crossOrigin: "anonymous",
+  },
   {
     rel: "preload",
     href: "/fonts/JetBrainsMono-Regular.woff2",

@@ -42,21 +42,20 @@ vi.mock("~/components/about", () => ({
 
 vi.mock("~/components/nav-block", () => ({
   default: ({
-    title,
-    description,
+    post,
+    index,
     caption,
-    href,
-    initialVideo,
   }: {
-    title: string;
-    description?: string;
+    post: { title: string; description?: string; url: string; slug: string };
+    index: number;
     caption?: string | null;
-    href: string;
-    initialVideo: number;
+    visual?: unknown;
+    className?: string;
+    hero?: boolean;
   }) => (
     <div data-testid="nav-block">
-      <a href={`${href}/${initialVideo + 1}`}>{title}</a>
-      {description && <p>{description}</p>}
+      <a href={`${post.url}/${index + 1}`}>{post.title}</a>
+      {post.description && <p>{post.description}</p>}
       {caption && <span>{caption}</span>}
     </div>
   ),

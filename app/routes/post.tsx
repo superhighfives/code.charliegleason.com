@@ -4,12 +4,12 @@ import { KudosButton } from "~/components/kudos-button";
 import Metadata from "~/components/metadata";
 import Metalinks from "~/components/metalinks";
 import { components } from "~/components/utils/components";
-import tags from "~/components/utils/tags";
+import metatags from "~/components/utils/metatags";
 import VideoMasthead from "~/components/video-masthead";
 import { customMdxParse } from "~/mdx/custom-mdx-parser";
 import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
-import { processArticleDate } from "~/utils/posts";
+import { processArticleData } from "~/utils/posts";
 import { highlightCode } from "~/utils/shiki.server";
 import {
   parseImageIndex,
@@ -99,11 +99,10 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
 
   // Calculate isOldArticle on server to prevent hydration mismatch
   const currentDate = new Date();
-  const { isOldArticle } = processArticleDate(
-    frontmatter.data,
-    frontmatter.date,
+  const { isOldArticle } = processArticleData({
+    frontmatter,
     currentDate,
-  );
+  });
 
   const responseData = {
     __raw: rawContent,
@@ -130,14 +129,17 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
 }
 
 export function meta({ data, params }: Route.MetaArgs) {
-  if (!data) return tags();
+  if (!data) return metatags();
   const { attributes } = data;
   // The index param is optional - only present when navigating from shared links
   const imageParam =
     "index" in params ? (params.index as string | undefined) : undefined;
   const parsedIndex = parseImageIndex(imageParam ?? null);
   // Convert internal index back to user-facing for meta tags
-  return tags(attributes, parsedIndex !== null ? parsedIndex + 1 : undefined);
+  return metatags(
+    attributes,
+    parsedIndex !== null ? parsedIndex + 1 : undefined,
+  );
 }
 
 export function shouldRevalidate() {
@@ -149,32 +151,30 @@ export default function Post() {
   const {
     kudosTotal,
     kudosYou,
-    randomVideo: initialVideo,
+    randomVideo: video,
     nextVideo,
     isOldArticle,
   } = useLoaderData<typeof loader>();
 
   const Component = useMdxComponent(components);
-  const { title, data, links, date, slug, visual } = useMdxAttributes();
-  const { metadata } = processArticleDate(data, date);
+  const frontmatter = useMdxAttributes();
+  const { title, links, date, slug, visual } = frontmatter;
+  const { metadata } = processArticleData({ frontmatter });
 
   return (
     <div className="grid gap-y-4 relative">
-      {slug &&
-        initialVideo !== undefined &&
-        nextVideo !== undefined &&
-        visual && (
-          <VideoMasthead
-            slug={slug}
-            initialVideo={initialVideo}
-            nextVideo={nextVideo}
-            visual={visual}
-          />
-        )}
-      <div className="flex flex-wrap gap-y-2 font-semibold max-w-[65ch]">
+      {slug && video !== undefined && nextVideo !== undefined && visual && (
+        <VideoMasthead
+          slug={slug}
+          video={video}
+          nextVideo={nextVideo}
+          visual={visual}
+        />
+      )}
+      <div className="flex flex-wrap gap-y-2 max-w-xl">
         <Link
           to="/"
-          className="group text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"
+          className="font-mono font-semibold group text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"
         >
           ❯ cd ~/code
           <span className="hidden sm:inline">.</span>
@@ -182,7 +182,7 @@ export default function Post() {
           <span className="hidden sm:inline">.com</span>
         </Link>
         <span className="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
-        <h1 className="text-gray-900 dark:text-gray-100 leading-relaxed sm:pl-4">
+        <h1 className="font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 text-3xl w-full">
           {title}
         </h1>
       </div>
@@ -190,7 +190,7 @@ export default function Post() {
       <Metadata data={metadata} />
 
       {isOldArticle ? (
-        <p className="rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-[65ch]">
+        <p className="font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-xl">
           This has not been updated in the last three months, so this
           information miiiiiight be out of date. Here be dragons, etc.
         </p>

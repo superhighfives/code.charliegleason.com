@@ -45,7 +45,7 @@ export default function Index() {
           {posts.length ? (
             posts.map((post, index) => {
               const dateCaption =
-                post.date && differenceInMonths(new Date(), post.date) <= 3
+                post.date && differenceInMonths(new Date(), post.date) <= 12
                   ? `${formatDistanceToNow(post.date)} ago`
                   : null;
               return (

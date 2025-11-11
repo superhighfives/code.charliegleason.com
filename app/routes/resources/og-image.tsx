@@ -121,8 +121,13 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
       height: OG_IMAGE_HEIGHT,
       fonts: [
         {
-          name: "JetBrainsMono-Semibold",
+          name: "JetBrains Mono",
           data: await loadGoogleFont({ family: "JetBrains Mono", weight: 600 }),
+          style: "normal",
+        },
+        {
+          name: "Inter",
+          data: await loadGoogleFont({ family: "Inter", weight: 600 }),
           style: "normal",
         },
       ],
@@ -138,6 +143,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
           display: "flex",
           flexDirection: "row",
           color: textColor,
+          fontFamily: "JetBrains Mono",
         }}
       >
         {/* Left side: Text content */}
@@ -158,6 +164,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
               lineClamp: aiImageBase64 ? 3 : 2,
               lineHeight: 1.25,
               letterSpacing: "-0.01em",
+              fontFamily: "Inter",
             }}
           >
             {title}
@@ -166,8 +173,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
             <div
               style={{
                 display: "block",
-                fontSize: 30,
-                lineClamp: 3,
+                fontSize: 24,
                 lineHeight: 1.5,
                 letterSpacing: "-0.01em",
               }}

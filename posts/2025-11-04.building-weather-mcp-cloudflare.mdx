@@ -1,0 +1,674 @@
+---
+slug: building-weather-mcp-cloudflare
+title: Building a weather MCP server on Cloudflare Workers
+description: A complete guide to building and deploying a Model Context Protocol server that gives Claude weather superpowers.
+visual:
+  prompt: Weather in Tokyo, Japan
+  image:
+    url: https://replicate.com/jakedahn/flux-latentpop
+    version: jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: solid background, t-shirt design, LTNP style
+  video:
+    url: https://replicate.com/bytedance/seedance-1-pro-fast
+    version: bytedance/seedance-1-pro-fast
+    guidance: reflected in the water
+links:
+  Model Context Protocol: https://modelcontextprotocol.io/
+  Cloudflare Workers: https://developers.cloudflare.com/workers/
+  Open-Meteo API: https://open-meteo.com/
+  Cloudflare Agents: https://github.com/cloudflare/agents
+---
+
+I wanted to give Claude the ability to check the weather. Not by scraping websites or parsing HTML, but properly - with actual tools that return structured data. The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) makes this possible, and [Cloudflare Workers](https://developers.cloudflare.com/workers/) turned out to be the perfect place to host it.
+
+MCP is Anthropic's open protocol for connecting AI assistants to external data sources and tools. Instead of Claude having a fixed set of capabilities, you can extend it with custom servers that provide new tools, resources, and prompts. Think of it as a plugin system, but standardized and interoperable.
+
+This is a walkthrough of building a weather MCP server from scratch, getting it running on Cloudflare's edge network, and hooking it up to Claude Desktop so you can ask about weather anywhere in the world.
+
+## Try it now
+
+Want to see it in action before building your own? I've deployed a working version you can use right away. Add this to your Claude Desktop config:
+
+```json
+{
+  "mcpServers": {
+    "weather": {
+      "url": "https://weather-mcp-server.superhighfives.workers.dev/mcp"
+    }
+  }
+}
+```
+
+The full source code is available at [github.com/superhighfives/weather-mcp](https://github.com/superhighfives/weather-mcp).
+
+## What we're building
+
+A simple weather MCP server that can be used to get the current weather and forecast for any city in the world. Our server will provide two tools:
+
+- `get-current-weather` - Current conditions for any city
+- `get-forecast` - Multi-day forecasts (1-7 days)
+
+We'll use the [Open-Meteo API](https://open-meteo.com/) for weather data (it's free and doesn't require authentication), TypeScript for type safety, and [Cloudflare Workers](https://developers.cloudflare.com/workers/) for deployment. The whole thing will run on the edge with sub-100ms response times globally.
+
+## Prerequisites
+
+Before starting, make sure you have:
+
+- **Node.js 18 or later** - The MCP SDK and Wrangler require modern Node.js features
+- **npm or yarn** - For installing dependencies
+- **A Cloudflare account** - Free tier is sufficient ([sign up here](https://dash.cloudflare.com/sign-up))
+- **Claude Desktop** - To test your MCP server ([download here](https://claude.ai/download))
+
+You can verify your Node.js version with:
+
+```bash command
+node --version
+```
+
+If you're on an older version, update Node.js before proceeding.
+
+## Setting up the project
+
+Start by creating a new directory and initializing a Node.js project:
+
+```bash command
+mkdir weather-mcp-server
+cd weather-mcp-server
+npx wrangler init
+```
+
+[Wrangler](https://developers.cloudflare.com/workers/wrangler/) is Cloudflare's CLI for deploying Workers. You'll need to select a directory. Choose the `Hello World example`, and then `Worker only`, with the language set to `TypeScript`.
+
+Maybe grab a coffee while you wait. 
+
+---
+
+Update the `wrangler.jsonc` file with `"compatibility_flags": ["nodejs_compat"]`. The `nodejs_compat` flag enables Node.js APIs in the Workers runtime.
+
+```json
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "weather-mcp-example",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-11-06",
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"enabled": true
+	}
+}
+```
+
+Once that's done, install your dependencies:
+
+```bash command
+npm install @modelcontextprotocol/sdk @types/node agents typescript zod
+```
+
+Here's what each package does:
+- `@modelcontextprotocol/sdk` - The official MCP SDK for building servers
+- `@types/node` - TypeScript type definitions for Node.js
+- `agents` - Cloudflare's MCP framework that handles HTTP transport
+- `typescript` - Type safety and compilation
+- `zod` - Runtime schema validation for tool inputs
+
+
+## Building the MCP server
+
+Jump into `src/index.ts` and delete whatever code is there. You can then start with the imports:
+
+```ts
+import { createMcpHandler } from "agents/mcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+```
+
+The MCP SDK provides the core server functionality, `agents/mcp` handles the HTTP transport for Cloudflare Workers, and Zod lets us define type-safe schemas for tool inputs.
+
+### Weather codes and helper functions
+
+We'll need to add some types for the weather data. Open-Meteo returns data with the following structure:
+
+```ts
+interface GeocodingResponse {
+  results?: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+  }>;
+}
+
+interface WeatherResponse {
+  current: {
+    temperature_2m: number;
+    relative_humidity_2m: number;
+    weathercode: number;
+    windspeed_10m: number;
+    winddirection_10m: number;
+  };
+}
+
+interface ForecastResponse {
+  daily: {
+    time: string[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    weathercode: number[];
+    precipitation_probability_max: number[];
+  };
+}
+```
+
+Open-Meteo returns numeric weather codes (part of the WMO standard), so we need to map them to readable descriptions:
+
+```ts
+const WEATHER_CODES: Record<number, string> = {
+  0: "Clear sky",
+  1: "Mainly clear",
+  2: "Partly cloudy",
+  3: "Overcast",
+  45: "Foggy",
+  48: "Depositing rime fog",
+  51: "Light drizzle",
+  53: "Moderate drizzle",
+  55: "Dense drizzle",
+  61: "Slight rain",
+  63: "Moderate rain",
+  65: "Heavy rain",
+  71: "Slight snow",
+  73: "Moderate snow",
+  75: "Heavy snow",
+  77: "Snow grains",
+  80: "Slight rain showers",
+  81: "Moderate rain showers",
+  82: "Violent rain showers",
+  85: "Slight snow showers",
+  86: "Heavy snow showers",
+  95: "Thunderstorm",
+  96: "Thunderstorm with slight hail",
+  99: "Thunderstorm with heavy hail",
+};
+
+function getWeatherDescription(code: number): string {
+  return WEATHER_CODES[code] || "Unknown";
+}
+```
+
+### Geocoding cities to coordinates
+
+Open-Meteo needs latitude and longitude, so we'll use their geocoding API to convert city names:
+
+```ts
+async function geocodeCity(cityName: string): Promise<{
+  latitude: number;
+  longitude: number
+}> {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+    cityName
+  )}&count=1&language=en&format=json`;
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Geocoding API error: ${response.statusText}`);
+  }
+
+  const data = await response.json() as GeocodingResponse;
+
+  if (!data.results || data.results.length === 0) {
+    throw new Error(`City "${cityName}" not found`);
+  }
+
+  const result = data.results[0];
+  return {
+    latitude: result.latitude,
+    longitude: result.longitude,
+  };
+}
+```
+
+This searches for the city name and returns the first match. In a production app you might want to handle multiple matches or be more specific about which city you mean (there are multiple Portlands, for example).
+
+### Fetching current weather
+
+Now we can fetch the actual weather data:
+
+```ts
+async function getCurrentWeather(latitude: number, longitude: number) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weathercode,windspeed_10m,winddirection_10m`;
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Weather API error: ${response.statusText}`);
+  }
+
+  const data = await response.json() as WeatherResponse;
+  const current = data.current;
+
+  return {
+    temperature: current.temperature_2m,
+    weathercode: current.weathercode,
+    windspeed: current.windspeed_10m,
+    winddirection: current.winddirection_10m,
+    humidity: current.relative_humidity_2m,
+  };
+}
+```
+
+The `current` parameter in the URL specifies which fields we want. Open-Meteo has dozens of options - precipitation, UV index, visibility, etc. We're keeping it simple with temperature, humidity, wind, and conditions.
+
+### Fetching forecasts
+
+For multi-day forecasts, we need a slightly different endpoint:
+
+```ts
+async function getWeatherForecast(
+  latitude: number,
+  longitude: number,
+  days: number
+) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=${days}`;
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Weather API error: ${response.statusText}`);
+  }
+
+  const data = await response.json() as ForecastResponse;
+  const daily = data.daily;
+
+  const forecast = [];
+  for (let i = 0; i < daily.time.length; i++) {
+    forecast.push({
+      date: daily.time[i],
+      temperature_max: daily.temperature_2m_max[i],
+      temperature_min: daily.temperature_2m_min[i],
+      weathercode: daily.weathercode[i],
+      precipitation_probability: daily.precipitation_probability_max[i],
+    });
+  }
+
+  return forecast;
+}
+```
+
+The daily endpoint returns arrays of values, one for each day. We're transforming this into an array of objects to make it easier to work with.
+
+### Creating the MCP server
+
+Now we can create our MCP server instance:
+
+```ts
+const server = new McpServer({
+  name: "weather-server",
+  version: "1.0.0",
+});
+```
+
+### Adding the current weather tool
+
+Tools in MCP are defined with a name, description, input schema (using Zod), and a handler function:
+
+```ts
+server.tool(
+  "get-current-weather",
+  "Get the current weather for a specific city. Returns temperature, conditions, humidity, and wind information.",
+  {
+    city: z.string().describe("Name of the city (e.g., 'London', 'New York', 'Tokyo')"),
+  },
+  async ({ city }) => {
+    try {
+      const coords = await geocodeCity(city);
+      const weather = await getCurrentWeather(coords.latitude, coords.longitude);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                city,
+                coordinates: coords,
+                current: {
+                  temperature: `${weather.temperature}°C`,
+                  conditions: getWeatherDescription(weather.weathercode),
+                  humidity: `${weather.humidity}%`,
+                  wind: {
+                    speed: `${weather.windspeed} km/h`,
+                    direction: `${weather.winddirection}°`,
+                  },
+                },
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${errorMessage}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+```
+
+The handler calls our geocoding and weather functions, then formats the response as JSON. The `content` array can contain multiple items - text, images, or other content types. We're just using text here.
+
+Error handling is important. If the city isn't found or the API is down, we return an error response instead of throwing, which gives Claude a helpful message to show the user.
+
+### Adding the forecast tool
+
+The forecast tool is similar but takes an additional parameter for the number of days:
+
+```ts
+server.tool(
+  "get-forecast",
+  "Get weather forecast for a specific city. Returns daily forecasts with high/low temperatures and conditions.",
+  {
+    city: z.string().describe("Name of the city (e.g., 'London', 'New York', 'Tokyo')"),
+    days: z
+      .number()
+      .min(1)
+      .max(7)
+      .describe("Number of days to forecast (1-7)")
+      .default(3),
+  },
+  async ({ city, days }) => {
+    try {
+      const coords = await geocodeCity(city);
+      const forecast = await getWeatherForecast(
+        coords.latitude,
+        coords.longitude,
+        Math.min(Math.max(days, 1), 7)
+      );
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                city,
+                coordinates: coords,
+                forecast: forecast.map((day) => ({
+                  date: day.date,
+                  temperature: {
+                    max: `${day.temperature_max}°C`,
+                    min: `${day.temperature_min}°C`,
+                  },
+                  conditions: getWeatherDescription(day.weathercode),
+                  precipitation_probability: `${day.precipitation_probability}%`,
+                })),
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${errorMessage}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+```
+
+Zod handles validation automatically. If someone asks for 10 days, it'll clamp to 7. If they don't specify, it defaults to 3 days.
+
+### Adding a resource
+
+Resources in MCP are static content that the server can provide. They're useful for documentation or contextual information:
+
+```ts
+server.resource(
+  "weather-info",
+  "weather://info",
+  {
+    name: "Weather Service Information",
+    description: "Information about the weather service and API",
+    mimeType: "text/plain",
+  },
+  async () => ({
+    contents: [
+      {
+        uri: "weather://info",
+        mimeType: "text/plain",
+        text: `Weather MCP Server (Cloudflare Workers Edition)
+
+This server provides weather information using the Open-Meteo API.
+
+Available Tools:
+1. get-current-weather - Get current weather for any city
+2. get-forecast - Get weather forecast for 1-7 days
+
+Data Source: Open-Meteo (https://open-meteo.com/)
+- Free weather API with no authentication required
+- Provides current conditions and forecasts
+- Data updated regularly from meteorological services
+
+Example Usage:
+- "What's the weather in London?"
+- "Get me a 5-day forecast for Tokyo"
+- "What's the current temperature in New York?"
+
+Deployment: Cloudflare Workers (Global Edge Network)
+- Low latency worldwide
+- Automatic scaling
+- Highly available`,
+      },
+    ],
+  })
+);
+```
+
+Claude can read this resource to understand what the server does and how to use it. It's optional but helpful for more complex servers.
+
+## Cloudflare Workers integration
+
+Now we need to make this work as a Cloudflare Worker. The `agents` package provides a helper that wraps our MCP server with HTTP transport:
+
+```ts
+const mcpHandler = createMcpHandler(server, {
+  route: "/mcp",
+});
+```
+
+This creates a request handler that speaks the MCP protocol over HTTP. Claude will POST to this endpoint with JSON-RPC requests.
+
+Finally, export the Worker fetch handler:
+
+```ts
+export default {
+  async fetch(request: Request, env: any, ctx: any): Promise<Response> {
+    const url = new URL(request.url);
+
+    // Handle MCP requests
+    if (url.pathname === "/mcp") {
+      return mcpHandler(request, env, ctx);
+    }
+
+    // Health check endpoint
+    if (url.pathname === "/health") {
+      return new Response(
+        JSON.stringify({
+          status: "healthy",
+          server: "weather-mcp-server",
+          version: "1.0.0",
+          endpoint: "/mcp",
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Root endpoint with information
+    if (url.pathname === "/") {
+      return new Response(
+        `Weather MCP Server - Cloudflare Workers
+
+Available Endpoints:
+  POST /mcp     - MCP endpoint
+  GET  /health  - Health check
+
+To connect with Claude Desktop or other MCP clients, use the /mcp endpoint.
+
+Example configuration:
+{
+  "mcpServers": {
+    "weather": {
+      "url": "https://your-worker.your-subdomain.workers.dev/mcp"
+    }
+  }
+}
+
+Documentation: https://modelcontextprotocol.io/
+Source: https://github.com/cloudflare/agents
+`,
+        {
+          headers: { "Content-Type": "text/plain" },
+        }
+      );
+    }
+
+    return new Response("Not Found", { status: 404 });
+  },
+};
+```
+
+We're setting up three routes:
+- `/mcp` - The actual MCP endpoint
+- `/health` - Health check for monitoring
+- `/` - Documentation and usage info
+
+This makes it easy to verify the server is running and see how to connect to it.
+
+## Deploying to Cloudflare Workers
+
+If you haven't already, authenticate with Cloudflare:
+
+```bash command
+wrangler login
+```
+
+This will open your browser and ask you to log in. Once you're done, deploy:
+
+```bash command
+npm run deploy
+```
+
+Wrangler will bundle your code and push it to Cloudflare's edge network. You'll get a URL like `https://weather-mcp-server.your-subdomain.workers.dev`.
+
+Visit that URL in your browser and you should see the documentation page. Try `https://your-worker-url/health` to verify it's working.
+
+## Using with Claude Desktop
+
+Now for the fun part - connecting it to Claude.
+
+On macOS, Claude Desktop's config file is at:
+```
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
+
+On Windows, it's at:
+```
+%APPDATA%\Claude\claude_desktop_config.json
+```
+
+Open that file (create it if it doesn't exist) and add your weather server:
+
+```json
+{
+  "mcpServers": {
+    "weather": {
+      "url": "https://weather-mcp-server.your-subdomain.workers.dev/mcp"
+    }
+  }
+}
+```
+
+Replace `your-subdomain` with your actual Cloudflare Workers subdomain.
+
+Restart Claude Desktop. You should see a little hammer icon indicating tools are available. Now you can ask:
+
+- "What's the weather like in Tokyo?"
+- "Give me a 5-day forecast for London"
+- "What's the current temperature in San Francisco?"
+
+Claude will call your weather tools, get the data, and format it into a natural response. You've just extended Claude with live weather data, running on Cloudflare's global network.
+
+## Why Cloudflare Workers
+
+You might wonder why we're using Workers instead of running this locally. A few reasons:
+
+**Always available** - Your MCP server is up 24/7, not just when your laptop is on. This matters if you're using Claude Desktop across multiple machines or sharing the server with others.
+
+**Global edge network** - Cloudflare runs in 200+ locations worldwide. Requests are handled by the nearest datacenter, so weather queries are fast no matter where you are.
+
+**Automatic scaling** - If you build something popular (or give the URL to your team), it'll handle the traffic without you doing anything. Workers scale from zero to millions of requests automatically.
+
+**Free tier is generous** - 100,000 requests per day free. For a personal MCP server, that's effectively unlimited.
+
+**Stateless and simple** - No databases to manage, no servers to patch, no Docker containers to maintain. It's just code that runs when needed.
+
+## Addendum: Running locally
+
+For development, you can run the server locally with Wrangler's dev mode:
+
+```bash command
+npm run dev
+```
+
+This starts a local server at `http://localhost:8787`. You can test the endpoints:
+
+```bash command
+curl http://localhost:8787/health
+```
+
+To use it with Claude Desktop, update your config to point to localhost:
+
+```json
+{
+  "mcpServers": {
+    "weather": {
+      "url": "http://localhost:8787/mcp"
+    }
+  }
+}
+```
+
+Restart Claude Desktop and it'll connect to your local server instead. This is useful for testing changes before deploying.
+
+The nice thing about MCP over HTTP is you can switch between local and deployed just by changing the URL. When you're ready to go live, deploy to Workers and update the config. No code changes needed.
+
+## What's next
+
+This is a basic weather server, but it shows the pattern for building MCP servers on Cloudflare Workers. You could extend it with:
+
+- More weather data (UV index, air quality, hourly forecasts)
+- Multiple weather sources (compare forecasts from different APIs)
+- Historical weather data
+- Weather alerts and warnings
+- Caching to reduce API calls
+
+The same pattern works for other kinds of data too. Want to give Claude access to your company's internal APIs? Want to build tools that read from databases or call external services? MCP servers on Workers are a solid foundation.
+
+The combination of MCP's protocol, Cloudflare's `agents` package, and Workers' edge deployment makes it surprisingly straightforward to extend Claude with whatever capabilities you need. And unlike browser extensions or API wrappers, MCP servers work across all MCP clients - not just Claude Desktop.
+
+Now go build something useful and tell Claude what the weather's like.

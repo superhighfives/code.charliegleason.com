@@ -24,9 +24,7 @@ async function imageToBase64(imagePath: string): Promise<string> {
 /**
  * Extract colors from all images for a given post
  */
-async function extractColorsForPost(
-  slug: string,
-): Promise<ColorData[] | null> {
+async function extractColorsForPost(slug: string): Promise<ColorData[] | null> {
   const postDir = join(OUTPUT_DIR, slug);
   const colors: ColorData[] = [];
 
@@ -113,7 +111,9 @@ async function main() {
 
     // Only process posts with visual config
     if (!data.visual || typeof data.visual !== "object") {
-      console.log(`\n⏭️  Skipping: ${data.title || filePath} (no visual config)`);
+      console.log(
+        `\n⏭️  Skipping: ${data.title || filePath} (no visual config)`,
+      );
       skippedCount++;
       continue;
     }

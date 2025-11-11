@@ -42,7 +42,7 @@ jobs:
           sudo apt-get install -y pngquant
           wget -q https://github.com/shssoichiro/oxipng/releases/download/v9.1.5/oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
           tar xzf oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
-          sudo mv oxipng /usr/local/bin/
+          sudo mv oxipng-9.1.5-x86_64-unknown-linux-musl/oxipng /usr/local/bin/
           pngquant --version
           oxipng --version
 

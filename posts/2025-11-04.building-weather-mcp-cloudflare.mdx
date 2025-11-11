@@ -1,22 +1,44 @@
 ---
 slug: building-weather-mcp-cloudflare
 title: Building a weather MCP server on Cloudflare Workers
-description: A complete guide to building and deploying a Model Context Protocol server that gives Claude weather superpowers.
+description: >-
+  A complete guide to building and deploying a Model Context Protocol server
+  that gives Claude weather superpowers.
 visual:
-  prompt: Weather in Tokyo, Japan
+  prompt: 'Weather in Tokyo, Japan'
   image:
-    url: https://replicate.com/jakedahn/flux-latentpop
-    version: jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
-    guidance: solid background, t-shirt design, LTNP style
+    url: 'https://replicate.com/jakedahn/flux-latentpop'
+    version: >-
+      jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: 'solid background, t-shirt design, LTNP style'
   video:
-    url: https://replicate.com/bytedance/seedance-1-pro-fast
+    url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
     version: bytedance/seedance-1-pro-fast
     guidance: reflected in the water
+  colors:
+    - text: '#ffe0a0'
+      background: '#25353c'
+    - text: '#303030'
+      background: '#fb4a37'
+    - text: '#203030'
+      background: '#f84c40'
+    - text: '#ff9030'
+      background: '#28333e'
+    - text: '#203040'
+      background: '#e9e0b3'
+    - text: '#202040'
+      background: '#fc5c4b'
+    - text: '#fff0a0'
+      background: '#353e49'
+    - text: '#fff0b0'
+      background: '#2e3443'
+    - text: '#202020'
+      background: '#727373'
 links:
-  Model Context Protocol: https://modelcontextprotocol.io/
-  Cloudflare Workers: https://developers.cloudflare.com/workers/
-  Open-Meteo API: https://open-meteo.com/
-  Cloudflare Agents: https://github.com/cloudflare/agents
+  Model Context Protocol: 'https://modelcontextprotocol.io/'
+  Cloudflare Workers: 'https://developers.cloudflare.com/workers/'
+  Open-Meteo API: 'https://open-meteo.com/'
+  Cloudflare Agents: 'https://github.com/cloudflare/agents'
 ---
 
 I wanted to give Claude the ability to check the weather. Not by scraping websites or parsing HTML, but properly - with actual tools that return structured data. The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) makes this possible, and [Cloudflare Workers](https://developers.cloudflare.com/workers/) turned out to be the perfect place to host it.

@@ -4,6 +4,42 @@
 /* Font Face Declarations */
 /*************************************************************/
 
+/* Inter - Regular */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Inter-Regular.woff2") format("woff2");
+}
+
+/* Inter - Regular Italic */
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Inter-Italic.woff2") format("woff2");
+}
+
+/* Inter - SemiBold */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Inter-SemiBold.woff2") format("woff2");
+}
+
+/* Inter - SemiBold Italic */
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Inter-SemiBoldItalic.woff2") format("woff2");
+}
+
 /* JetBrains Mono - Regular */
 @font-face {
   font-family: "JetBrains Mono";
@@ -47,6 +83,9 @@
 @import "tailwindcss" source(".");
 
 @theme {
+  --font-sans:
+    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   --font-mono:
     "JetBrains Mono", "ui-monospace", "SFMono-Regular", '"Roboto Mono"',
     '"Courier New"', "monospace";
@@ -85,7 +124,7 @@ body {
   overflow-x: hidden;
   overscroll-behavior-x: none;
   background-color: var(--color-white);
-  @apply text-sm bg-white dark:bg-gray-950;
+  @apply font-sans text-sm bg-white dark:bg-gray-950;
 }
 
 /*************************************************************/

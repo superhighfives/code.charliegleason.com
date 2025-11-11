@@ -32,7 +32,7 @@ export default function NavBlock({
           "--text": visual?.colors?.[index]?.text || "inherit",
         } as React.CSSProperties
       }
-      className={`@container text-[var(--text)] bg-[var(--background)] overflow-hidden flex flex-col group justify-between rounded-md relative ring-transparent ring-offset-4 dark:ring-offset-gray-950 hover:ring-[var(--background)] hover:ring-2 focus:ring-2 gap-2 outline-none ${className}`}
+      className={`${hero ? "justify-center" : "justify-between"} @container text-[var(--text)] bg-[var(--background)] overflow-hidden flex flex-col group rounded-md relative ring-transparent ring-offset-4 dark:ring-offset-gray-950 hover:ring-[var(--background)] hover:ring-2 focus:ring-2 gap-2 outline-none ${className}`}
       rel="noreferrer"
     >
       <div

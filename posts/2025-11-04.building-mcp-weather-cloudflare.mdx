@@ -39,6 +39,10 @@ links:
   Cloudflare Workers: 'https://developers.cloudflare.com/workers/'
   Open-Meteo API: 'https://open-meteo.com/'
   Cloudflare Agents: 'https://github.com/cloudflare/agents'
+tags:
+  - mcp
+  - workers
+  - typescript
 ---
 
 I wanted to give Claude the ability to check the weather. Not by scraping websites or parsing HTML, but properly - with actual tools that return structured data. The [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) makes this possible, and [Cloudflare Workers](https://developers.cloudflare.com/workers/) turned out to be the perfect place to host it.

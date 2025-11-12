@@ -36,7 +36,7 @@ export default function Index() {
 
   return (
     <div className="grid gap-4 sm:gap-8 content-end h-full">
-      <h1 className="text-gray-400 dark:text-gray-500 font-mono">
+      <h1 className="text-gray-400 dark:text-gray-500 font-mono font-semibold">
         ❯ cd ~/code.charliegleason.com
       </h1>
       <About />
@@ -44,10 +44,9 @@ export default function Index() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-4">
           {posts.length ? (
             posts.map((post, index) => {
-              const dateCaption =
-                post.date && differenceInMonths(new Date(), post.date) <= 12
-                  ? `${formatDistanceToNow(post.date)} ago`
-                  : null;
+              const dateCaption = post.date
+                ? `${formatDistanceToNow(post.date)} ago`
+                : null;
               return (
                 <NavBlock
                   key={post.slug}
@@ -55,10 +54,13 @@ export default function Index() {
                   caption={dateCaption}
                   index={videos[post.slug]}
                   visual={post.frontmatter.visual}
+                  oldArticle={
+                    post.date && differenceInMonths(new Date(), post.date) > 12
+                  }
                   hero={index === 0}
                   className={
                     index === 0
-                      ? "sm:col-span-2 3xl:col-span-3 sm:row-span-1 lg:row-span-2 flex-col-reverse"
+                      ? "sm:col-span-2 3xl:col-span-3 sm:row-span-1 lg:row-span-2"
                       : ""
                   }
                 />

@@ -3,8 +3,7 @@ import { useScramble } from "use-scramble";
 import { scrambleOptions } from "./utils/scramble";
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
-  let className =
-    "border-b-2 font-semibold link-primary focus-ring-primary";
+  let className = "border-b-2 font-semibold link-primary focus-ring-primary";
   className += isActive
     ? " text-indigo-500 dark:text-indigo-300 border-indigo-500 dark:border-indigo-300"
     : " border-indigo-600/20 dark:border-indigo-400/30 hover:border-current hover:border-indigo-600/20 hover:dark:border-indigo-400/30 focus-visible:border-current focus-visible:border-indigo-600/20 focus-visible:dark:border-indigo-400/30";

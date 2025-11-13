@@ -1,4 +1,5 @@
 {
+  "enabledMcpjsonServers": ["beads"],
   "permissions": {
     "allow": [
       "Bash(chmod:*)",

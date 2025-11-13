@@ -45,7 +45,9 @@
       "Bash(bd update:*)",
       "Bash(bd close:*)",
       "Bash(bd sync:*)",
-      "Bash(bd import:*)"
+      "Bash(bd import:*)",
+      "Bash(git stash:*)",
+      "Bash(git remote prune:*)"
     ],
     "deny": [],
     "ask": []

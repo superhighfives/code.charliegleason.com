@@ -39,7 +39,9 @@
       "Bash(pngquant:*)",
       "Bash(oxipng --version:*)",
       "Bash(./scripts/optimize-pngs.sh:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote prune:*)"
     ],
     "deny": [],
     "ask": []

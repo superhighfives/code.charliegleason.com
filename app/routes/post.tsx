@@ -174,7 +174,7 @@ export default function Post() {
       <div className="flex flex-wrap gap-y-2 max-w-xl">
         <Link
           to="/"
-          className="font-mono font-semibold group text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm"
+          className="font-mono font-semibold group link-primary focus-ring-primary pr-2"
         >
           ❯ cd ~/code
           <span className="hidden sm:inline">.</span>

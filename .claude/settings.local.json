@@ -39,7 +39,11 @@
       "Bash(pngquant:*)",
       "Bash(oxipng --version:*)",
       "Bash(./scripts/optimize-pngs.sh:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(bd ready:*)",
+      "Bash(bd create:*)",
+      "Bash(bd update:*)",
+      "Bash(bd close:*)"
     ],
     "deny": [],
     "ask": []

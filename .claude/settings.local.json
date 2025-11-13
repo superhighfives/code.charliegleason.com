@@ -43,7 +43,9 @@
       "Bash(bd ready:*)",
       "Bash(bd create:*)",
       "Bash(bd update:*)",
-      "Bash(bd close:*)"
+      "Bash(bd close:*)",
+      "Bash(bd sync:*)",
+      "Bash(bd import:*)"
     ],
     "deny": [],
     "ask": []

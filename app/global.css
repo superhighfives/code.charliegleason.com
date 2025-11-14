@@ -447,3 +447,12 @@ strong {
 .command + .markdown-alert {
   @apply mt-0.5;
 }
+
+/*************************************************************/
+/* Nav block hover effects */
+/*************************************************************/
+
+/* When any nav-block is hovered or focused, fade OTHER nav-blocks to 50% */
+.nav-blocks-grid:has(.nav-block:hover, .nav-block:focus-visible) > .nav-block:not(:hover):not(:focus-visible) {
+  opacity: 0.9;
+}

@@ -97,12 +97,6 @@
   --breakpoint-3xl: 110rem;
   --breakpoint-4xl: 120rem;
 
-  /* Semantic spacing for consistent layouts */
-  --spacing-card: 1rem;        /* Equivalent to p-4 */
-  --spacing-card-lg: 2rem;     /* Equivalent to p-8 */
-  --spacing-section: 1rem;     /* Equivalent to gap-4 */
-  --spacing-section-lg: 2rem;  /* Equivalent to gap-8 */
-
   /* Animations */
   @keyframes blink {
     0%,

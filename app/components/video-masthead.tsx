@@ -80,14 +80,14 @@ export default function VideoMasthead({
             Generated with{" "}
             <a
               href={visual.image.url}
-              className="underline underline-offset-1 hover:text-gray-600 dark:hover:text-gray-300 outline-none focus:text-gray-600 dark:focus:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
+              className="underline underline-offset-1 hover:text-gray-600 dark:hover:text-gray-300 outline-none focus-visible:text-gray-600 dark:focus-visible:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
             >
               {extractModelName(visual.image.url)}
             </a>
             {" and "}
             <a
               href={visual.video.url}
-              className="underline underline-offset-1  hover:text-gray-600 dark:hover:text-gray-300 outline-none focus:text-gray-600 dark:focus:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
+              className="underline underline-offset-1  hover:text-gray-600 dark:hover:text-gray-300 outline-none focus-visible:text-gray-600 dark:focus-visible:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
             >
               {extractModelName(visual.video.url)}
             </a>

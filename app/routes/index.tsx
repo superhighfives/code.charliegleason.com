@@ -41,7 +41,7 @@ export default function Index() {
       </h1>
       <About />
       <div className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 grid gap-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-4">
+        <div className="nav-blocks-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-4">
           {posts.length ? (
             posts.map((post, index) => {
               const dateCaption = post.date

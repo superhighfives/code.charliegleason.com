@@ -72,7 +72,7 @@ export function KudosButton({
         disabled={disabled}
         aria-label="Give kudos"
         title={disabled ? "Limit reached" : "Give kudos"}
-        className={`font-mono bg-white dark:bg-gray-950 relative z-10 inline-flex items-center gap-2 px-3 py-2 border border-indigo-600/50 dark:border-indigo-400/50 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 ${disabled ? "border-current/20" : "hover:text-indigo-500 hover:dark:text-indigo-300 focus-visible:text-indigo-500 focus-visible:dark:text-indigo-300 focus-visible:border-current"} ${disabled ? "cursor-not-allowed" : ""} ${!disabled ? "cursor-pointer" : ""}`}
+        className={`font-mono bg-white dark:bg-gray-950 relative z-10 inline-flex items-center gap-2 px-3 py-2 border border-indigo-600/50 dark:border-indigo-400/50 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 focus-ring-primary ${disabled ? "border-current/20" : "hover:text-indigo-500 hover:dark:text-indigo-300 focus-visible:text-indigo-500 focus-visible:dark:text-indigo-300 focus-visible:border-current"} ${disabled ? "cursor-not-allowed" : ""} ${!disabled ? "cursor-pointer" : ""}`}
       >
         <span role="img" aria-hidden="true">
           <ThumbsUp size={16} />

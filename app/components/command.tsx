@@ -29,7 +29,7 @@ export default function Command({
       <button
         type="button"
         onClick={handleCopy}
-        className="absolute top-2.5 right-2.5 p-2 rounded-xs bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+        className="absolute top-2.5 right-2.5 p-2 rounded-xs bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 transition-colors focus-ring-primary"
         aria-label="Copy to clipboard"
       >
         <IconSwapAnimation condition={copied}>

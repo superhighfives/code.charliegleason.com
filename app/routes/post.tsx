@@ -174,6 +174,7 @@ export default function Post() {
       <div className="flex flex-wrap gap-y-2 max-w-xl">
         <Link
           to="/"
+          viewTransition
           className="font-mono font-semibold group link-primary focus-ring-primary pr-2"
         >
           ❯ cd ~/code

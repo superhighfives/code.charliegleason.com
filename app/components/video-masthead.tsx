@@ -64,6 +64,7 @@ export default function VideoMasthead({
             muted
             playsInline
             className="size-full"
+            style={{ viewTransitionName: `post-visual-${slug}` }}
             initial={hasChanged ? { x: "100%" } : false}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}

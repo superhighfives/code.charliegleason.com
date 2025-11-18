@@ -456,3 +456,38 @@ strong {
 .nav-blocks-grid:has(.nav-block:hover, .nav-block:focus-visible) > .nav-block:not(:hover):not(:focus-visible) {
   opacity: 0.9;
 }
+
+/*************************************************************/
+/* View Transitions */
+/*************************************************************/
+
+/*
+ * View Transition API configuration for smooth page transitions
+ * Supports morphing between index grid and post page
+ */
+
+/* Root transition for overall page fade */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Disable root crossfade to only show morphing elements */
+::view-transition-old(root) {
+  animation-name: none;
+}
+
+::view-transition-new(root) {
+  animation-name: none;
+}
+
+/* Custom animation for post visuals (images/videos) morphing */
+::view-transition-old(post-visual),
+::view-transition-new(post-visual) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Maintain aspect ratio during transition */
+  object-fit: cover;
+  overflow: clip;
+}

@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Link } from "react-router";
 import type { Post, VisualConfig } from "~/mdx/types";
 import { toUserIndex } from "~/utils/video-index";
 
@@ -25,9 +26,10 @@ export default function NavBlock({
   const elementRef = useRef<HTMLAnchorElement>(null);
 
   return (
-    <a
+    <Link
       ref={elementRef}
-      href={`${url}/${toUserIndex(index)}`}
+      to={`${url}/${toUserIndex(index)}`}
+      viewTransition
       style={
         {
           "--background": visual?.colors?.[index]?.background || "inherit",
@@ -35,7 +37,6 @@ export default function NavBlock({
         } as React.CSSProperties
       }
       className={`nav-block ${hero ? "justify-center" : "justify-between sm:flex-col"} flex-col-reverse @container text-[var(--text)] bg-[var(--background)] overflow-hidden flex group rounded-md relative ring-transparent ring-offset-1 dark:ring-offset-gray-950 hover:ring-[var(--background)] hover:ring-3 focus-visible:ring-[var(--background)] focus-visible:ring-3 outline-none transition-opacity duration-300 ${className}`}
-      rel="noreferrer"
     >
       <div
         className={`flex flex-col gap-4 p-4 ${hero ? "flex-0" : "h-auto flex-1 justify-between"}`}
@@ -85,8 +86,9 @@ export default function NavBlock({
           src={`/posts/${slug}/${index}.png`}
           alt={title}
           className={`${hero ? "mask-b-from-75% mask-b-to-95%" : "mask-t-from-95% mask-t-to-100%"}`}
+          style={{ viewTransitionName: `post-visual-${slug}` }}
         />
       </div>
-    </a>
+    </Link>
   );
 }

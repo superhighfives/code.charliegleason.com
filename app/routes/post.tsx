@@ -173,7 +173,7 @@ export default function Post() {
       )}
       <div
         className="flex flex-wrap gap-y-2 max-w-xl"
-        style={{ viewTransitionName: 'post-breadcrumb' }}
+        style={{ viewTransitionName: "post-breadcrumb" }}
       >
         <Link
           to="/"
@@ -191,7 +191,10 @@ export default function Post() {
         </h1>
       </div>
 
-      <Metadata data={metadata} style={{ viewTransitionName: 'post-metadata' }} />
+      <Metadata
+        data={metadata}
+        style={{ viewTransitionName: "post-metadata" }}
+      />
 
       {isOldArticle ? (
         <p className="font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-xl">
@@ -199,7 +202,7 @@ export default function Post() {
           information miiiiiight be out of date. Here be dragons, etc.
         </p>
       ) : null}
-      <div className="post" style={{ viewTransitionName: 'post-content' }}>
+      <div className="post" style={{ viewTransitionName: "post-content" }}>
         <Component />
       </div>
       {slug && (

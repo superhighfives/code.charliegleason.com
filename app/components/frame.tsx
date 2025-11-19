@@ -18,8 +18,8 @@ function MenuItem({ to, children }: { to: string; children: string }) {
   const location = useLocation();
 
   // Check if we're already on this page
-  const isCurrentPage = location.pathname === to ||
-    (to === "/" && location.pathname === "/");
+  const isCurrentPage =
+    location.pathname === to || (to === "/" && location.pathname === "/");
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // If already on this page, just scroll to top without view transition
@@ -56,7 +56,7 @@ export function Frame({
       <div className="content-end">{children}</div>
       <div
         className="z-50 fixed inset-x-0 bottom-0 bg-gray-50 dark:bg-gray-900 drop-shadow-2xl font-mono"
-        style={{ viewTransitionName: 'navigation' }}
+        style={{ viewTransitionName: "navigation" }}
       >
         <div className="flex justify-between border-t dark:border-gray-800 px-8 pt-4 pb-4 sm:pb-12">
           <div className="flex gap-6">

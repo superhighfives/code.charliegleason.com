@@ -86,7 +86,6 @@ export default function NavBlock({
           src={`/posts/${slug}/${index}.png`}
           alt={title}
           className={`${hero ? "mask-b-from-75% mask-b-to-95%" : "mask-t-from-95% mask-t-to-100%"}`}
-          style={{ viewTransitionName: `post-visual-${slug}` }}
         />
       </div>
     </Link>

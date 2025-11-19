@@ -1,9 +1,18 @@
 import { format, parseISO } from "date-fns";
 import type { MetaData } from "~/mdx/types";
 
-export default function Metadata({ data }: { data?: MetaData[] }) {
+export default function Metadata({
+  data,
+  style,
+}: {
+  data?: MetaData[];
+  style?: React.CSSProperties;
+}) {
   return data?.length ? (
-    <dl className="font-mono text-xs divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 max-w-xl">
+    <dl
+      className="font-mono text-xs divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 max-w-xl"
+      style={style}
+    >
       {data.map((item: { key: string; value: string }) => {
         const date = /(\d{4})-(\d{2})-(\d{2})/.exec(item.value);
         return (

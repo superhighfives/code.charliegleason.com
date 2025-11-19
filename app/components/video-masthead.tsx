@@ -65,7 +65,7 @@ export default function VideoMasthead({
             playsInline
             className="size-full"
             style={{ viewTransitionName: `post-visual-${slug}` }}
-            initial={hasChanged ? { x: "100%" } : false}
+            initial={hasChanged ? { x: "100%" } : undefined}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ duration: 0.1 }}

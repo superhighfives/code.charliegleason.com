@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router";
+import { Link, NavLink, useLocation } from "react-router";
 import { useScramble } from "use-scramble";
 import { scrambleOptions } from "./utils/scramble";
 
@@ -15,13 +15,29 @@ function MenuItem({ to, children }: { to: string; children: string }) {
     ...scrambleOptions,
     text: children.toString(),
   });
+  const location = useLocation();
+
+  // Check if we're already on this page
+  const isCurrentPage = location.pathname === to ||
+    (to === "/" && location.pathname === "/");
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If already on this page, just scroll to top without view transition
+    if (isCurrentPage) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <NavLink
       to={to}
+      viewTransition
       className={navLinkClass}
       ref={ref}
       onMouseEnter={replay}
       onFocus={replay}
+      onClick={handleClick}
     >
       {children}
     </NavLink>
@@ -38,11 +54,15 @@ export function Frame({
   return (
     <div className="grid grid-rows-layout gap-8 min-h-dvh p-4 sm:p-8 [padding-bottom:calc(env(safe-area-inset-bottom)+4.5rem)] sm:[padding-bottom:calc(env(safe-area-inset-bottom)+8rem)] text-indigo-600 dark:text-indigo-400 overflow-x-hidden">
       <div className="content-end">{children}</div>
-      <div className="z-50 fixed inset-x-0 bottom-0 bg-gray-50 dark:bg-gray-900 drop-shadow-2xl font-mono">
+      <div
+        className="z-50 fixed inset-x-0 bottom-0 bg-gray-50 dark:bg-gray-900 drop-shadow-2xl font-mono"
+        style={{ viewTransitionName: 'navigation' }}
+      >
         <div className="flex justify-between border-t dark:border-gray-800 px-8 pt-4 pb-4 sm:pb-12">
           <div className="flex gap-6">
             <Link
               to="/"
+              viewTransition
               className="flex gap-1 leading-tight select-none focus-ring-primary"
             >
               <span>{"❯"}</span>

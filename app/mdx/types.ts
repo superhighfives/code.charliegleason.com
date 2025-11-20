@@ -26,6 +26,7 @@ export interface Post {
   date?: Date;
   tags?: string[];
   frontmatter: PostFrontmatter;
+  excerpt?: string;
 }
 
 export interface ModelConfig {

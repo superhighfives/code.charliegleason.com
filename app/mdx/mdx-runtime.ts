@@ -1,6 +1,84 @@
 import manifest from "virtual:mdx-manifest";
 import type { MdxFile, MdxRuntimeData, Post } from "./types";
 
+/**
+ * Strip markdown formatting from text
+ */
+function stripMarkdown(text: string): string {
+  return (
+    text
+      // Remove links [text](url) -> text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      // Remove bold **text** or __text__ -> text
+      .replace(/(\*\*|__)(.*?)\1/g, "$2")
+      // Remove italic *text* or _text_ -> text
+      .replace(/(\*|_)(.*?)\1/g, "$2")
+      // Remove inline code `code` -> code
+      .replace(/`([^`]+)`/g, "$1")
+      // Remove strikethrough ~~text~~ -> text
+      .replace(/~~(.*?)~~/g, "$1")
+  );
+}
+
+/**
+ * Extract the first couple of paragraphs from MDX content
+ * Skips frontmatter, code blocks, and component tags
+ */
+function extractExcerpt(content: string, paragraphCount = 2): string {
+  // Remove frontmatter if present
+  const withoutFrontmatter = content.replace(/^---\n[\s\S]*?\n---\n/, "");
+
+  // Split by double newlines to get paragraphs
+  const lines = withoutFrontmatter.split("\n");
+  const paragraphs: string[] = [];
+  let currentParagraph = "";
+  let inCodeBlock = false;
+  let inComponent = false;
+
+  for (const line of lines) {
+    // Track code blocks
+    if (line.trim().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+
+    // Skip code blocks
+    if (inCodeBlock) continue;
+
+    // Track JSX components (simple detection)
+    if (line.trim().startsWith("<") && !line.trim().startsWith("</")) {
+      inComponent = true;
+    }
+    if (line.trim().startsWith("</") || line.trim().endsWith("/>")) {
+      inComponent = false;
+      continue;
+    }
+
+    // Skip component content
+    if (inComponent) continue;
+
+    // Skip empty lines and headings
+    if (!line.trim() || line.trim().startsWith("#")) {
+      if (currentParagraph.trim()) {
+        paragraphs.push(stripMarkdown(currentParagraph.trim()));
+        currentParagraph = "";
+      }
+      continue;
+    }
+
+    // Build paragraph
+    currentParagraph += (currentParagraph ? " " : "") + line.trim();
+  }
+
+  // Add final paragraph if exists
+  if (currentParagraph.trim()) {
+    paragraphs.push(stripMarkdown(currentParagraph.trim()));
+  }
+
+  // Return first N paragraphs
+  return paragraphs.slice(0, paragraphCount).join("\n\n");
+}
+
 export async function getRuntimeMdxManifest(): Promise<{ files: MdxFile[] }> {
   return manifest;
 }
@@ -56,6 +134,7 @@ export async function loadAllMdxRuntime(
       date,
       tags: attributes.tags,
       frontmatter: attributes,
+      excerpt: extractExcerpt(file.rawContent),
     };
   });
 }

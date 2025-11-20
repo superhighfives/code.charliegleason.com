@@ -60,7 +60,7 @@ export default function Index() {
                   hero={index === 0}
                   className={
                     index === 0
-                      ? "sm:col-span-2 3xl:col-span-3 sm:row-span-1 lg:row-span-2"
+                      ? "sm:col-span-2 3xl:col-span-3 sm:row-span-1 md:row-span-2"
                       : ""
                   }
                 />

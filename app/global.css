@@ -456,3 +456,118 @@ strong {
 .nav-blocks-grid:has(.nav-block:hover, .nav-block:focus-visible) > .nav-block:not(:hover):not(:focus-visible) {
   opacity: 0.9;
 }
+
+/*************************************************************/
+/* View Transitions */
+/*************************************************************/
+
+/*
+ * View Transition API configuration for smooth page transitions
+ * Supports morphing between index grid and post page
+ */
+
+/* Root transition - old disappears instantly, new fades in */
+::view-transition-old(root) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(root) {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Custom animation for post visuals (images/videos) */
+::view-transition-old(post-visual),
+::view-transition-new(post-visual) {
+  /* Maintain aspect ratio during transition */
+  object-fit: cover;
+  overflow: clip;
+  mix-blend-mode: normal;
+}
+
+/* Completely disable group morphing for post visual */
+::view-transition-group(post-visual) {
+  /* No morphing animation at all */
+  animation: none !important;
+}
+
+/* New visual slides down from top and fades in */
+::view-transition-new(post-visual) {
+  animation: slideFromTop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both,
+             fade-in 0.7s ease-out 0.1s both;
+  opacity: 0;
+  transform: translateY(-200px);
+}
+
+@keyframes slideFromTop {
+  from {
+    transform: translateY(-200px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Post content elements - old disappears instantly, new fades in staggered */
+::view-transition-old(post-breadcrumb),
+::view-transition-old(post-metadata),
+::view-transition-old(post-content),
+::view-transition-old(post-visual) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(post-breadcrumb) {
+  animation: slideUpFade 0.5s ease-out 0.2s both;
+}
+
+::view-transition-new(post-metadata) {
+  animation: slideUpFade 0.5s ease-out 0.3s both;
+}
+
+::view-transition-new(post-content) {
+  animation: slideUpFade 0.5s ease-out 0.4s both;
+}
+
+/* Keep navigation fixed and prevent flickering during transitions */
+::view-transition-old(navigation),
+::view-transition-new(navigation) {
+  /* Keep navigation instantly visible with no animation */
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Ensure navigation group doesn't animate and stays on top */
+::view-transition-group(navigation) {
+  animation-duration: 0s;
+  z-index: 9999;
+}

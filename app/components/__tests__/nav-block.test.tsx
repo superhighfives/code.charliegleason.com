@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { BrowserRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import NavBlock from "../nav-block";
 
@@ -32,7 +33,11 @@ describe("NavBlock", () => {
   });
 
   it("should render with basic props", () => {
-    render(<NavBlock post={defaultPost} index={5} />);
+    render(
+      <BrowserRouter>
+        <NavBlock post={defaultPost} index={5} />
+      </BrowserRouter>,
+    );
 
     expect(screen.getByText("Test Post Title")).toBeInTheDocument();
     expect(screen.getByText("This is a test description")).toBeInTheDocument();
@@ -40,7 +45,11 @@ describe("NavBlock", () => {
 
   it("should render without optional description", () => {
     const postWithoutDescription = { ...defaultPost, description: undefined };
-    render(<NavBlock post={postWithoutDescription} index={5} />);
+    render(
+      <BrowserRouter>
+        <NavBlock post={postWithoutDescription} index={5} />
+      </BrowserRouter>,
+    );
 
     expect(screen.getByText("Test Post Title")).toBeInTheDocument();
     expect(
@@ -49,7 +58,11 @@ describe("NavBlock", () => {
   });
 
   it("should render image with correct src", () => {
-    const { container } = render(<NavBlock post={defaultPost} index={5} />);
+    const { container } = render(
+      <BrowserRouter>
+        <NavBlock post={defaultPost} index={5} />
+      </BrowserRouter>,
+    );
 
     const img = container.querySelector("img") as HTMLImageElement;
     expect(img).toBeInTheDocument();
@@ -57,7 +70,11 @@ describe("NavBlock", () => {
   });
 
   it("should render link with correct href including video index", () => {
-    render(<NavBlock post={defaultPost} index={5} />);
+    render(
+      <BrowserRouter>
+        <NavBlock post={defaultPost} index={5} />
+      </BrowserRouter>,
+    );
 
     const link = screen.getByRole("link");
     // Should include video index (video 5 + 1 = 6 in user-facing format)
@@ -65,14 +82,22 @@ describe("NavBlock", () => {
   });
 
   it("should have hover effect classes on link", () => {
-    render(<NavBlock post={defaultPost} index={5} />);
+    render(
+      <BrowserRouter>
+        <NavBlock post={defaultPost} index={5} />
+      </BrowserRouter>,
+    );
 
     const link = screen.getByRole("link");
     expect(link).toHaveClass("group");
   });
 
   it("should render all content within link element", () => {
-    render(<NavBlock post={defaultPost} index={5} />);
+    render(
+      <BrowserRouter>
+        <NavBlock post={defaultPost} index={5} />
+      </BrowserRouter>,
+    );
 
     const link = screen.getByRole("link");
     expect(link).toContainElement(screen.getByText("Test Post Title"));
@@ -86,21 +111,33 @@ describe("NavBlock", () => {
       ...defaultPost,
       tags: ["react", "typescript"],
     };
-    render(<NavBlock post={postWithTags} index={5} />);
+    render(
+      <BrowserRouter>
+        <NavBlock post={postWithTags} index={5} />
+      </BrowserRouter>,
+    );
 
     expect(screen.getByText("react")).toBeInTheDocument();
     expect(screen.getByText("typescript")).toBeInTheDocument();
   });
 
   it("should not render tags section when tags are empty", () => {
-    const { container } = render(<NavBlock post={defaultPost} index={5} />);
+    const { container } = render(
+      <BrowserRouter>
+        <NavBlock post={defaultPost} index={5} />
+      </BrowserRouter>,
+    );
 
     // Tags container should not be present
     expect(container.querySelector(".flex-wrap.gap-2")).not.toBeInTheDocument();
   });
 
   it("should apply className", () => {
-    render(<NavBlock post={defaultPost} index={5} className="puppies" />);
+    render(
+      <BrowserRouter>
+        <NavBlock post={defaultPost} index={5} className="puppies" />
+      </BrowserRouter>,
+    );
 
     const link = screen.getByRole("link");
     expect(link).toHaveClass("puppies");
@@ -120,7 +157,11 @@ describe("NavBlock", () => {
         { text: "#555555", background: "#aaaaaa" },
       ],
     };
-    render(<NavBlock post={defaultPost} index={5} visual={visual} />);
+    render(
+      <BrowserRouter>
+        <NavBlock post={defaultPost} index={5} visual={visual} />
+      </BrowserRouter>,
+    );
 
     const link = screen.getByRole("link");
     expect(link).toHaveStyle({

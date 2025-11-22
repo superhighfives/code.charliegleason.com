@@ -111,7 +111,7 @@
   --animate-blink: blink 1s steps(1, end) infinite;
 
   /* Layout */
-  --grid-template-rows-layout: "1fr auto";
+  --grid-template-rows-layout: 1fr auto;
 }
 
 @plugin "@tailwindcss/typography";
@@ -570,4 +570,17 @@ strong {
 ::view-transition-group(navigation) {
   animation-duration: 0s;
   z-index: 9999;
+}
+
+/* Accessibility: Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+    animation-delay: 0s !important;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+  }
 }

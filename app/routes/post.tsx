@@ -178,6 +178,7 @@ export default function Post() {
         <Link
           to="/"
           viewTransition
+          prefetch="intent"
           className="font-mono font-semibold group link-primary focus-ring-primary pr-2"
         >
           ❯ cd ~/code

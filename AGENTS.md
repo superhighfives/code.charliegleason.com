@@ -74,12 +74,12 @@ bd close bd-42 --reason "Completed" --json
 4. **Discover new work?** Create linked issue:
    - `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`
 5. **Complete**: `bd close <id> --reason "Done"`
-6. **Commit together**: Always commit the `.beads/issues.jsonl` file together with the code changes so issue state stays in sync with code state
+6. **Commit together**: Always commit the `.beads/beads.jsonl` file together with the code changes so issue state stays in sync with code state
 
 ### Auto-Sync
 
 bd automatically syncs with git:
-- Exports to `.beads/issues.jsonl` after changes (5s debounce)
+- Exports to `.beads/beads.jsonl` after changes (5s debounce)
 - Imports from JSONL when newer (e.g., after `git pull`)
 - No manual export/import needed!
 
@@ -178,9 +178,9 @@ bd close bd-42 bd-43 --reason "Completed" --json
 
 # 4. Sync carefully - example workflow (adapt as needed):
 git pull --rebase
-# If conflicts in .beads/issues.jsonl, resolve thoughtfully:
-#   - git checkout --theirs .beads/issues.jsonl (accept remote)
-#   - bd import -i .beads/issues.jsonl (re-import)
+# If conflicts in .beads/beads.jsonl, resolve thoughtfully:
+#   - git checkout --theirs .beads/beads.jsonl (accept remote)
+#   - bd import -i .beads/beads.jsonl (re-import)
 #   - Or manual merge, then import
 bd sync  # Export/import/verify
 git push

@@ -33,6 +33,7 @@ function MenuItem({ to, children }: { to: string; children: string }) {
     <NavLink
       to={to}
       viewTransition
+      prefetch="intent"
       className={navLinkClass}
       ref={ref}
       onMouseEnter={replay}
@@ -63,6 +64,7 @@ export function Frame({
             <Link
               to="/"
               viewTransition
+              prefetch="intent"
               className="flex gap-1 leading-tight select-none focus-ring-primary"
             >
               <span>{"❯"}</span>

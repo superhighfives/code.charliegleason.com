@@ -862,3 +862,7 @@ npm run check                  # Full check (types + build)
 - Check `en_theme` cookie is set
 - Verify client hints middleware
 - Check theme resource route `/theme-switch`
+
+# IMPORTANT
+
+🚨 Never commit or push code unless specifically asked, especially to `main`. 🚨

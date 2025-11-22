@@ -30,6 +30,7 @@ export default function NavBlock({
       ref={elementRef}
       to={`${url}/${toUserIndex(index)}`}
       viewTransition
+      prefetch="intent"
       style={
         {
           "--background": visual?.colors?.[index]?.background || "inherit",

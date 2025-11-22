@@ -111,7 +111,7 @@
   --animate-blink: blink 1s steps(1, end) infinite;
 
   /* Layout */
-  --grid-template-rows-layout: "1fr auto";
+  --grid-template-rows-layout: 1fr auto;
 }
 
 @plugin "@tailwindcss/typography";

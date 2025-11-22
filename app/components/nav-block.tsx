@@ -89,12 +89,9 @@ export default function NavBlock({
           </div>
         ) : null}
         {hero ? (
-          <a
-            href={`${url}/${toUserIndex(index)}`}
-            className="absolute bottom-0 rounded-t-sm self-start px-4 py-2 bg-(--text)/90 text-(--background) font-semibold max-md:hidden"
-          >
+          <span className="absolute bottom-0 rounded-t-sm self-start px-4 py-2 bg-[var(--text)]/90 text-[var(--background)] font-semibold max-md:hidden">
             Read more
-          </a>
+          </span>
         ) : null}
       </div>
       <div

@@ -1,0 +1,201 @@
+---
+slug: upward-accordion
+title: Upward Accordions
+description: Keeping UI elements stable when collapsing content.
+tags:
+  - ux
+  - animation
+  - tutorial
+visual:
+  prompt: An elevator
+  image:
+    url: 'https://replicate.com/jakedahn/flux-latentpop'
+    version: >-
+      jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: 'solid background, t-shirt design, LTNP style'
+  video:
+    url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
+    version: bytedance/seedance-1-pro-fast
+  colors:
+    - text: '#303030'
+      background: '#f64d3b'
+    - text: '#202030'
+      background: '#e14132'
+    - text: '#303030'
+      background: '#fa5746'
+    - text: '#d0f020'
+      background: '#2d2e37'
+    - text: '#303030'
+      background: '#fa4a35'
+    - text: '#d0b0d0'
+      background: '#6b4877'
+    - text: '#202030'
+      background: '#db4533'
+    - text: '#302030'
+      background: '#fc7d24'
+    - text: '#303030'
+      background: '#fa4738'
+links:
+  Original article: 'https://samding.dev/crafts/upward-accordion/'
+---
+
+Ever notice how accordion buttons jump around when you collapse them after scrolling? [Sam Ding](https://x.com/samding) built [a neat fix](https://samding.dev/crafts/upward-accordion/) - compensate the scroll position during the collapse animation so the button stays put.
+
+Here's the difference. First, the traditional behavior - expand it, scroll down, then collapse. Watch the button jump.
+
+### Normal accordion
+
+```jsx live
+import { useState, useRef, useEffect } from 'react'
+import { faker } from '@faker-js/faker'; // ^10.1.0
+
+function Accordion({ title, children }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [height, setHeight] = useState(0)
+  const contentRef = useRef(null)
+  const buttonRef = useRef(null)
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setHeight(isOpen ? contentRef.current.scrollHeight : 0)
+    }
+  }, [isOpen])
+
+  return (
+    <div className="border overflow-hidden">
+      <div
+        ref={contentRef}
+        style={{
+          height: `${height}px`,
+          transition: 'height 300ms ease-out',
+          overflow: 'hidden'
+        }}
+      >
+        <div className="p-4 space-y-2">
+          {children}
+        </div>
+      </div>
+      <button
+        ref={buttonRef}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-3 text-left font-medium bg-gray-100 hover:bg-gray-200 flex justify-between items-center"
+      >
+        <span>{title}</span>
+        <span className="text-xl">{isOpen ? '−' : '+'}</span>
+      </button>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <div className="pt-16 max-w-2xl mx-auto p-4 text-gray-950 leading-7 text-sm dark:text-gray-50 bg-gray-50 dark:bg-gray-950">
+      {faker.lorem.paragraphs(10)}
+      <Accordion title="Click to expand">
+        {faker.lorem.paragraphs(10)}
+      </Accordion>
+      {faker.lorem.paragraphs(10)}
+    </div>
+  )
+}
+```
+
+Now the smart version. Same deal, but the button stays in place.
+
+### Smart accordion
+
+```jsx live
+import { useState, useRef, useEffect } from 'react'
+import { faker } from '@faker-js/faker'; // ^10.1.0
+
+function SmartAccordion({ title, children }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [height, setHeight] = useState(0)
+  const contentRef = useRef(null)
+  const buttonRef = useRef(null)
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setHeight(isOpen ? contentRef.current.scrollHeight : 0)
+    }
+  }, [isOpen])
+
+  const handleToggle = () => {
+    if (isOpen && buttonRef.current && contentRef.current) {
+      // Record initial state
+      const initialScrollY = window.scrollY
+      const initialHeight = contentRef.current.offsetHeight
+
+      // Start tracking scroll compensation
+      const checkScroll = () => {
+        if (contentRef.current) {
+          const currentHeight = contentRef.current.offsetHeight
+          const reduction = initialHeight - currentHeight
+
+          // Adjust scroll to keep button in same viewport position
+          if (reduction > 0) {
+            window.scrollTo({
+              top: Math.max(0, initialScrollY - reduction),
+              behavior: 'auto'
+            })
+          }
+
+          // Continue checking if animation is still running
+          if (currentHeight > 0) {
+            requestAnimationFrame(checkScroll)
+          }
+        }
+      }
+
+      requestAnimationFrame(checkScroll)
+    }
+
+    setIsOpen(!isOpen)
+  }
+
+  return (
+    <div className="border overflow-hidden">
+      <div
+        ref={contentRef}
+        style={{
+          height: `${height}px`,
+          transition: 'height 300ms ease-out',
+          overflow: 'hidden'
+        }}
+      >
+        <div className="p-4 space-y-2">
+          {children}
+        </div>
+      </div>
+      <button
+        ref={buttonRef}
+        onClick={handleToggle}
+        className="w-full px-4 py-3 text-left font-medium bg-gray-100 hover:bg-gray-200 flex justify-between items-center"
+      >
+        <span>{title}</span>
+        <span className="text-xl">{isOpen ? '−' : '+'}</span>
+      </button>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <div className="pt-16 max-w-2xl mx-auto p-4 text-gray-950 leading-7 text-sm dark:text-gray-50 bg-gray-50 dark:bg-gray-950">
+      {faker.lorem.paragraphs(10)}
+      <SmartAccordion title="Click to expand">
+        {faker.lorem.paragraphs(10)}
+      </SmartAccordion>
+      {faker.lorem.paragraphs(10)}
+    </div>
+  )
+}
+```
+
+## How it works
+
+When you click collapse, record the button's position and the content height. Use `requestAnimationFrame` to poll the height during the CSS transition. As it shrinks, adjust `window.scrollY` by the same amount. Content shrinks 200px? Scroll up 200px. Button stays put.
+
+The compensation only happens on collapse, not expand. Opening an accordion is expected - closing is where the disorientation happens. Performance impact is minimal since modern browsers handle `scrollTo()` efficiently, and the loop exits when height hits zero.
+
+It's a small detail, but it's the kind of polish that respects the user's attention. The button stays where you clicked it instead of drifting upward while you hunt for it.

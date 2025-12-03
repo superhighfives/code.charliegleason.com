@@ -14,6 +14,18 @@ vi.mock("~/routes/resources/theme-switch", () => ({
   useOptionalTheme: () => "light",
 }));
 
+// Mock useNavigation hook
+vi.mock("react-router", async () => {
+  const actual = await vi.importActual("react-router");
+  return {
+    ...actual,
+    useNavigation: () => ({
+      state: "idle",
+      location: undefined,
+    }),
+  };
+});
+
 describe("NavBlock", () => {
   const defaultPost = {
     title: "Test Post Title",

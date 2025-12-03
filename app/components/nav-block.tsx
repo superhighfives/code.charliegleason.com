@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Link, useNavigation } from "react-router";
 import type { Post, VisualConfig } from "~/mdx/types";
 import { toUserIndex } from "~/utils/video-index";

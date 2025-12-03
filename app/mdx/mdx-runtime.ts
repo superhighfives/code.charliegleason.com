@@ -24,7 +24,7 @@ function stripMarkdown(text: string): string {
  * Extract the first couple of paragraphs from MDX content
  * Skips frontmatter, code blocks, and component tags
  */
-function extractExcerpt(content: string, paragraphCount = 2): string {
+function extractExcerpt(content: string, paragraphCount = 4): string {
   // Remove frontmatter if present
   const withoutFrontmatter = content.replace(/^---\n[\s\S]*?\n---\n/, "");
 

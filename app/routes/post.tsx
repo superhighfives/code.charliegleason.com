@@ -187,7 +187,7 @@ export default function Post() {
           <span className="hidden sm:inline">.com</span>
         </Link>
         <span className="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
-        <h1 className="font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 text-3xl w-full">
+        <h1 className="font-heading font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 text-3xl w-full">
           {title}
         </h1>
       </div>
@@ -198,7 +198,10 @@ export default function Post() {
       />
 
       {isOldArticle ? (
-        <p className="font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-xl">
+        <p
+          style={{ viewTransitionName: "post-warning" }}
+          className="font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-xl"
+        >
           This has not been updated in the last three months, so this
           information miiiiiight be out of date. Here be dragons, etc.
         </p>

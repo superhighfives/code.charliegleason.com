@@ -15,7 +15,7 @@ export function About() {
         <Hand size="48" className="rotate-45" />
       </div>
       <div className="flex flex-col gap-2 items-start justify-end">
-        <h2 className="border-b border-indigo-500 pb-2 font-semibold">
+        <h2 className="font-heading text-3xl border-b border-indigo-500 pb-2 font-semibold">
           Hello, I'm Charlie.
         </h2>
         <p className="leading-relaxed text-gray-600 dark:text-gray-400">

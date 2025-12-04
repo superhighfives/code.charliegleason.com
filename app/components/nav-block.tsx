@@ -76,7 +76,7 @@ export default function NavBlock({
                 ))}
               </div>
               <div
-                className={`text-pretty space-x-2 flex flex-col items-start font-semibold ${hero ? "text-2xl sm:text-4xl" : "text-lg sm:text-2xl"}`}
+                className={`font-heading text-pretty space-x-2 flex flex-col items-start font-semibold ${hero ? "text-3xl sm:text-4xl" : "text-3xl sm:text-3xl sm:leading-8"}`}
               >
                 {title}
               </div>

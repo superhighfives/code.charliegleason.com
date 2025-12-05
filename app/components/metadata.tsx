@@ -10,7 +10,7 @@ export default function Metadata({
 }) {
   return data?.length ? (
     <dl
-      className="font-mono text-xs divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 max-w-xl"
+      className="font-mono text-sm divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 max-w-xl"
       style={style}
     >
       {data.map((item: { key: string; value: string }) => {

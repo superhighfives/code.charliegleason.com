@@ -53,7 +53,7 @@ export function Frame({
   themeSwitch?: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-rows-layout gap-8 min-h-dvh p-4 sm:p-8 [padding-bottom:calc(env(safe-area-inset-bottom)+4.5rem)] sm:[padding-bottom:calc(env(safe-area-inset-bottom)+8rem)] text-indigo-600 dark:text-indigo-400 overflow-x-hidden">
+    <div className="grid grid-rows-layout gap-8 min-h-dvh p-4 sm:p-8 [padding-bottom:calc(env(safe-area-inset-bottom)+2.5rem)] sm:[padding-bottom:calc(env(safe-area-inset-bottom)+6rem)] text-indigo-600 dark:text-indigo-400 overflow-x-hidden">
       <div className="content-end">{children}</div>
       <div
         className="z-50 fixed inset-x-0 bottom-0 bg-gray-50 dark:bg-gray-900 drop-shadow-2xl font-mono"

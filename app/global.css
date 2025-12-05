@@ -4,6 +4,24 @@
 /* Font Face Declarations */
 /*************************************************************/
 
+/* PolySans - Variable */
+@font-face {
+  font-family: "PolySans";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/PolySans-variable.woff2") format("woff2");
+}
+
+/* PolySans - Variable Italic */
+@font-face {
+  font-family: "PolySans";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/PolySansItalic-variable.woff2") format("woff2");
+}
+
 /* Inter - Regular */
 @font-face {
   font-family: "Inter";
@@ -86,6 +104,9 @@
   /* Typography */
   --font-sans:
     "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-heading:
+    "PolySans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --font-mono:
     "JetBrains Mono", "ui-monospace", "SFMono-Regular", '"Roboto Mono"',
@@ -328,14 +349,14 @@ html.dark .shiki span {
 
 /* Base prose setup with content width constraints */
 @utility post-prose {
-  @apply prose dark:prose-invert max-w-none text-pretty border border-transparent sm:px-4;
+  @apply prose dark:prose-invert max-w-none text-pretty border border-transparent sm:px-4 text-lg;
   @apply [&>*:not(.code)]:max-w-[calc(35rem-2px)];
   @apply [&>:first-child]:mt-0 [&>:last-child]:mb-0;
 }
 
 /* Heading typography and hash prefixes */
 @utility post-headings {
-  @apply prose-headings:text-sm prose-headings:font-mono;
+  @apply prose-headings:font-mono prose-headings:text-lg;
   @apply prose-h1:before:content-['#'] prose-h2:before:content-['##'] prose-h3:before:content-['###'];
   @apply prose-h4:before:content-['####'] prose-h5:before:content-['#####'] prose-h6:before:content-['######'];
   @apply prose-headings:before:mr-2 prose-headings:before:tracking-widest prose-headings:before:text-indigo-400;
@@ -437,7 +458,7 @@ strong {
 
 .code .cm-content,
 .code .cm-editor {
-  @apply text-sm! leading-6!;
+  @apply text-lg! leading-7!;
 }
 
 /*************************************************************/
@@ -541,6 +562,7 @@ strong {
 ::view-transition-old(post-breadcrumb),
 ::view-transition-old(post-metadata),
 ::view-transition-old(post-content),
+::view-transition-old(post-warning),
 ::view-transition-old(post-visual) {
   animation: none;
   opacity: 0;
@@ -552,6 +574,10 @@ strong {
 
 ::view-transition-new(post-metadata) {
   animation: slideUpFade 0.5s ease-out 0.3s both;
+}
+
+::view-transition-new(post-warning) {
+  animation: slideUpFade 0.5s ease-out 0.4s both;
 }
 
 ::view-transition-new(post-content) {

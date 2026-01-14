@@ -1,0 +1,377 @@
+---
+slug: cloudflare-tunnel-ollama-opencode
+title: Running Ollama on your desktop GPU from anywhere with Cloudflare Tunnel
+description: >-
+  A complete guide to exposing Ollama running on a Windows PC with a 4090 GPU so
+  you can use it remotely with opencode via a secure Cloudflare Tunnel.
+visual:
+  prompt: A tunnel of light connecting two distant computers
+  image:
+    url: 'https://replicate.com/jakedahn/flux-latentpop'
+    version: >-
+      jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: 'solid background, t-shirt design, LTNP style'
+  video:
+    url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
+    version: bytedance/seedance-1-pro-fast
+  colors:
+    - text: '#ffff10'
+      background: '#0f1628'
+    - text: '#ffd000'
+      background: '#0f152e'
+    - text: '#d0f060'
+      background: '#141e2f'
+    - text: '#ff9030'
+      background: '#0f1727'
+    - text: '#ffa030'
+      background: '#090e26'
+    - text: '#ffe050'
+      background: '#0d1a33'
+    - text: '#60ff80'
+      background: '#15162b'
+    - text: '#d0f040'
+      background: '#091027'
+    - text: '#fff070'
+      background: '#0f1926'
+links:
+  Cloudflare Tunnel: >-
+    https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/
+  Ollama: 'https://ollama.com/'
+  OpenCode: 'https://opencode.ai/'
+tags:
+  - ollama
+  - cloudflare
+  - ai
+---
+
+I have a Windows PC with a 4090 GPU sitting at home. It's great for running local LLMs, but I wanted to use it from my laptop when I'm traveling. The solution turned out to be Cloudflare Tunnel - a secure way to expose Ollama without opening ports or dealing with VPNs.
+
+This is how I set it up to work with opencode, Anthropic's AI coding assistant that can use various LLM providers.
+
+## The architecture
+
+The setup looks like this:
+
+```
+[Laptop] → opencode → HTTPS → [Cloudflare Access] → [Cloudflare Tunnel] → [Windows PC:11434] → Ollama → 4090
+```
+
+Your laptop talks to Cloudflare over HTTPS, Cloudflare authenticates the request, then forwards it through an encrypted tunnel to your Windows PC. From opencode's perspective, it's just hitting an HTTPS endpoint. From your PC's perspective, it's just receiving local requests.
+
+No port forwarding, no dynamic DNS, no exposing your home network to the internet.
+
+## Why this is useful
+
+Running LLMs locally is nice. You get full control over the model, no API costs, and reasonable speed if you have decent hardware. But "local" usually means you're sitting at that specific machine.
+
+Cloudflare Tunnel lets you access your local Ollama instance from anywhere - your laptop at a coffee shop, your phone, or shared with teammates. All without the usual networking hassles.
+
+## Part 1: Windows PC setup
+
+Let's start by getting Ollama running properly on the Windows machine.
+
+### Installing Ollama
+
+Download the Windows installer from [ollama.com](https://ollama.com/download/windows) and run it. It'll install natively and automatically use CUDA if you have an NVIDIA GPU.
+
+Verify it's working:
+
+```bash command
+ollama list
+```
+
+You should see your GPU in use if you have nvidia-smi running.
+
+### Choosing a model
+
+For coding with tool calling support, Qwen3 works well. The 30B MoE version fits comfortably in 24GB VRAM:
+
+```bash command
+ollama pull qwen3:30b-a3b
+```
+
+Tool calling requires a larger context window than the default. Create a file called `Modelfile`:
+
+```
+FROM qwen3:30b-a3b
+PARAMETER num_ctx 16384
+```
+
+Then build your custom model:
+
+```bash command
+ollama create qwen3-coder -f Modelfile
+```
+
+I started with 16384 context. If you run into VRAM issues, you can reduce it to 8192.
+
+**A note on model choice:** I initially tried Qwen 2.5 Coder but ran into issues with tool calling in Ollama. Qwen3 handles it much better. Also avoid the VL (vision-language) variants if you're tight on memory.
+
+### Allowing network access
+
+By default, Ollama only listens on localhost. To accept connections from the tunnel, set an environment variable.
+
+In PowerShell as administrator:
+
+```powershell
+[Environment]::SetEnvironmentVariable("OLLAMA_HOST", "0.0.0.0:11434", "Machine")
+```
+
+Restart the Ollama service after setting this. You can do this by restarting your computer or finding the Ollama service in Task Manager.
+
+### Installing cloudflared
+
+The tunnel software is called cloudflared. Install it with winget:
+
+```powershell
+winget install cloudflare.cloudflared
+```
+
+Or download it from the [Cloudflare downloads page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/).
+
+### Authenticating cloudflared
+
+Run this to authenticate with your Cloudflare account:
+
+```powershell
+cloudflared tunnel login
+```
+
+This opens your browser. Select the domain you want to use for the tunnel (you'll need a domain in your Cloudflare account).
+
+### Creating the tunnel
+
+Create a named tunnel:
+
+```powershell
+cloudflared tunnel create ollama-tunnel
+```
+
+Note the UUID that gets printed out. You'll need it in the config file.
+
+### Configuring the tunnel
+
+Create a config file at `C:\Users\<username>\.cloudflared\config.yml`:
+
+```yaml
+tunnel: <TUNNEL_UUID>
+credentials-file: C:\Users\<username>\.cloudflared\<TUNNEL_UUID>.json
+
+ingress:
+  - hostname: ollama.yourdomain.com
+    service: http://localhost:11434
+  - service: http_status:404
+```
+
+Replace `<TUNNEL_UUID>` with the UUID from the previous step, and `ollama.yourdomain.com` with your actual domain.
+
+The ingress rules tell cloudflared where to route requests. Anything hitting `ollama.yourdomain.com` gets forwarded to `localhost:11434` (where Ollama is listening).
+
+### Adding DNS
+
+This creates the DNS record that points your domain to the tunnel:
+
+```powershell
+cloudflared tunnel route dns ollama-tunnel ollama.yourdomain.com
+```
+
+### Running the tunnel
+
+Test it first:
+
+```powershell
+cloudflared tunnel run ollama-tunnel
+```
+
+If everything works, install it as a Windows service so it starts automatically:
+
+```powershell
+cloudflared service install
+```
+
+The tunnel is now running and will automatically start when Windows boots.
+
+## Part 2: Cloudflare Access setup
+
+This is the part I got wrong the first time.
+
+Cloudflare Tunnel creates a secure connection between Cloudflare's edge and your PC, but by default anyone who knows the URL can use it. Cloudflare Access adds authentication.
+
+### Creating an Access application
+
+Go to the Cloudflare Zero Trust Dashboard → Access → Applications, then click "Add an application" and choose "Self-hosted."
+
+Configure it:
+- **Application name:** Ollama API
+- **Session duration:** 24 hours (or whatever you prefer)
+- **Application domain:** ollama.yourdomain.com
+
+### Creating the right policy
+
+This is where I messed up initially. When you create an access policy, there are different actions you can choose. For browser-based access, you'd use "Allow" and authenticate with email or SSO.
+
+But opencode makes API calls. It's not a browser, so it can't handle redirects to a login page. You need to create a policy with **Service Auth** instead.
+
+1. Policy name: Service Token Access
+2. **Action:** Service Auth (not "Allow")
+3. Include rule:
+   - Selector: Service Token
+   - Value: Select your service token (we'll create this next)
+
+Without the Service Auth action, API requests get redirected to a browser login page and fail. This took me longer to figure out than I'd like to admit.
+
+### Generating a service token
+
+Since opencode uses API calls, we need a token that can authenticate without a browser.
+
+Go to Access → Service Auth → Service Tokens, then click "Create Service Token."
+
+Name it something like `opencode-laptop`.
+
+You'll get two values: `CF-Access-Client-Id` and `CF-Access-Client-Secret`. Copy both and keep them somewhere safe. You'll need them on your laptop.
+
+These tokens provide full API access, so treat them like passwords. If they leak, rotate them immediately.
+
+## Part 3: Laptop setup
+
+Now we configure opencode to use the remote Ollama instance.
+
+### Installing opencode
+
+On macOS:
+
+```bash command
+brew install opencode
+```
+
+Or via npm:
+
+```bash command
+npm install -g @anthropics/opencode
+```
+
+### Configuring opencode
+
+Create or edit `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "ollama-remote": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (Remote)",
+      "options": {
+        "baseURL": "https://ollama.yourdomain.com/v1",
+        "headers": {
+          "CF-Access-Client-Id": "<YOUR_CLIENT_ID>",
+          "CF-Access-Client-Secret": "<YOUR_CLIENT_SECRET>"
+        }
+      },
+      "models": {
+        "qwen3-coder": {
+          "name": "Qwen 3 Coder 30B"
+        }
+      }
+    }
+  }
+}
+```
+
+Replace the placeholder values with your actual domain and service token credentials.
+
+The `baseURL` uses `/v1` because Ollama exposes an OpenAI-compatible API at that path. The headers include your Cloudflare Access credentials, which get sent with every request.
+
+### Testing it
+
+First, test the API directly:
+
+```bash command
+curl -X POST https://ollama.yourdomain.com/api/generate \
+  -H "CF-Access-Client-Id: <YOUR_CLIENT_ID>" \
+  -H "CF-Access-Client-Secret: <YOUR_CLIENT_SECRET>" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "qwen3-coder", "prompt": "Say hello", "stream": false}'
+```
+
+If you get a JSON response with generated text, it's working.
+
+Then try opencode:
+
+```bash command
+opencode
+```
+
+You should see your remote model available as an option.
+
+## Troubleshooting
+
+Here are the issues I ran into and how I fixed them.
+
+### Tool calls failing
+
+If the model generates responses but tool calls don't work, check your context window. Tool calling needs at least 16K context. Make sure your Modelfile has `PARAMETER num_ctx 16384` or higher.
+
+Also double-check you're using Qwen3, not Qwen 2.5 Coder. The latter has known issues with tool calling in Ollama.
+
+### Connection refused
+
+If you can't connect at all, verify the `OLLAMA_HOST` environment variable is set to `0.0.0.0:11434`. Then restart the Ollama service.
+
+Check the tunnel is running:
+
+```powershell
+cloudflared tunnel info ollama-tunnel
+```
+
+### 401/403 errors or redirects
+
+If you're getting authentication errors, verify your service token headers are correct in the opencode config.
+
+Also double-check that your Access policy uses "Service Auth" action, not "Allow." This was my mistake - I had created an email-based policy initially, which doesn't work for API requests.
+
+### Model crashes with memory errors
+
+If you see "memory layout cannot be allocated" errors, reduce the context size in your Modelfile. Try 8192 instead of 16384.
+
+You can also check VRAM usage with:
+
+```bash command
+nvidia-smi
+```
+
+If you're maxing out, consider using a smaller model or a more aggressive quantization.
+
+### Slow responses
+
+This is normal for large models. The 30B model takes a few seconds to start generating, especially on the first request after loading the model into VRAM.
+
+I typically see around 70 tokens per second with the Q4 quantization on a 4090, which is fast enough for coding.
+
+## Why Qwen3 over Qwen 2.5 Coder
+
+I spent a weekend trying to get Qwen 2.5 Coder to work with tool calling before switching to Qwen3. The issue is that Ollama's tool calling support varies by model, and Qwen3 handles it significantly better.
+
+The 30B MoE variant (with 3B active parameters) is a good balance. It fits in 24GB VRAM with room for a 16K context window, and the mixture-of-experts architecture keeps inference fast.
+
+If you have more VRAM or less need for context, other options work too. The 32B dense model is excellent but leaves less room for context. DeepSeek Coder v2 is faster but tool calling is hit-or-miss.
+
+## Security considerations
+
+A few things to keep in mind.
+
+Service tokens bypass browser authentication. If someone gets your tokens, they have full access to your Ollama instance. Don't commit them to git, don't share screenshots with them visible, and rotate them if you suspect they've leaked.
+
+The tunnel credentials (the JSON file in `.cloudflared`) should also stay private. They're what allow cloudflared to connect to your specific tunnel.
+
+If your laptop has a static IP, you can add IP restrictions in Cloudflare Access for an extra layer of security.
+
+## What's next
+
+This setup has been surprisingly reliable. The tunnel reconnects automatically if my home internet drops, and Cloudflare's edge handles the authentication before anything reaches my PC.
+
+Latency is good - usually under 100ms - which is barely noticeable compared to the time the model takes to generate responses.
+
+The same pattern works for other services too. I've used Cloudflare Tunnel to expose Jupyter notebooks, local web servers, and various development tools. It's become my default way of accessing home-hosted services remotely.
+
+Now go put that gaming GPU to work.

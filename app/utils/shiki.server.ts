@@ -25,7 +25,17 @@ async function getHighlighter(): Promise<HighlighterCore> {
       await loadWasm(ONIG_WASM);
       return await createHighlighterCore({
         themes: [shikiLatte, shikiMocha],
-        langs: [bash, javascript, json, jsx, powershell, toml, tsx, typescript, yaml],
+        langs: [
+          bash,
+          javascript,
+          json,
+          jsx,
+          powershell,
+          toml,
+          tsx,
+          typescript,
+          yaml,
+        ],
         engine: createOnigurumaEngine(),
       });
     })();

@@ -43,7 +43,7 @@ describe("InlineCode", () => {
 
     const code = container.querySelector("code");
     expect(code).toHaveClass("font-normal");
-    expect(code).toHaveClass("text-sm");
+    expect(code).toHaveClass("text-green-600");
   });
 
   it("should handle word breaking", () => {

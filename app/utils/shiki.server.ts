@@ -2,9 +2,11 @@ import bash from "@shikijs/langs/bash";
 import javascript from "@shikijs/langs/javascript";
 import json from "@shikijs/langs/json";
 import jsx from "@shikijs/langs/jsx";
+import powershell from "@shikijs/langs/powershell";
 import toml from "@shikijs/langs/toml";
 import tsx from "@shikijs/langs/tsx";
 import typescript from "@shikijs/langs/typescript";
+import yaml from "@shikijs/langs/yaml";
 import {
   createHighlighterCore,
   createOnigurumaEngine,
@@ -23,7 +25,7 @@ async function getHighlighter(): Promise<HighlighterCore> {
       await loadWasm(ONIG_WASM);
       return await createHighlighterCore({
         themes: [shikiLatte, shikiMocha],
-        langs: [bash, javascript, json, jsx, toml, tsx, typescript],
+        langs: [bash, javascript, json, jsx, powershell, toml, tsx, typescript, yaml],
         engine: createOnigurumaEngine(),
       });
     })();

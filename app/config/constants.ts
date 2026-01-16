@@ -9,3 +9,9 @@
  * User-facing URLs display as 1-VISUAL_COUNT
  */
 export const VISUAL_COUNT = 9;
+
+/**
+ * Maximum content width class for consistent layout across the site
+ * Used to constrain content width in prose areas, metadata, and navigation
+ */
+export const MAX_WIDTH_CLASS = "max-w-4xl";

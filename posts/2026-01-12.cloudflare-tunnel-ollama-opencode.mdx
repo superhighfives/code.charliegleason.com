@@ -44,90 +44,77 @@ tags:
   - ai
 ---
 
-I have a Windows PC with a 4090 GPU sitting at home. It's great for running local LLMs, but I wanted to use it from my laptop when I'm traveling. The solution turned out to be Cloudflare Tunnel - a secure way to expose Ollama without opening ports or dealing with VPNs.
+At some point in the last few years I thought it was monumentally important that I build a gaming PC. I don't use it often as I'd hoped, but it turns out the 4090 is great for running local LLMs. I wanted to use it from my laptop when I'm traveling, because tokens are expensive and little projects are great. The solution turned out to be [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) - a secure way to expose Ollama without opening ports or dealing with VPNs.
 
-This is how I set it up to work with opencode, Anthropic's AI coding assistant that can use various LLM providers.
+This is how I set it up to work with [opencode](https://opencode.ai), the open source AI coding assistant that makes it easy to use various LLM providers, including your own.
 
 ## The architecture
 
 The setup looks like this:
 
-```
-[Laptop] → opencode → HTTPS → [Cloudflare Access] → [Cloudflare Tunnel] → [Windows PC:11434] → Ollama → 4090
+```bash
+[Laptop] → opencode → HTTPS → [Cloudflare Access] → [Cloudflare Tunnel] → [Windows PC:11434] → Ollama → 4090 GPU
 ```
 
-Your laptop talks to Cloudflare over HTTPS, Cloudflare authenticates the request, then forwards it through an encrypted tunnel to your Windows PC. From opencode's perspective, it's just hitting an HTTPS endpoint. From your PC's perspective, it's just receiving local requests.
+Your laptop talks to Cloudflare over HTTPS, Cloudflare authenticates the request, then forwards it through an encrypted tunnel to your Windows PC (or whatever machine you're running whatever service on). From opencode's perspective, it's just hitting an HTTPS endpoint. From your PC's perspective, it's just receiving local requests.
 
-No port forwarding, no dynamic DNS, no exposing your home network to the internet.
+No port forwarding, no dynamic DNS, no exposing your home network to the internet. Easy as.
 
 ## Why this is useful
 
 Running LLMs locally is nice. You get full control over the model, no API costs, and reasonable speed if you have decent hardware. But "local" usually means you're sitting at that specific machine.
 
-Cloudflare Tunnel lets you access your local Ollama instance from anywhere - your laptop at a coffee shop, your phone, or shared with teammates. All without the usual networking hassles.
+Cloudflare Tunnel lets you access your local Ollama instance from anywhere - at a coffee shop, your phone, or shared with others. All without the usual networking hassles.
 
 ## Part 1: Windows PC setup
 
-Let's start by getting Ollama running properly on the Windows machine.
+Let's start by getting Ollama running properly on the Windows machine, but these instructions should work for any other service you want to expose.
 
 ### Installing Ollama
 
 Download the Windows installer from [ollama.com](https://ollama.com/download/windows) and run it. It'll install natively and automatically use CUDA if you have an NVIDIA GPU.
-
-Verify it's working:
-
-```bash command
-ollama list
-```
-
-You should see your GPU in use if you have nvidia-smi running.
 
 ### Choosing a model
 
 For coding with tool calling support, Qwen3 works well. The 30B MoE version fits comfortably in 24GB VRAM:
 
 ```bash command
-ollama pull qwen3:30b-a3b
+ollama pull qwen3-coder:30b
 ```
 
-Tool calling requires a larger context window than the default. Create a file called `Modelfile`:
-
-```
-FROM qwen3:30b-a3b
-PARAMETER num_ctx 16384
-```
-
-Then build your custom model:
-
-```bash command
-ollama create qwen3-coder -f Modelfile
-```
-
-I started with 16384 context. If you run into VRAM issues, you can reduce it to 8192.
-
-**A note on model choice:** I initially tried Qwen 2.5 Coder but ran into issues with tool calling in Ollama. Qwen3 handles it much better. Also avoid the VL (vision-language) variants if you're tight on memory.
+> [!NOTE]
+> **A note on model choice:** I initially tried Qwen 2.5 Coder but ran into issues with tool calling in Ollama. Qwen3 handles it much better. Also avoid the VL (vision-language) variants if you're tight on memory.
 
 ### Allowing network access
 
 By default, Ollama only listens on localhost. To accept connections from the tunnel, set an environment variable.
 
-In PowerShell as administrator:
+> [!NOTE]
+> Ollama does have a setting to expose itself to the network, so you can also try that. I probably should have, on reflection.
+
+In PowerShell (as administrator):
 
 ```powershell
 [Environment]::SetEnvironmentVariable("OLLAMA_HOST", "0.0.0.0:11434", "Machine")
 ```
 
-Restart the Ollama service after setting this. You can do this by restarting your computer or finding the Ollama service in Task Manager.
+Restart the Ollama service after setting this. You can do this byfinding the Ollama service in Task Manager or in your running applications.
 
 ### Installing cloudflared
 
-The tunnel software is called cloudflared. Install it with winget:
+The tunnel software is called `cloudflared`. Install it with `winget`:
 
 ```powershell
-winget install cloudflare.cloudflared
+winget install --id Cloudflare.cloudflared
 ```
 
-Or download it from the [Cloudflare downloads page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/).
+If you're on a Mac, you can use `brew`:
+
+```bash
+brew install cloudflared
+```
+
+Or you download it from the [Cloudflare downloads page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/).
 
 ### Authenticating cloudflared
 
@@ -183,54 +170,51 @@ Test it first:
 cloudflared tunnel run ollama-tunnel
 ```
 
-If everything works, install it as a Windows service so it starts automatically:
+You can also [install it as a Windows service](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/as-a-service/windows/) so it starts automatically.
 
-```powershell
-cloudflared service install
-```
-
-The tunnel is now running and will automatically start when Windows boots.
+There you go, your very own tunnel to the outside world.
 
 ## Part 2: Cloudflare Access setup
 
-This is the part I got wrong the first time.
-
-Cloudflare Tunnel creates a secure connection between Cloudflare's edge and your PC, but by default anyone who knows the URL can use it. Cloudflare Access adds authentication.
-
-### Creating an Access application
-
-Go to the Cloudflare Zero Trust Dashboard → Access → Applications, then click "Add an application" and choose "Self-hosted."
-
-Configure it:
-- **Application name:** Ollama API
-- **Session duration:** 24 hours (or whatever you prefer)
-- **Application domain:** ollama.yourdomain.com
-
-### Creating the right policy
-
-This is where I messed up initially. When you create an access policy, there are different actions you can choose. For browser-based access, you'd use "Allow" and authenticate with email or SSO.
-
-But opencode makes API calls. It's not a browser, so it can't handle redirects to a login page. You need to create a policy with **Service Auth** instead.
-
-1. Policy name: Service Token Access
-2. **Action:** Service Auth (not "Allow")
-3. Include rule:
-   - Selector: Service Token
-   - Value: Select your service token (we'll create this next)
-
-Without the Service Auth action, API requests get redirected to a browser login page and fail. This took me longer to figure out than I'd like to admit.
+Cloudflare Tunnel creates a secure connection between Cloudflare's edge and your PC, but by default anyone who knows the URL can use it. [Cloudflare Access](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/security/secure-with-access/) adds authentication.
 
 ### Generating a service token
 
 Since opencode uses API calls, we need a token that can authenticate without a browser.
 
-Go to Access → Service Auth → Service Tokens, then click "Create Service Token."
+Go to `Access` → `Service Auth` → `Service Tokens`, then click **Create Service Token**.
 
 Name it something like `opencode-laptop`.
 
 You'll get two values: `CF-Access-Client-Id` and `CF-Access-Client-Secret`. Copy both and keep them somewhere safe. You'll need them on your laptop.
 
 These tokens provide full API access, so treat them like passwords. If they leak, rotate them immediately.
+
+### Creating an Access application
+
+Go to your [Cloudflare Dashboard](https://dash.cloudflare.com/) → Zero Trust → Access controls → Applications, then click "Add an application" and choose "Self-hosted."
+
+```yaml
+Application name:    Ollama API
+Session duration:    24 hours (or whatever you prefer)
+Application domain:  ollama.yourdomain.com
+```
+
+### Creating the right policy
+
+Next we need to define who can access our tunnel. 
+
+When you create an access policy, there are different actions you can choose. For browser-based access, you'd use "Allow" and authenticate with email or SSO.
+
+```yaml
+Policy name:         Service Token Access
+Action:              Service Auth (not "Allow")
+Include rule:
+ - Selector:         Service Token
+ - Value:            Select your service token (the one you made earlier)
+```
+
+Without the Service Auth action, API requests get redirected to a browser login page and fail. This took me longer to figure out than I'd like to admit.
 
 ## Part 3: Laptop setup
 
@@ -241,13 +225,7 @@ Now we configure opencode to use the remote Ollama instance.
 On macOS:
 
 ```bash command
-brew install opencode
-```
-
-Or via npm:
-
-```bash command
-npm install -g @anthropics/opencode
+brew install anomalyco/tap/opencode
 ```
 
 ### Configuring opencode
@@ -348,14 +326,6 @@ This is normal for large models. The 30B model takes a few seconds to start gene
 
 I typically see around 70 tokens per second with the Q4 quantization on a 4090, which is fast enough for coding.
 
-## Why Qwen3 over Qwen 2.5 Coder
-
-I spent a weekend trying to get Qwen 2.5 Coder to work with tool calling before switching to Qwen3. The issue is that Ollama's tool calling support varies by model, and Qwen3 handles it significantly better.
-
-The 30B MoE variant (with 3B active parameters) is a good balance. It fits in 24GB VRAM with room for a 16K context window, and the mixture-of-experts architecture keeps inference fast.
-
-If you have more VRAM or less need for context, other options work too. The 32B dense model is excellent but leaves less room for context. DeepSeek Coder v2 is faster but tool calling is hit-or-miss.
-
 ## Security considerations
 
 A few things to keep in mind.
@@ -368,7 +338,7 @@ If your laptop has a static IP, you can add IP restrictions in Cloudflare Access
 
 ## What's next
 
-This setup has been surprisingly reliable. The tunnel reconnects automatically if my home internet drops, and Cloudflare's edge handles the authentication before anything reaches my PC.
+This setup has been surprisingly reliable. The tunnel can reconnect automatically if my home internet drops, and Cloudflare's edge handles the authentication before anything reaches my PC.
 
 Latency is good - usually under 100ms - which is barely noticeable compared to the time the model takes to generate responses.
 

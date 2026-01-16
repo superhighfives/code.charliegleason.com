@@ -1,6 +1,7 @@
 import { Hand } from "lucide-react";
 import { Link } from "react-router";
 import { useScramble } from "use-scramble";
+import { MAX_WIDTH_CLASS } from "~/config/constants";
 import { scrambleOptions } from "./utils/scramble";
 
 export function About() {
@@ -10,7 +11,9 @@ export function About() {
   });
 
   return (
-    <div className="flex flex-wrap sm:flex-nowrap gap-6 dark:text-white max-w-xl font-mono">
+    <div
+      className={`flex flex-wrap sm:flex-nowrap gap-6 dark:text-white ${MAX_WIDTH_CLASS} font-mono`}
+    >
       <div className="sm:border border-indigo-500 text-indigo-500 sm:h-full flex sm:items-center sm:justify-center sm:w-92 rounded aspect-square">
         <Hand size="48" className="rotate-45" />
       </div>

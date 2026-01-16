@@ -6,6 +6,7 @@ import Metalinks from "~/components/metalinks";
 import { components } from "~/components/utils/components";
 import metatags from "~/components/utils/metatags";
 import VideoMasthead from "~/components/video-masthead";
+import { MAX_WIDTH_CLASS } from "~/config/constants";
 import { customMdxParse } from "~/mdx/custom-mdx-parser";
 import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
@@ -172,7 +173,7 @@ export default function Post() {
         />
       )}
       <div
-        className="flex flex-wrap gap-y-2 max-w-xl"
+        className={`flex flex-wrap gap-y-2 ${MAX_WIDTH_CLASS}`}
         style={{ viewTransitionName: "post-breadcrumb" }}
       >
         <Link
@@ -200,7 +201,7 @@ export default function Post() {
       {isOldArticle ? (
         <p
           style={{ viewTransitionName: "post-warning" }}
-          className="font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-xl"
+          className={`font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 ${MAX_WIDTH_CLASS}`}
         >
           This has not been updated in the last three months, so this
           information miiiiiight be out of date. Here be dragons, etc.

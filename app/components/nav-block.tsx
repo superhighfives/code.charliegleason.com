@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { Link, useNavigation } from "react-router";
+import { MAX_WIDTH_CLASS } from "~/config/constants";
 import type { Post, VisualConfig } from "~/mdx/types";
 import { toUserIndex } from "~/utils/video-index";
 
@@ -56,7 +57,7 @@ export default function NavBlock({
         <div className="space-y-2 sm:space-y-4 flex-shrink-0">
           <div className="flex justify-between relative z-10">
             <div
-              className={`max-w-2xl flex w-0 flex-1 flex-col items-start flex-wrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
+              className={`${MAX_WIDTH_CLASS} flex w-0 flex-1 flex-col items-start flex-wrap gap-x-2 ${description ? "gap-y-2" : "gap-y-0"}`}
             >
               <div className="text-xs relative whitespace-nowrap w-full z-10 flex gap-2 items-center overflow-hidden [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)]">
                 {caption ? (
@@ -95,7 +96,9 @@ export default function NavBlock({
         {hero && excerpt ? (
           <div className="flex-1 min-h-0 relative overflow-hidden mt-4">
             <div className="absolute inset-0 flex pointer-events-none mask-b-from-80% mask-b-to-100%">
-              <div className="max-w-2xl text-base text-current/50 leading-relaxed whitespace-pre-wrap h-fit">
+              <div
+                className={`${MAX_WIDTH_CLASS} text-base text-current/50 leading-relaxed whitespace-pre-wrap h-fit`}
+              >
                 {excerpt}
               </div>
             </div>

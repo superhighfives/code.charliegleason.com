@@ -350,8 +350,8 @@ html.dark .shiki span {
 /* Base prose setup with content width constraints */
 @utility post-prose {
   @apply prose dark:prose-invert max-w-none text-pretty border border-transparent sm:px-4 text-lg;
-  @apply [&>*:not(.code)]:max-w-[calc(35rem-2px)];
-  @apply [&>:first-child]:mt-0 [&>:last-child]:mb-0;
+  @apply [&>*:not(.code)]:max-w-[calc(var(--container-4xl)-1rem-2px)];
+  @apply [&>:first-child]:mt-0 [&>:last-child]:mb-0 leading-8;
 }
 
 /* Heading typography and hash prefixes */
@@ -366,8 +366,8 @@ html.dark .shiki span {
 @utility post-heading-borders {
   @apply prose-h1:border-b-2 prose-h2:border-b;
   @apply prose-h1:border-indigo-500 prose-h2:border-indigo-500;
-  @apply prose-h2:pb-4 prose-h2:mb-4;
-  @apply prose-h1:mt-16 prose-h2:mt-12 prose-h3:mt-8 prose-h4:mt-4 prose-h5:mt-2 prose-h6:mt-2;
+  @apply prose-h1:pb-4 prose-h1:mb-4 prose-h2:pb-4 prose-h2:mb-4 prose-h3:mb-5;
+  @apply prose-h1:mt-16 prose-h2:mt-12 prose-h3:mt-12;
 }
 
 /* Link styling with decorations and focus states */
@@ -385,7 +385,7 @@ html.dark .shiki span {
 
 /* Composed post class for backward compatibility */
 .post {
-  @apply post-prose post-headings post-heading-borders post-links;
+  @apply post-prose post-headings post-heading-borders post-links sm:my-8;
 }
 
 @utility prose {
@@ -405,7 +405,7 @@ html.dark .shiki span {
 /*************************************************************/
 
 .code {
-	@apply overflow-x-scroll max-w-[calc(100vw)] -mx-4 sm:-mx-12 border-y border-gray-200 dark:border-gray-700 dark:bg-gray-900 bg-gray-50 text-gray-400 [&>*]:mx-8 sm:[&>*]:mx-12 [&>*]:inline-block;
+	@apply overflow-x-scroll max-w-[calc(100vw)] -mx-4 sm:-mx-12 border-y border-gray-200 dark:border-gray-700/50 dark:bg-gray-900/50 bg-gray-50 text-gray-400 [&>*]:mx-8 sm:[&>*]:mx-12 [&>*]:inline-block;
 }
 
 /*************************************************************/

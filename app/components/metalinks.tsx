@@ -1,10 +1,11 @@
 import LinkBlock from "~/components/link-block";
+import { MAX_WIDTH_CLASS } from "~/config/constants";
 
 export type MetaData = { key: string; value: string };
 
 export default function Metadata({ links }: { links?: MetaData[] }) {
   return links ? (
-    <dl className="pt-2 max-w-xl">
+    <dl className={`pt-2 ${MAX_WIDTH_CLASS}`}>
       <dt className="sm:px-4 font-semibold leading-6 text-gray-900 dark:text-gray-500 font-mono">
         Links
       </dt>

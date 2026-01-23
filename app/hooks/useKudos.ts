@@ -13,9 +13,17 @@ export function useKudos({
     result: { ok?: boolean; total?: number; you?: number; reason?: string };
   }>();
 
-  // Get optimistic values from fetcher or use server values
-  const total = fetcher.data?.result?.total ?? initialTotal;
-  const you = fetcher.data?.result?.you ?? initialYou;
+  // Base values: use server response if available, otherwise initial values
+  const baseTotal = fetcher.data?.result?.total ?? initialTotal;
+  const baseYou = fetcher.data?.result?.you ?? initialYou;
+
+  // Optimistic update: if submitting, increment by 1 immediately
+  // This gives instant feedback while the request is in flight
+  const isSubmitting = fetcher.state === "submitting";
+  const optimisticIncrement = isSubmitting ? 1 : 0;
+
+  const total = baseTotal + optimisticIncrement;
+  const you = baseYou + optimisticIncrement;
 
   const remaining = Math.max(0, 50 - you);
   const pending = fetcher.state !== "idle";

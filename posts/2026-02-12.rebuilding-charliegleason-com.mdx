@@ -1,0 +1,232 @@
+---
+slug: rebuilding-charliegleason-com
+title: Rebuilding charliegleason.com
+description: >-
+  How I rebuilt my personal site's authentication and infrastructure as a pnpm
+  monorepo with Astro, Cloudflare Workers, Durable Objects, and real-time
+  features.
+visual:
+  prompt: Yellow flowers in vase
+  image:
+    url: 'https://replicate.com/jakedahn/flux-latentpop'
+    version: >-
+      jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: 'solid background, t-shirt design, LTNP style'
+  video:
+    url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
+    version: bytedance/seedance-1-pro-fast
+    guidance: 3d rotation of the vase and flowers
+  colors:
+    - text: '#405030'
+      background: '#fcda08'
+    - text: '#403040'
+      background: '#fc9c30'
+    - text: '#405030'
+      background: '#f5efa4'
+    - text: '#505040'
+      background: '#fdf593'
+    - text: '#607030'
+      background: '#fcf62e'
+    - text: '#403030'
+      background: '#fddb49'
+    - text: '#504040'
+      background: '#f1ebc0'
+    - text: '#606020'
+      background: '#fbf252'
+    - text: '#403040'
+      background: '#fdc91e'
+tags:
+  - astro
+  - cloudflare
+  - workers
+  - typescript
+links:
+  Astro: 'https://astro.build/'
+  Cloudflare Workers: 'https://developers.cloudflare.com/workers/'
+  Cloudflare Durable Objects: 'https://developers.cloudflare.com/durable-objects/'
+  Effect: 'https://effect.website/'
+---
+
+Back in June 2024, I wrote about [a hack I'd cobbled together](/public-private-remix-routes) to open-source my personal site while keeping some routes behind a password. The gist: `npm link` and `sync-directory` would watch a private repo and pipe protected routes into the public Remix app's `node_modules`. It worked. It also felt like it could fall apart at any moment, which didn't feel great.
+
+The site has been completely rebuilt. The new [charliegleason.com](https://charliegleason.com) is a proper `pnpm` monorepo running [Astro](https://astro.build/) on [Cloudflare Workers](https://developers.cloudflare.com/workers/), with [Durable Objects](https://developers.cloudflare.com/durable-objects/) for real-time features and a real session-based authentication system. No more symlinks, either.
+
+## The architecture
+
+The monorepo has four packages:
+
+- **`@charliegleason/web`** - The Astro SSR site, deployed as a Cloudflare Worker.
+- **`@charliegleason/visitor-counter`** - A Durable Object that tracks real-time visitors via WebSocket.
+- **`@charliegleason/lastfm-tracker`** - A Durable Object that broadcasts what I'm listening to on Last.fm via WebSocket.
+- **`@charliegleason/private`** - Protected content that never leaves the private repo.
+
+Each package has its own `wrangler.jsonc` and its own deploy step. You find them all on GitHub: [charliegleason/charliegleason.com](https://github.com/charliegleason/charliegleason.com).
+
+## Authentication flow
+
+The auth system is deliberately simple. Password-based, session-stored, no OAuth dance.
+
+The flow: visit a protected route, middleware redirects you to `/login`, and you enter the password. A session gets created in Cloudflare KV with a 7-day TTL, a cookie gets set, and you're redirected back to where you were trying to go. KV handles expiration automatically.
+
+I'm using [Effect](https://effect.website/) for the session management, mostly because I wanted typed error handling without a bunch of try/catch nesting. The `createSession` function is a good example of what that looks like:
+
+```ts
+export const createSession = (
+  kv: KVNamespace,
+  userId: string,
+): Effect.Effect<string, KVError> =>
+  Effect.gen(function* () {
+    const sessionId = crypto.randomUUID();
+    const now = Date.now();
+
+    const session: Session = {
+      userId,
+      createdAt: now,
+      expiresAt: now + SESSION_DURATION_MS,
+    };
+
+    yield* Effect.tryPromise({
+      try: () =>
+        kv.put(`session:${sessionId}`, JSON.stringify(session), {
+          expirationTtl: SESSION_DURATION_SECONDS,
+        }),
+      catch: (error) =>
+        new KVError({
+          operation: "put",
+          key: `session:${sessionId}`,
+          message: "Failed to create session",
+          cause: error,
+        }),
+    });
+
+    yield* Effect.logDebug(`Created session: ${sessionId}`);
+    return sessionId;
+  });
+```
+
+A UUID session ID, a JSON blob in KV, and a TTL that means I never have to clean up stale sessions. If you're thinking "that's a key-value store with extra steps," you're right, but the extra steps have types.
+
+## Protected routes injection
+
+This is the part I'm most pleased with. Instead of the old symlink-and-sync approach, I (read: the robots) wrote an Astro integration that scans the private content directory at build time and uses `injectRoute` to register protected pages:
+
+```ts
+export default function protectedRoutes(
+  options: ProtectedRoutesOptions = {},
+): AstroIntegration {
+  return {
+    name: "protected-routes",
+    hooks: {
+      "astro:config:setup": ({ injectRoute, config, logger }) => {
+        const rootDir = fileURLToPath(config.root);
+        const protectedDir = options.protectedDir || "../private/content";
+        const contentDir = join(rootDir, protectedDir);
+
+        if (!existsSync(contentDir)) {
+          logger.info("No protected content directory found");
+          logger.info("This is expected in public mirror builds");
+          return;
+        }
+
+        const routes = findAstroFiles(contentDir, contentDir);
+
+        for (const route of routes) {
+          logger.info(`Injecting protected route: ${route.pattern}`);
+          injectRoute({
+            pattern: route.pattern,
+            entrypoint: route.entrypoint,
+          });
+        }
+      },
+    },
+  };
+}
+```
+
+The key detail: when the private package isn't there - like in public mirror builds - it logs a friendly message and moves on. No crash, no build failure. The public site builds and deploys perfectly fine without the protected content. The private monorepo builds with everything.
+
+## Durable Objects for real-time features
+
+I wanted a live visitor counter and a now-playing widget. Both felt like natural fits for Durable Objects - they're stateful, long-lived, and need to broadcast to multiple clients.
+
+### Visitor counter
+
+The visitor counter is ridiculous simple. The count _is_ the number of open WebSocket connections. No database, no persistence needed. Someone connects, the count goes up. Someone disconnects, the count goes down. Everyone gets a broadcast.
+
+```ts
+export class VisitorCounter extends DurableObject<Env> {
+  async fetch(request: Request): Promise<Response> {
+    const upgradeHeader = request.headers.get("Upgrade");
+    if (upgradeHeader !== "websocket") {
+      return new Response("Expected WebSocket", { status: 426 });
+    }
+
+    const webSocketPair = new WebSocketPair();
+    const [client, server] = Object.values(webSocketPair);
+
+    this.ctx.acceptWebSocket(server);
+    this.broadcast();
+
+    return new Response(null, {
+      status: 101,
+      webSocket: client,
+    });
+  }
+
+  async webSocketClose(ws: WebSocket, code: number, reason: string): Promise<void> {
+    ws.close(code, reason);
+    this.broadcast();
+  }
+
+  private getCount(): number {
+    return this.ctx.getWebSockets().length;
+  }
+
+  private broadcast(): void {
+    const count = this.getCount();
+    const message = JSON.stringify({ count });
+    for (const ws of this.ctx.getWebSockets()) {
+      try { ws.send(message); } catch {}
+    }
+  }
+}
+```
+
+WebSocket hibernation means Cloudflare isn't charging me for idle connections, and the global singleton pattern means everyone sees the same count. It's the kind of feature that's disproportionately fun relative to the effort involved.
+
+### Last.fm tracker
+
+The Last.fm tracker is slightly more involved. The frontend connects directly to the tracker Worker via WebSocket - it doesn't go through the main Astro app at all. When a connection comes in, the Durable Object immediately sends the current track (if it has one) and starts polling. Every 30 seconds, an Alarm fires, hits the Last.fm API, and checks if the track has changed. If it has, it broadcasts to all connected clients. If not, it does nothing.
+
+The current track gets stored in Durable Object storage so it survives cold starts - when the DO spins back up, it restores from storage in the constructor before accepting any connections. The Last.fm API response includes a `nowplaying` attribute, which gets passed through as an `isNowPlaying` flag. The frontend uses that to show "Listening to" with animated equalizer bars when music is playing, or "Last played" with static bars when it's not.
+
+One nice detail: the Alarm only reschedules itself if there are active WebSocket connections. No listeners, no polling. It starts up again when someone connects.
+
+## Hosting on Cloudflare
+
+Everything runs on Cloudflare's edge. The main Astro site is a Worker. Sessions live in KV. The Durable Objects are deployed as independent Workers with service bindings connecting them to the main app.
+
+The `wrangler.jsonc` for the web app ties it all together:
+
+```json
+{
+  "name": "astro-charliegleason-com",
+  "kv_namespaces": [{ "binding": "SESSION", "id": "..." }],
+  "durable_objects": {
+    "bindings": [
+      { "name": "VISITOR_COUNTER", "class_name": "VisitorCounter", "script_name": "visitor-counter" },
+      { "name": "LASTFM_TRACKER", "class_name": "LastFmTracker", "script_name": "lastfm-tracker" }
+    ]
+  }
+}
+```
+
+One thing that tripped me up: deployment order matters. The Durable Object Workers need to exist before the web app can bind to them. GitHub Actions handles the sequencing - Durable Objects deploy first, then the web app. I learned this the hard way, which is how I learn most things.
+
+## The public mirror
+
+The mental model has completely flipped from the old approach. Previously, the public repo was the source of truth - the private repo consumed it via `npm link` and `sync-directory`. Now the private monorepo is the source of truth, and `git subtree push` mirrors `apps/web/` to the [public repo](https://github.com/superhighfives/charliegleason.com). Protected content never leaves the private repo. It never gets committed to the public mirror. It's a much cleaner separation.
+
+## Wrapping up
+
+The old system worked, but the new setup works better. It's a real monorepo with real auth, real-time features, and a deployment pipeline that doesn't make me nervous. It's the kind of rebuild where the end result looks simple, which I think means it was worth doing.

@@ -1,0 +1,133 @@
+---
+slug: dotfiles-one-command-setup
+title: 'Dotfiles: One command to set up any Mac'
+description: >-
+  How I went from hours of manual setup to a single command that configures a
+  brand new Mac with all my tools, settings, and preferences.
+tags:
+  - dotfiles
+  - automation
+  - tools
+  - zsh
+visual:
+  prompt: 'Bold geometric dot patterns forming clear terminal windows and command prompt shapes, high contrast with bright coral and orange dots on solid black background, clean lines, pop art style, t-shirt design'
+  image:
+    url: 'https://replicate.com/jakedahn/flux-latentpop'
+    version: >-
+      jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: 'solid background, t-shirt design, LTNP style'
+  video:
+    url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
+    version: bytedance/seedance-1-pro-fast
+  colors:
+    - text: '#2a2a2a'
+      background: '#f5f5f0'
+    - text: '#3a3a3a'
+      background: '#e8e4dc'
+    - text: '#1a1a1a'
+      background: '#d4d0c8'
+    - text: '#2d2d2d'
+      background: '#f0ebe3'
+    - text: '#252525'
+      background: '#e5e0d8'
+    - text: '#303030'
+      background: '#f2ede5'
+    - text: '#202020'
+      background: '#d8d4cc'
+    - text: '#353535'
+      background: '#ebe6de'
+    - text: '#282828'
+      background: '#f7f2ea'
+data:
+  Originally Posted: 2024-03-04T00:00:00.000Z
+links:
+  Repository: 'https://github.com/superhighfives/dotfiles'
+  GNU Stow: 'https://www.gnu.org/software/stow/'
+---
+
+I've set up a lot of Macs over the years. My own machines, work laptops, family computers that I inevitably end up supporting. Each time, I'd spend hours installing the same apps, copying over configuration files, and trying to remember which shell plugins I actually used versus which ones I'd installed on a whim and forgotten about.
+
+Then I discovered [dotfiles](https://dotfiles.github.io/). The idea is simple - version control your configuration files so you can reproduce your entire development environment on a new machine. But simple ideas often hide complexity, and it took me a few iterations to get something that actually worked.
+
+## Why bother?
+
+If you've never had to set up a new development machine from scratch, you might be wondering why this matters. Let me paint you a picture:
+
+It's Monday morning. You open a shiny new MacBook. You need Homebrew, your shell configured, Git set up with SSH keys, Node installed, your editor with all its extensions, and about twenty other things just to get back to productivity. You spend the entire day installing things, googling error messages, and realizing at 4pm that you forgot to copy over your Git config.
+
+Or: You run one command, grab a coffee, and come back to a fully configured machine.
+
+That's what a good dotfiles setup gives you. It's insurance against hardware failure, job changes, or that inevitable moment when you decide to "start fresh" and immediately regret it.
+
+## What mine does
+
+My dotfiles repository lives at [github.com/superhighfives/dotfiles](https://github.com/superhighfives/dotfiles). It handles everything from Xcode Command Line Tools to my preferred VS Code extensions. Here's what happens when you run the install script:
+
+1. **Checks prerequisites** - Makes sure we're on macOS and have internet
+2. **Installs Xcode CLT** - The foundation everything else builds on
+3. **Installs Homebrew** - The package manager I can't live without
+4. **Installs packages** - From a Brewfile that includes everything from `bat` (a better `cat`) to Chrome and Figma
+5. **Sets up mise** - Manages Node, Bun, pnpm, and Python versions
+6. **Configures zsh** - oh-my-zsh with Powerlevel10k theme and useful plugins
+7. **Generates SSH keys** - Ed25519 keys with commit signing configured
+8. **Symlinks dotfiles** - Uses GNU Stow to link configs into place
+9. **Sets up secrets** - Creates a `.secrets` file for API tokens
+10. **Installs editor extensions** - VS Code and Cursor extensions
+11. **Imports Raycast settings** - Restores my window management and shortcuts
+
+The whole thing is idempotent - you can run it multiple times safely. It checks what's already installed and skips it.
+
+## The work mode trick
+
+One feature I'm particularly proud of is the `--work` flag. Personal machines need different software than work machines. I don't need Discord or my personal AI tools on a work laptop, and my employer probably doesn't want me installing a Plex client on their hardware.
+
+Running `sh install.sh --work` skips the personal apps and installs work-specific ones instead. The script maintains three Brewfiles:
+
+- `Brewfile` - Core tools everyone needs (bat, fzf, GitHub CLI, etc.)
+- `Brewfile.personal` - ChatGPT, Claude Desktop, Discord, Plex, etc.
+- `Brewfile.work` - Windsurf (Codeium's editor), and anything work-specific
+
+This makes it trivial to set up a work machine without worrying about accidentally installing personal software, or vice versa.
+
+## CLI tools that make a difference
+
+The best part of automating my setup is that I get to use better versions of common tools without thinking about it. Here are the ones I reach for daily:
+
+- **[bat](https://github.com/sharkdp/bat)** - Syntax highlighting for `cat`. Reading code without it feels wrong now.
+- **[delta](https://github.com/dandavison/delta)** - Beautiful git diffs with side-by-side comparison. It's integrated into my git config so every diff looks great.
+- **[fd](https://github.com/sharkdp/fd)** - A faster, more intuitive `find`. I use it for `fzf` integration.
+- **[fzf](https://github.com/junegunn/fzf)** - Fuzzy finder for files, command history, and git branches. Bound to `Ctrl+T` and `Ctrl+R` in my shell.
+- **[ripgrep](https://github.com/BurntSushi/ripgrep)** - Blazing fast search that respects `.gitignore` by default. I use this constantly.
+- **[zoxide](https://github.com/ajeetdsouza/zoxide)** - Smarter `cd` that learns where you go. Type `z blog` and it takes me to my blog directory, even from anywhere in the filesystem.
+
+These aren't just nice-to-haves - they fundamentally change how I interact with the terminal. And because they're in my dotfiles, every machine I use has them configured exactly the same way.
+
+## Managing configuration with Stow
+
+The dotfiles themselves are managed with [GNU Stow](https://www.gnu.org/software/stow/), a symlink farm manager. Instead of copying files into `~`, Stow creates symlinks from `~` back to the repo. This means:
+
+- Changes I make to `~/.zshrc` are immediately reflected in the repo
+- I can version control everything
+- The repo structure mirrors the home directory structure
+
+My `.zshrc` sets up fzf with custom preview commands, integrates zoxide for smart directory jumping, and activates mise for runtime management. It's not just about having the files - it's about having them configured exactly how I like them.
+
+## What I'd do differently
+
+Looking back, there are a few things I'd change:
+
+**Secrets management** - Right now I create a `.secrets` file and prompt for an npm token during install. It works, but I should probably integrate with 1Password's CLI for a more secure approach.
+
+**Conditional GUI apps** - Some apps like 1Password and Chrome require manual sign-in anyway. I could make the script smarter about detecting headless environments and skipping GUI-only steps.
+
+**More granular profiles** - The `--work` flag is binary, but real life has more nuance. A designer might want Figma but not the AI coding tools. I might add profile flags in the future.
+
+## Should you do this?
+
+If you set up more than one Mac every couple of years, absolutely. The upfront investment pays for itself quickly. Even if you only use it once, having your environment documented and version controlled is valuable insurance.
+
+Start small. Don't try to automate everything at once. Pick the things you install on every machine - Homebrew, your shell, maybe your editor. Get those working first. Then gradually add more as you find yourself doing repetitive setup tasks.
+
+The [dotfiles.github.io](https://dotfiles.github.io/) site has a great collection of other people's setups to learn from. Mine is at [github.com/superhighfives/dotfiles](https://github.com/superhighfives/dotfiles) if you want to fork it or just see how I structured things.
+
+Now when I get a new machine, I run one command, make a cup of tea, and come back to a fully configured development environment. That's time I'd rather spend actually building things.

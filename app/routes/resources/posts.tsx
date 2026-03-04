@@ -17,7 +17,7 @@ export async function loader() {
   const postsData = sortedPosts.slice(0, 10).map((post) => ({
     slug: post.slug,
     url: `https://code.charliegleason.com${post.url}`,
-    imageUrl: `https://code.charliegleason.com/posts/${post.slug}/1.png`,
+    imageUrl: `https://code.charliegleason.com/posts/${post.slug}/0.png`,
     title: post.title,
     description: post.description,
     date: post.date?.toISOString(),

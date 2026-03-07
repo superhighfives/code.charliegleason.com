@@ -21,7 +21,7 @@ function stripMarkdown(text: string): string {
 }
 
 /**
- * Extract the first couple of paragraphs from MDX content
+ * Extract the first several paragraphs from MDX content
  * Skips frontmatter, code blocks, and component tags
  */
 function extractExcerpt(content: string, paragraphCount = 8): string {
@@ -68,9 +68,9 @@ function extractExcerpt(content: string, paragraphCount = 8): string {
 
     // Build paragraph - preserve line breaks for list items and short lines
     const trimmedLine = line.trim();
-    const isListItem = /^\d+\./.test(trimmedLine);
+    const isListItem = /^(\d+\.|- |\* )/.test(trimmedLine);
     if (isListItem && currentParagraph.trim()) {
-      // Start a new paragraph for numbered list items
+      // Start a new paragraph for list items
       paragraphs.push(stripMarkdown(currentParagraph.trim()));
       currentParagraph = trimmedLine;
     } else {

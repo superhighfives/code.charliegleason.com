@@ -97,7 +97,7 @@ export default function NavBlock({
           <div className="flex-1 min-h-0 relative overflow-hidden mt-4">
             <div className="absolute inset-0 flex pointer-events-none mask-b-from-80% mask-b-to-100%">
               <div
-                className={`${MAX_WIDTH_CLASS} text-base text-current/50 leading-relaxed whitespace-pre-wrap h-fit`}
+                className={`${MAX_WIDTH_CLASS} text-base text-current/50 leading-snug whitespace-pre-wrap h-fit`}
               >
                 {excerpt}
               </div>

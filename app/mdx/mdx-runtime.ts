@@ -24,7 +24,7 @@ function stripMarkdown(text: string): string {
  * Extract the first couple of paragraphs from MDX content
  * Skips frontmatter, code blocks, and component tags
  */
-function extractExcerpt(content: string, paragraphCount = 4): string {
+function extractExcerpt(content: string, paragraphCount = 8): string {
   // Remove frontmatter if present
   const withoutFrontmatter = content.replace(/^---\n[\s\S]*?\n---\n/, "");
 
@@ -66,8 +66,16 @@ function extractExcerpt(content: string, paragraphCount = 4): string {
       continue;
     }
 
-    // Build paragraph
-    currentParagraph += (currentParagraph ? " " : "") + line.trim();
+    // Build paragraph - preserve line breaks for list items and short lines
+    const trimmedLine = line.trim();
+    const isListItem = /^\d+\./.test(trimmedLine);
+    if (isListItem && currentParagraph.trim()) {
+      // Start a new paragraph for numbered list items
+      paragraphs.push(stripMarkdown(currentParagraph.trim()));
+      currentParagraph = trimmedLine;
+    } else {
+      currentParagraph += (currentParagraph ? " " : "") + trimmedLine;
+    }
   }
 
   // Add final paragraph if exists

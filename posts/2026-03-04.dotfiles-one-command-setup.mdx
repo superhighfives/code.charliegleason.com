@@ -1,0 +1,117 @@
+---
+slug: dotfiles-one-command-setup
+title: 'Dotfiles: One command to set up any Mac'
+description: >-
+  How I went from hours of manual setup to a single command that configures a
+  brand new Mac with all my tools, settings, and preferences.
+tags:
+  - dotfiles
+  - automation
+  - tools
+  - zsh
+visual:
+  prompt: >-
+    Bold geometric dot patterns forming clear terminal windows and command
+    prompt shapes, high contrast with bright coral and orange dots on solid
+    black background, clean lines, pop art style, t-shirt design
+  image:
+    url: 'https://replicate.com/jakedahn/flux-latentpop'
+    version: >-
+      jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: 'solid background, t-shirt design, LTNP style'
+  video:
+    url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
+    version: bytedance/seedance-1-pro-fast
+    guidance: >-
+      no text, no words, no language, animate the dots out of frame, kinetic
+      movement
+  colors:
+    - text: '#ff5030'
+      background: '#020203'
+    - text: '#ff4030'
+      background: '#040304'
+    - text: '#ff5030'
+      background: '#010102'
+    - text: '#ff5000'
+      background: '#020102'
+    - text: '#ff5020'
+      background: '#0b0b0f'
+    - text: '#ff5040'
+      background: '#020202'
+    - text: '#ff5030'
+      background: '#040304'
+    - text: '#ff5030'
+      background: '#060405'
+    - text: '#ff5030'
+      background: '#030304'
+data:
+  Originally Posted: 2024-03-04T00:00:00.000Z
+links:
+  Repository: 'https://github.com/superhighfives/dotfiles'
+  GNU Stow: 'https://www.gnu.org/software/stow/'
+---
+
+Setting up a new Mac used to take me days. I'd install Homebrew, configure my shell, set up Git with SSH keys, install Node, download my editor extensions, and inevitably realize at some point that I'd forgot to copy over some config file.
+
+I came across [Matt Silverlock's dotfiles](https://github.com/elithrar/dotfiles/) and realized this could be automated. The idea is simple - version control your configuration so one command reproduces your entire environment on a new machine.
+
+My dotfiles now handle everything from Xcode Command Line Tools to VS Code extensions. What used to take hours now happens while I make a crisp beverage.
+
+## What it does
+
+1. **Checks prerequisites** - Verifies macOS and internet connection
+2. **Installs Xcode CLT** - The foundation for everything else
+3. **Installs Homebrew** - Package manager
+4. **Installs packages** - From a Brewfile with CLI tools and apps
+5. **Sets up mise** - Manages Node, Bun, pnpm, Python versions
+6. **Configures zsh** - oh-my-zsh with plugins and theme
+7. **Generates SSH keys** - Ed25519 keys with commit signing
+8. **Symlinks dotfiles** - GNU Stow links configs into place
+9. **Sets up secrets** - API token configuration
+10. **Installs editor extensions** - VS Code and Cursor
+11. **Imports Raycast settings** - Window management and shortcuts
+
+The script is idempotent - safe to run multiple times, skipping what's already installed.
+
+## Work mode
+
+The `--work` flag separates personal from work setups, given I don't need certain tools or apps on a work laptop, but I want a consistent environment for non-sensitive configurations.
+
+Running `sh install.sh --work` swaps the Brewfile:
+
+- `Brewfile` - Core tools for everyone
+- `Brewfile.personal` - Personal stuff
+- `Brewfile.work` - Work-specific stuff
+
+## CLI tools that make a difference
+
+These tools fundamentally change how I work in the terminal:
+
+- **[bat](https://github.com/sharkdp/bat)** - Syntax-highlighting `cat`
+- **[delta](https://github.com/dandavison/delta)** - Beautiful git diffs
+- **[fd](https://github.com/sharkdp/fd)** - Intuitive `find` replacement
+- **[fzf](https://github.com/junegunn/fzf)** - Fuzzy finder bound to `Ctrl+T` and `Ctrl+R`
+- **[ripgrep](https://github.com/BurntSushi/ripgrep)** - Fast search respecting `.gitignore`
+- **[zoxide](https://github.com/ajeetdsouza/zoxide)** - Smarter `cd` that learns your directories
+
+## Managing configuration with Stow
+
+[GNU Stow](https://www.gnu.org/software/stow/) manages the dotfiles by creating symlinks from `~` back to the repo. Edit `~/.zshrc` and the change is immediately in version control.
+
+Stow has a `.stow-local-ignore` file that prevents certain files from being linked. I use it to skip the README, install scripts, and anything else that shouldn't live in `~`:
+
+```
+\.git
+\.gitignore
+README.md
+install.sh
+Brewfile
+```
+
+My `.zshrc` configures fzf with custom previews, integrates zoxide, and activates mise. Everything is configured exactly how I like it, on every machine.
+
+## Should you do this?
+
+If you set up more than one Mac every couple of years, yes. The investment pays for itself quickly. It's also very comforting.
+
+Start small - fork my repo or [Matt's](https://github.com/elithrar/dotfiles/), and edit it to your liking. You could just use Homebrew, your shell, and your editor, and add more as you find repetitive tasks.

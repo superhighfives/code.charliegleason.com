@@ -1,6 +1,6 @@
-import { format, parseISO } from "date-fns";
 import { MAX_WIDTH_CLASS } from "~/config/constants";
 import type { MetaData } from "~/mdx/types";
+import { formatDisplayDate } from "~/utils/date";
 
 export default function Metadata({
   data,
@@ -25,7 +25,7 @@ export default function Metadata({
               {item.key}
             </dt>
             <dd className="mt-1 text-gray-700 dark:text-gray-300 sm:col-span-2 sm:mt-0">
-              {date ? format(parseISO(item.value), "dd/MM/yyyy") : item.value}
+              {date ? formatDisplayDate(item.value) : item.value}
             </dd>
           </div>
         );

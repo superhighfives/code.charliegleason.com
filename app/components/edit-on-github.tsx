@@ -1,4 +1,5 @@
 import { GitBranch } from "lucide-react";
+import { extractDateString } from "~/utils/date";
 
 export default function EditOnGitHub({
   date,
@@ -7,7 +8,7 @@ export default function EditOnGitHub({
   date: string;
   slug: string;
 }) {
-  const formattedDate = date.split("T")[0];
+  const formattedDate = extractDateString(date);
 
   return (
     <a

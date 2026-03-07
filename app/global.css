@@ -352,6 +352,8 @@ html.dark .shiki span {
   @apply prose dark:prose-invert max-w-none text-pretty border border-transparent sm:px-4 text-lg;
   @apply [&>*:not(.code)]:max-w-[calc(var(--container-4xl)-1rem-2px)];
   @apply [&>:first-child]:mt-0 [&>:last-child]:mb-0 leading-8;
+  @apply prose-li:my-1.5;
+  @apply [&_li_p]:my-0;
 }
 
 /* Heading typography and hash prefixes */

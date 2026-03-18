@@ -1,17 +1,9 @@
 import type { APIRoute } from "astro";
 
-// Helper to get env - returns null in dev mode when cloudflare:workers unavailable
-function getCloudflareEnv() {
-  try {
-    // Dynamic import to avoid build errors in dev mode
-    const { env } = require("cloudflare:workers");
-    return env;
-  } catch {
-    return null;
-  }
-}
+// Cloudflare env is injected via Astro's locals in the Cloudflare adapter
+// In dev mode, locals.runtime won't exist, so we return null
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, locals }) => {
   const url = new URL(request.url);
   const slug = url.searchParams.get("slug");
 
@@ -22,7 +14,10 @@ export const GET: APIRoute = async ({ request }) => {
     });
   }
 
-  const env = getCloudflareEnv();
+  // Cloudflare runtime env is available via locals in the Cloudflare adapter
+  const runtime = (locals as { runtime?: { env?: Record<string, unknown> } })
+    .runtime;
+  const env = runtime?.env as { KUDOS_DO?: DurableObjectNamespace } | undefined;
 
   // Dev mode fallback - return mock data
   if (!env?.KUDOS_DO) {
@@ -50,7 +45,7 @@ export const GET: APIRoute = async ({ request }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   let body: { slug?: string; fingerprint?: string } = {};
   try {
     body = await request.json();
@@ -70,7 +65,10 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  const env = getCloudflareEnv();
+  // Cloudflare runtime env is available via locals in the Cloudflare adapter
+  const runtime = (locals as { runtime?: { env?: Record<string, unknown> } })
+    .runtime;
+  const env = runtime?.env as { KUDOS_DO?: DurableObjectNamespace } | undefined;
 
   // Dev mode fallback - return mock success
   if (!env?.KUDOS_DO) {

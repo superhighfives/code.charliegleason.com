@@ -85,19 +85,30 @@ const imageIndices = Array.from({ length: VISUAL_COUNT }, (_, i) => i);
 </Layout>
 
 <script>
-  // Add hover behavior to play/pause videos
-  document.querySelectorAll('.card').forEach((card) => {
-    const video = card.querySelector('video') as HTMLVideoElement;
-    if (!video) return;
+  // Add hover behavior to play/pause videos using event delegation
+  // This avoids duplicate listeners when navigating with View Transitions
+  const container = document.querySelector('.grid');
+  if (container && !container.hasAttribute('data-listeners-attached')) {
+    container.setAttribute('data-listeners-attached', 'true');
     
-    card.addEventListener('mouseenter', () => {
-      video.currentTime = 0;
-      video.play();
-    });
+    container.addEventListener('mouseenter', (e) => {
+      const card = (e.target as Element).closest('.card');
+      if (!card) return;
+      const video = card.querySelector('video') as HTMLVideoElement;
+      if (video) {
+        video.currentTime = 0;
+        video.play();
+      }
+    }, true);
     
-    card.addEventListener('mouseleave', () => {
-      video.pause();
-      video.currentTime = 0;
-    });
-  });
+    container.addEventListener('mouseleave', (e) => {
+      const card = (e.target as Element).closest('.card');
+      if (!card) return;
+      const video = card.querySelector('video') as HTMLVideoElement;
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    }, true);
+  }
 </script>

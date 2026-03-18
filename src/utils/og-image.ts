@@ -5,6 +5,28 @@ import { ImageResponse, loadGoogleFont } from "workers-og";
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
 
+// Cache fonts in module scope to avoid loading on every request
+let cachedFonts: { jetBrainsMono: ArrayBuffer; inter: ArrayBuffer } | null =
+  null;
+
+async function getFonts() {
+  if (cachedFonts) return cachedFonts;
+  const [jetBrainsMono, inter] = await Promise.all([
+    loadGoogleFont({ family: "JetBrains Mono", weight: 600 }),
+    loadGoogleFont({ family: "Inter", weight: 600 }),
+  ]);
+  cachedFonts = { jetBrainsMono, inter };
+  return cachedFonts;
+}
+
+// Custom error for 404 cases
+export class PostNotFoundError extends Error {
+  constructor(slug: string) {
+    super(`Post not found: ${slug}`);
+    this.name = "PostNotFoundError";
+  }
+}
+
 export interface OgImageOptions {
   slug: string;
   requestUrl: string;
@@ -21,7 +43,7 @@ export async function generateOgImage({
   const post = posts.find((p) => p.data.slug === slug);
 
   if (!post) {
-    throw new Error("Post not found");
+    throw new PostNotFoundError(slug);
   }
 
   const { title, description, visual } = post.data;
@@ -75,7 +97,7 @@ export async function generateOgImage({
     : "";
 
   const html = `
-    <div style="width: ${OG_IMAGE_WIDTH}px; height: ${OG_IMAGE_HEIGHT}px; background: ${backgroundColor}; display: flex; flex-direction: row; color: ${textColor}; font-family: 'JetBrains Mono', monospace;">
+    <div style="position: relative; width: ${OG_IMAGE_WIDTH}px; height: ${OG_IMAGE_HEIGHT}px; background: ${backgroundColor}; display: flex; flex-direction: row; color: ${textColor}; font-family: 'JetBrains Mono', monospace;">
       <div style="width: ${leftWidth}; height: 100%; padding: ${leftPadding}; display: flex; flex-direction: column; gap: 24px;">
         <div style="display: flex; font-size: 48px; line-height: 1.25; letter-spacing: -0.01em; font-family: 'Inter', sans-serif;">
           ${title}
@@ -89,11 +111,8 @@ export async function generateOgImage({
     </div>
   `;
 
-  // Load fonts
-  const [jetBrainsMono, inter] = await Promise.all([
-    loadGoogleFont({ family: "JetBrains Mono", weight: 600 }),
-    loadGoogleFont({ family: "Inter", weight: 600 }),
-  ]);
+  // Load fonts (cached in module scope)
+  const fonts = await getFonts();
 
   const imageResponse = new ImageResponse(html, {
     width: OG_IMAGE_WIDTH,
@@ -101,13 +120,13 @@ export async function generateOgImage({
     fonts: [
       {
         name: "JetBrains Mono",
-        data: jetBrainsMono,
+        data: fonts.jetBrainsMono,
         weight: 600,
         style: "normal",
       },
       {
         name: "Inter",
-        data: inter,
+        data: fonts.inter,
         weight: 600,
         style: "normal",
       },

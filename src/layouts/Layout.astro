@@ -1,0 +1,90 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import ThemeToggle from "~/components/ThemeToggle";
+import NavMenuItem from "~/components/NavMenuItem";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "❯ ~/code.charliegleason.com", description } = Astro.props;
+
+// Get theme from cookie
+const themeCookie = Astro.cookies.get("en_theme")?.value;
+const theme = themeCookie === "light" || themeCookie === "dark" ? themeCookie : null;
+
+// Get current path for nav highlighting
+const currentPath = Astro.url.pathname;
+const isHome = currentPath === "/";
+const isAbout = currentPath === "/about" || currentPath === "/about/";
+---
+
+<!doctype html>
+<html lang="en" class={theme === "dark" ? "dark" : ""}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Enable client-side routing with view transitions -->
+    <ClientRouter />
+    
+    <!-- Preload fonts -->
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Inter-SemiBold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/JetBrainsMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin />
+    
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml" />
+    
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    
+    <!-- Prevent FOUC - detect theme before paint -->
+    <script is:inline>
+      (function() {
+        const themeCookie = document.cookie.match(/en_theme=([^;]+)/)?.[1];
+        if (themeCookie === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else if (themeCookie === 'light') {
+          document.documentElement.classList.remove('dark');
+        } else {
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+          }
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="grid grid-rows-layout gap-8 min-h-dvh p-4 sm:p-8 [padding-bottom:calc(env(safe-area-inset-bottom)+2.5rem)] sm:[padding-bottom:calc(env(safe-area-inset-bottom)+6rem)] text-indigo-600 dark:text-indigo-400 overflow-x-hidden">
+      <div class="content-end">
+        <slot />
+      </div>
+      
+      <!-- Fixed bottom navigation -->
+      <nav class="z-50 fixed inset-x-0 bottom-0 bg-gray-50 dark:bg-gray-900 drop-shadow-2xl font-mono" style="view-transition-name: navigation" transition:persist>
+        <div class="flex justify-between border-t dark:border-gray-800 px-8 pt-4 pb-4 sm:pb-12">
+          <div class="flex gap-6">
+            <a
+              href="/"
+              class="flex gap-1 leading-tight select-none focus-ring-primary"
+            >
+              <span>❯</span>
+              <span class="animate-blink">█</span>
+            </a>
+            <NavMenuItem client:load href="/" isActive={isHome}>Home</NavMenuItem>
+            <NavMenuItem client:load href="/about" isActive={isAbout}>About</NavMenuItem>
+          </div>
+          <div class="flex gap-6">
+            <ThemeToggle client:load initialTheme={theme as "light" | "dark" | undefined} />
+          </div>
+        </div>
+      </nav>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,40 @@
+---
+import { getCollection } from "astro:content";
+
+// Redirect handler for visual index URLs
+// e.g., /hello-world/15 redirects to /hello-world with a cookie set
+
+const { slug, index } = Astro.params;
+
+// Find the post to get its visual count
+const posts = await getCollection("posts");
+const post = posts.find((p) => p.data.slug === slug);
+
+if (!post) {
+  return Astro.redirect("/404");
+}
+
+// Get visual count from post's colors array or default to 9
+const visualCount = post.data.visual?.colors?.length ?? 9;
+
+// Validate index is a number between 1 and visualCount
+const parsedIndex = parseInt(index ?? "", 10);
+if (isNaN(parsedIndex) || parsedIndex < 1 || parsedIndex > visualCount) {
+  return Astro.redirect("/404");
+}
+
+// Convert to internal index (0-based)
+const internalIndex = parsedIndex - 1;
+
+// Set cookie and redirect
+const cookieName = `visual-index-${slug}`;
+const cookieValue = `${cookieName}=${internalIndex}; path=/; max-age=60; samesite=lax`;
+
+return new Response(null, {
+  status: 302,
+  headers: {
+    "Location": `/${slug}`,
+    "Set-Cookie": cookieValue,
+  },
+});
+---

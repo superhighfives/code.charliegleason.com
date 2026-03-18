@@ -1,0 +1,173 @@
+---
+import { getCollection, render } from "astro:content";
+import { differenceInMonths, format } from "date-fns";
+import Layout from "~/layouts/Layout.astro";
+import Visual from "~/components/Visual.astro";
+import Picture from "~/components/Picture.astro";
+import Icon from "~/components/Icon.astro";
+import LiveCodeBlock from "~/components/LiveCodeBlock";
+import VideoMasthead from "~/components/VideoMasthead";
+import { KudosButton } from "~/components/KudosButton";
+import EditOnGitHub from "~/components/EditOnGitHub.astro";
+import LinkBlock from "~/components/LinkBlock.astro";
+
+// In server mode, we get the slug from the URL params
+const { slug } = Astro.params;
+
+// Find the post by slug
+const posts = await getCollection("posts");
+const post = posts.find((p) => p.data.slug === slug);
+
+if (!post) {
+  return Astro.redirect("/404");
+}
+
+const { Content } = await render(post);
+
+// Extract date from filename
+const dateMatch = post.id.match(/^(\d{4}-\d{2}-\d{2})\./);
+const date = dateMatch ? new Date(dateMatch[1]) : null;
+
+// Generate random video index based on available visuals
+const VISUAL_COUNT = post.data.visual?.colors?.length ?? 9;
+
+// Check for visual index cookie (set by redirect handler)
+let videoIndex: number | null = null;
+const cookieName = `visual-index-${slug}`;
+const cookieHeader = Astro.request.headers.get("Cookie");
+if (cookieHeader) {
+  const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]+)`));
+  if (match) {
+    const value = parseInt(match[1], 10);
+    if (!isNaN(value) && value >= 0 && value < VISUAL_COUNT) {
+      videoIndex = value;
+    }
+  }
+}
+
+// Use cookie value or generate random
+const randomVideo = videoIndex ?? Math.floor(Math.random() * VISUAL_COUNT);
+
+// Delete the cookie after reading (so refresh generates new random)
+if (videoIndex !== null && slug) {
+  Astro.response.headers.set(
+    "Set-Cookie",
+    `visual-index-${slug}=; path=/; max-age=0; samesite=lax`
+  );
+}
+
+// Check if article is old (more than 3 months, matching original)
+const isOldArticle = date ? differenceInMonths(new Date(), date) >= 3 : false;
+
+// Build metadata matching original processArticleData
+const metadata: Array<{ label: string; value: string }> = [];
+
+// Overview (description) first
+if (post.data.description) {
+  metadata.push({ label: "Overview", value: post.data.description });
+}
+
+// Last Updated (formatted as dd/MM/yyyy like original)
+if (date) {
+  metadata.push({ label: "Last Updated", value: format(date, "dd/MM/yyyy") });
+}
+
+// Tags
+if (post.data.tags?.length) {
+  metadata.push({ label: "Tags", value: post.data.tags.join(", ") });
+}
+
+// Add custom data entries
+if (post.data.data) {
+  for (const [key, value] of Object.entries(post.data.data)) {
+    metadata.push({ label: key, value: String(value) });
+  }
+}
+
+// Prepare links for display
+const links = post.data.links 
+  ? Object.entries(post.data.links).map(([key, value]) => {
+      const url = new URL(value as string);
+      return { key, value: value as string, hostname: url.hostname };
+    })
+  : [];
+---
+
+<Layout title={`${post.data.title} ❯ ~/code.charliegleason.com`} description={post.data.description}>
+  <div class="grid gap-y-4 relative">
+    {slug && post.data.visual && (
+      <VideoMasthead
+        client:load
+        slug={slug}
+        video={randomVideo}
+        visual={post.data.visual}
+      />
+    )}
+    
+    <div class="flex flex-wrap gap-y-2 max-w-4xl" style="view-transition-name: post-breadcrumb">
+      <a
+        href="/"
+        class="font-mono font-semibold group link-primary focus-ring-primary pr-2"
+      >
+        ❯ cd ~/code<span class="hidden sm:inline">.</span><span class="hidden sm:inline">charliegleason</span><span class="hidden sm:inline">.com</span>
+      </a>
+      <span class="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
+      <h1 class="font-heading font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 text-3xl w-full">
+        {post.data.title}
+      </h1>
+    </div>
+
+    {/* Metadata - bordered dl grid layout matching original */}
+    {metadata.length > 0 && (
+      <dl class="font-mono text-sm divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 max-w-4xl" style="view-transition-name: post-metadata">
+        {metadata.map(({ label, value }) => (
+          <div class="sm:px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 leading-6">
+            <dt class="font-semibold text-gray-400 dark:text-gray-500">{label}</dt>
+            <dd class="mt-1 text-gray-700 dark:text-gray-300 sm:col-span-2 sm:mt-0">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    )}
+
+    {/* Old article warning */}
+    {isOldArticle && (
+      <p class="font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 max-w-4xl" style="view-transition-name: post-warning">
+        This has not been updated in the last three months, so this
+        information miiiiiight be out of date. Here be dragons, etc.
+      </p>
+    )}
+
+    <div class="post prose prose-gray dark:prose-invert prose-headings:font-heading prose-headings:font-semibold prose-a:text-indigo-600 dark:prose-a:text-indigo-400 max-w-4xl" style="view-transition-name: post-content">
+      <Content components={{ Visual, Picture, Icon }} />
+    </div>
+
+    {/* Kudos and Edit on GitHub - side by side like original */}
+    {slug && (
+      <div class="flex flex-wrap justify-start sm:px-4 items-center gap-4">
+        <KudosButton client:load slug={slug} />
+        {date && <EditOnGitHub date={date.toISOString()} slug={slug} />}
+      </div>
+    )}
+
+    {/* Links section - styled like original */}
+    {links.length > 0 && (
+      <dl class="pt-2 max-w-4xl">
+        <dt class="sm:px-4 font-semibold leading-6 text-gray-900 dark:text-gray-500 font-mono">
+          Links
+        </dt>
+        <dd class="mt-2 text-gray-900 bg-white dark:bg-gray-950">
+          <div class="divide-y divide-gray-100 dark:divide-gray-900 rounded-md overflow-hidden border border-gray-200 dark:border-gray-800">
+            {links.map((link) => (
+              <LinkBlock
+                title={link.key}
+                caption={link.hostname}
+                action="Open"
+                href={link.value}
+              />
+            ))}
+          </div>
+        </dd>
+      </dl>
+    )}
+  </div>
+</Layout>

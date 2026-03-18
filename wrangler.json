@@ -1,19 +1,10 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "code",
-  "main": "./workers/app.ts",
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "code-astro",
   "compatibility_date": "2025-04-01",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true
-  },
-  "upload_source_maps": true,
-  "vars": {
-    "VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare"
-  },
-  "assets": {
-    "directory": "./public/",
-    "binding": "ASSETS"
   },
   "r2_buckets": [
     {
@@ -30,24 +21,9 @@
       }
     ]
   },
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_classes": ["KudosObject"]
-    }
-  ],
-  "routes": [
-    {
-      "pattern": "code.charliegleason.com",
-      "custom_domain": true
-    }
-  ],
   "env": {
     "staging": {
-      "name": "code-staging",
-      "vars": {
-        "VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare (Staging)"
-      },
+      "name": "code-astro-staging",
       "r2_buckets": [
         {
           "bucket_name": "visual-assets-staging",
@@ -62,13 +38,7 @@
             "script_name": "code-staging"
           }
         ]
-      },
-      "routes": [
-        {
-          "pattern": "staging.code.charliegleason.com",
-          "custom_domain": true
-        }
-      ]
+      }
     }
   }
 }

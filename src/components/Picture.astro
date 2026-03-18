@@ -1,0 +1,32 @@
+---
+interface Props {
+  src: string;
+  alt?: string;
+  themed?: boolean;
+}
+
+const { src, alt = "", themed = false } = Astro.props;
+
+// Get theme from cookie
+const themeCookie = Astro.cookies.get("en_theme")?.value;
+const theme = themeCookie === "dark" ? "dark" : themeCookie === "light" ? "light" : null;
+
+// Generate dark mode image path if themed
+const darkSrc = themed ? src.replace(/\.([^.]+)$/, "-dark.$1") : null;
+---
+
+<picture class="overflow-hidden rounded shadow-sm w-full align-top my-0 block">
+  {themed && darkSrc && (
+    <source srcset={darkSrc} media="(prefers-color-scheme: dark)" />
+  )}
+  <img src={src} alt={alt} class="w-full" loading="lazy" />
+</picture>
+
+{themed && (
+  <style define:vars={{ lightSrc: `url(${src})`, darkSrc: `url(${darkSrc})` }}>
+    /* Handle explicit theme class */
+    .dark picture img {
+      content: var(--darkSrc);
+    }
+  </style>
+)}

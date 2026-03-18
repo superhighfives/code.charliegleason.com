@@ -191,34 +191,17 @@ body {
 
 /* Light mode - use light theme colors */
 .shiki,
-.shiki span,
-.astro-code,
-.astro-code span {
-  color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
+.shiki span {
+  color: var(--shiki-light) !important;
 }
 
 /* Dark mode - use dark theme colors */
 html.dark .shiki,
-html.dark .shiki span,
-html.dark .astro-code,
-html.dark .astro-code span {
-  color: var(--shiki-dark);
-  background-color: var(--shiki-dark-bg);
+html.dark .shiki span {
+  color: var(--shiki-dark) !important;
 }
 
-/* Code block container styling */
-.astro-code,
-.shiki {
-  padding: 1rem;
-  border-radius: 0.375rem;
-  overflow-x: auto;
-  font-size: 0.875rem;
-  line-height: 1.7;
-}
-
-.shiki:focus-visible,
-.astro-code:focus-visible {
+.shiki:focus-visible {
   outline: none;
   border-radius: 2px;
   @apply ring-4 ring-offset-2 ring-indigo-100 bg-indigo-100 ring-offset-indigo-100 dark:ring-indigo-900 dark:bg-indigo-900 dark:ring-offset-indigo-900;

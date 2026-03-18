@@ -36,7 +36,7 @@ export default function NavMenuItem({
   const activeClass =
     "text-indigo-500 dark:text-indigo-300 border-indigo-500 dark:border-indigo-300";
   const inactiveClass =
-    "border-indigo-600/20 dark:border-indigo-400/30 hover:border-current";
+    "border-indigo-600/20 dark:border-indigo-400/30 hover:border-current hover:border-indigo-600/20 hover:dark:border-indigo-400/30 focus-visible:border-current focus-visible:border-indigo-600/20 focus-visible:dark:border-indigo-400/30";
 
   // Render static link for SSR, then hydrate with scramble effect
   return (

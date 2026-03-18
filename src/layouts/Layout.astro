@@ -76,7 +76,7 @@ const isAbout = currentPath === "/about" || currentPath === "/about/";
               class="flex gap-1 leading-tight select-none focus-ring-primary"
             >
               <span>❯</span>
-              <span class="animate-blink">█</span>
+              <span class="animate-blink step">█</span>
             </a>
             <NavMenuItem client:load href="/" isActive={isHome}>Home</NavMenuItem>
             <NavMenuItem client:load href="/about" isActive={isAbout}>About</NavMenuItem>

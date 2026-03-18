@@ -17,7 +17,7 @@ export default function NavMenuItem({
 
   const { ref, replay } = useScramble({
     ...scrambleOptions,
-    text: children,
+    text: mounted ? children : "",
   });
 
   useEffect(() => {

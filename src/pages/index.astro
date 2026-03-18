@@ -1,8 +1,8 @@
 ---
 import { getCollection } from "astro:content";
-import Layout from "~/layouts/Layout.astro";
-import AboutSection from "~/components/AboutSection";
-import NavBlock from "~/components/NavBlock.astro";
+import AboutSection from "../components/AboutSection.tsx";
+import NavBlock from "../components/NavBlock.astro";
+import Layout from "../layouts/Layout.astro";
 
 // Get all posts and sort by date (extracted from filename)
 const posts = await getCollection("posts");
@@ -29,30 +29,32 @@ for (const post of postsWithDates) {
 
 // Strip markdown formatting from text
 function stripMarkdown(text: string): string {
-  return text
-    // Remove links but keep text: [text](url) -> text
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    // Remove bold: **text** or __text__ -> text
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/__([^_]+)__/g, "$1")
-    // Remove italic: *text* or _text_ -> text
-    .replace(/\*([^*]+)\*/g, "$1")
-    .replace(/_([^_]+)_/g, "$1")
-    // Remove inline code: `code` -> code
-    .replace(/`([^`]+)`/g, "$1")
-    // Remove list markers: 1. or - or *
-    .replace(/^\s*[\d]+\.\s+/gm, "")
-    .replace(/^\s*[-*]\s+/gm, "")
-    // Normalize whitespace
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    text
+      // Remove links but keep text: [text](url) -> text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      // Remove bold: **text** or __text__ -> text
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/__([^_]+)__/g, "$1")
+      // Remove italic: *text* or _text_ -> text
+      .replace(/\*([^*]+)\*/g, "$1")
+      .replace(/_([^_]+)_/g, "$1")
+      // Remove inline code: `code` -> code
+      .replace(/`([^`]+)`/g, "$1")
+      // Remove list markers: 1. or - or *
+      .replace(/^\s*[\d]+\.\s+/gm, "")
+      .replace(/^\s*[-*]\s+/gm, "")
+      // Normalize whitespace
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 // Extract excerpts from raw content (first few paragraphs)
 function extractExcerpt(content: string, paragraphCount = 8): string {
   // Remove frontmatter if present
   const withoutFrontmatter = content.replace(/^---\n[\s\S]*?\n---\n/, "");
-  
+
   const lines = withoutFrontmatter.split("\n");
   const paragraphs: string[] = [];
   let currentParagraph = "";

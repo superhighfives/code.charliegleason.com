@@ -1,15 +1,14 @@
 ---
 import { getCollection, render } from "astro:content";
 import { differenceInMonths, format } from "date-fns";
-import Layout from "~/layouts/Layout.astro";
-import Visual from "~/components/Visual.astro";
-import Picture from "~/components/Picture.astro";
-import Icon from "~/components/Icon.astro";
-import LiveCodeBlock from "~/components/LiveCodeBlock";
-import VideoMasthead from "~/components/VideoMasthead";
-import { KudosButton } from "~/components/KudosButton";
-import EditOnGitHub from "~/components/EditOnGitHub.astro";
-import LinkBlock from "~/components/LinkBlock.astro";
+import EditOnGitHub from "../../components/EditOnGitHub.astro";
+import Icon from "../../components/Icon.astro";
+import { KudosButton } from "../../components/KudosButton.tsx";
+import LinkBlock from "../../components/LinkBlock.astro";
+import Picture from "../../components/Picture.astro";
+import VideoMasthead from "../../components/VideoMasthead.tsx";
+import Visual from "../../components/Visual.astro";
+import Layout from "../../layouts/Layout.astro";
 
 // In server mode, we get the slug from the URL params
 const { slug } = Astro.params;
@@ -39,7 +38,7 @@ if (cookieHeader) {
   const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]+)`));
   if (match) {
     const value = parseInt(match[1], 10);
-    if (!isNaN(value) && value >= 0 && value < VISUAL_COUNT) {
+    if (!Number.isNaN(value) && value >= 0 && value < VISUAL_COUNT) {
       videoIndex = value;
     }
   }
@@ -52,7 +51,7 @@ const randomVideo = videoIndex ?? Math.floor(Math.random() * VISUAL_COUNT);
 if (videoIndex !== null && slug) {
   Astro.response.headers.set(
     "Set-Cookie",
-    `visual-index-${slug}=; path=/; max-age=0; samesite=lax`
+    `visual-index-${slug}=; path=/; max-age=0; samesite=lax`,
   );
 }
 
@@ -85,7 +84,7 @@ if (post.data.data) {
 }
 
 // Prepare links for display
-const links = post.data.links 
+const links = post.data.links
   ? Object.entries(post.data.links).map(([key, value]) => {
       const url = new URL(value as string);
       return { key, value: value as string, hostname: url.hostname };

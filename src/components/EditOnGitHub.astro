@@ -9,7 +9,7 @@ const { date, slug } = Astro.props;
 // Extract date from ISO string or formatted date
 function extractDateString(dateInput: string): string {
   const d = new Date(dateInput);
-  if (isNaN(d.getTime())) return dateInput;
+  if (Number.isNaN(d.getTime())) return dateInput;
   return d.toISOString().split("T")[0];
 }
 

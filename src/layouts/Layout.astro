@@ -1,8 +1,8 @@
 ---
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
-import ThemeToggle from "~/components/ThemeToggle";
-import NavMenuItem from "~/components/NavMenuItem";
+import NavMenuItem from "../components/NavMenuItem.tsx";
+import ThemeToggle from "../components/ThemeToggle.tsx";
 
 interface Props {
   title?: string;
@@ -13,7 +13,8 @@ const { title = "❯ ~/code.charliegleason.com", description } = Astro.props;
 
 // Get theme from cookie
 const themeCookie = Astro.cookies.get("en_theme")?.value;
-const theme = themeCookie === "light" || themeCookie === "dark" ? themeCookie : null;
+const theme =
+  themeCookie === "light" || themeCookie === "dark" ? themeCookie : null;
 
 // Get current path for nav highlighting
 const currentPath = Astro.url.pathname;

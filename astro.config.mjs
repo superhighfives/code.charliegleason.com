@@ -15,7 +15,7 @@ export default defineConfig({
   }),
   integrations: [mdx(), react()],
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [/** @type {any} */ (tailwindcss())],
     // Fix React hooks SSR errors by preventing multiple React copies
     ssr: {
       noExternal: ["use-scramble", "framer-motion"],

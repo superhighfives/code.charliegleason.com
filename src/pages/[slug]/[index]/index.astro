@@ -19,7 +19,7 @@ const visualCount = post.data.visual?.colors?.length ?? 9;
 
 // Validate index is a number between 1 and visualCount
 const parsedIndex = parseInt(index ?? "", 10);
-if (isNaN(parsedIndex) || parsedIndex < 1 || parsedIndex > visualCount) {
+if (Number.isNaN(parsedIndex) || parsedIndex < 1 || parsedIndex > visualCount) {
   return Astro.redirect("/404");
 }
 
@@ -33,7 +33,7 @@ const cookieValue = `${cookieName}=${internalIndex}; path=/; max-age=60; samesit
 return new Response(null, {
   status: 302,
   headers: {
-    "Location": `/${slug}`,
+    Location: `/${slug}`,
     "Set-Cookie": cookieValue,
   },
 });

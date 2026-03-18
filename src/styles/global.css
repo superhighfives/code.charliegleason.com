@@ -1,4 +1,4 @@
-/* biome-ignore-file: Tailwind v4 @theme tokens unsupported by current Biome */
+/* Tailwind v4 @theme tokens handled via biome.json css.parser.tailwindDirectives */
 
 /*************************************************************/
 /* Font Face Declarations */
@@ -98,6 +98,7 @@
 /* Tailwind setup */
 /*************************************************************/
 
+/* biome-ignore lint/correctness/noInvalidPositionAtImportRule: Tailwind v4 source() syntax requires @font-face declarations first */
 @import "tailwindcss" source("../");
 
 @theme {
@@ -106,8 +107,8 @@
     "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --font-heading:
-    "PolySans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+    "PolySans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:
     "JetBrains Mono", "ui-monospace", "SFMono-Regular", '"Roboto Mono"',
     '"Courier New"', "monospace";
@@ -180,8 +181,8 @@ body {
 /*************************************************************/
 
 :root {
-  --code-branding-light: #4C4CDD;
-  --code-branding-dark: #03060E;
+  --code-branding-light: #4c4cdd;
+  --code-branding-dark: #03060e;
 }
 
 /*************************************************************/
@@ -193,8 +194,8 @@ body {
 .shiki span,
 .astro-code,
 .astro-code span {
-  color: var(--shiki-light) !important;
-  background-color: var(--shiki-light-bg) !important;
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
 }
 
 /* Dark mode - use dark theme colors */
@@ -202,8 +203,8 @@ html.dark .shiki,
 html.dark .shiki span,
 html.dark .astro-code,
 html.dark .astro-code span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
 }
 
 /* Code block container styling */
@@ -263,23 +264,43 @@ html.dark .astro-code span {
 }
 
 .markdown-alert-note {
-  border-color: color-mix(in srgb, var(--github-alert-note-color) 30%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--github-alert-note-color) 30%,
+    transparent
+  );
   color: var(--github-alert-note-color);
-  background-color: color-mix(in srgb, var(--github-alert-note-color) 10%, transparent);
+  background-color: color-mix(
+    in srgb,
+    var(--github-alert-note-color) 10%,
+    transparent
+  );
 }
 
 .markdown-alert-tip {
-  border-color: color-mix(in srgb, var(--github-alert-tip-color) 30%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--github-alert-tip-color) 30%,
+    transparent
+  );
   color: var(--github-alert-tip-color);
 }
 
 .markdown-alert-important {
-  border-color: color-mix(in srgb, var(--github-alert-important-color) 30%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--github-alert-important-color) 30%,
+    transparent
+  );
   color: var(--github-alert-important-color);
 }
 
 .markdown-alert-warning {
-  border-color: color-mix(in srgb, var(--github-alert-warning-color) 30%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--github-alert-warning-color) 30%,
+    transparent
+  );
   color: var(--github-alert-warning-color);
 }
 
@@ -367,10 +388,10 @@ html.dark .astro-code span {
 @utility prose {
   blockquote {
     p {
-        &:first-of-type::before,
-        &:last-of-type::after {
-            content: none;
-        }
+      &:first-of-type::before,
+      &:last-of-type::after {
+        content: none;
+      }
     }
   }
 }
@@ -380,7 +401,7 @@ html.dark .astro-code span {
 /*************************************************************/
 
 .code {
-	@apply overflow-x-scroll max-w-[calc(100vw)] -mx-4 sm:-mx-12 border-y border-gray-200 dark:border-gray-700/50 dark:bg-gray-900/50 bg-gray-50 text-gray-400 [&>*]:mx-8 sm:[&>*]:mx-12 [&>*]:inline-block;
+  @apply overflow-x-scroll max-w-[calc(100vw)] -mx-4 sm:-mx-12 border-y border-gray-200 dark:border-gray-700/50 dark:bg-gray-900/50 bg-gray-50 text-gray-400 [&>*]:mx-8 sm:[&>*]:mx-12 [&>*]:inline-block;
 }
 
 /*************************************************************/
@@ -447,7 +468,8 @@ strong {
 /* Nav block hover effects */
 /*************************************************************/
 
-.nav-blocks-grid:has(.nav-block:hover, .nav-block:focus-visible) > .nav-block:not(:hover):not(:focus-visible) {
+.nav-blocks-grid:has(.nav-block:hover, .nav-block:focus-visible)
+> .nav-block:not(:hover):not(:focus-visible) {
   opacity: 0.8;
 }
 
@@ -478,12 +500,13 @@ strong {
 }
 
 ::view-transition-group(post-visual) {
-  animation: none !important;
+  animation: none;
 }
 
 ::view-transition-new(post-visual) {
-  animation: slideFromTop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both,
-             fade-in 0.7s ease-out 0.1s both;
+  animation:
+    slideFromTop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both,
+    fade-in 0.7s ease-out 0.1s both;
   opacity: 0;
   transform: translateY(-200px);
 }
@@ -565,11 +588,11 @@ strong {
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
   ::view-transition-new(*) {
-    animation: none !important;
-    animation-delay: 0s !important;
+    animation: none;
+    animation-delay: 0s;
   }
 
   ::view-transition-group(*) {
-    animation-duration: 0s !important;
+    animation-duration: 0s;
   }
 }

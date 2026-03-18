@@ -9,14 +9,16 @@ const { src, alt = "", themed = false } = Astro.props;
 
 // Get theme from cookie (light, dark, or system/unset)
 const themeCookie = Astro.cookies.get("en_theme")?.value;
-const explicitTheme = themeCookie === "dark" ? "dark" : themeCookie === "light" ? "light" : null;
+const explicitTheme =
+  themeCookie === "dark" ? "dark" : themeCookie === "light" ? "light" : null;
 
 // Generate dark mode image path if themed
 const darkSrc = themed ? src.replace(/\.([^.]+)$/, "-dark.$1") : null;
 
 // For explicit themes, select the correct image server-side
 // For system theme (no cookie), use picture/source for media query
-const resolvedSrc = themed && explicitTheme === "dark" && darkSrc ? darkSrc : src;
+const resolvedSrc =
+  themed && explicitTheme === "dark" && darkSrc ? darkSrc : src;
 const useMediaQuery = themed && !explicitTheme;
 ---
 

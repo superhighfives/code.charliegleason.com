@@ -1,5 +1,5 @@
 ---
-import { formatDistanceToNow, differenceInMonths } from "date-fns";
+import { differenceInMonths, formatDistanceToNow } from "date-fns";
 
 interface Props {
   title: string;
@@ -18,18 +18,18 @@ interface Props {
   className?: string;
 }
 
-const { 
-  title, 
-  description, 
-  slug, 
+const {
+  title,
+  description,
+  slug,
   url,
   date,
-  tags = [], 
+  tags = [],
   excerpt,
-  index, 
+  index,
   visual,
-  hero = false, 
-  className = "" 
+  hero = false,
+  className = "",
 } = Astro.props;
 
 // Get colors from visual config

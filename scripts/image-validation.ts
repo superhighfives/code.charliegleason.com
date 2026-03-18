@@ -6,21 +6,21 @@
 import { decode } from "fast-png";
 import type { PngData, RGB } from "../src/utils/png-utils.js";
 import {
-	calculateAverageColor,
-	calculateColorDistance,
-	getPixelFromPngData,
+  calculateAverageColor,
+  calculateColorDistance,
+  getPixelFromPngData,
 } from "../src/utils/png-utils.js";
 import {
-	LEFT_EDGE_WIDTH,
-	PERCEPTUAL_COLOR_THRESHOLD,
-	SOLID_EDGE_PERCENTAGE,
+  LEFT_EDGE_WIDTH,
+  PERCEPTUAL_COLOR_THRESHOLD,
+  SOLID_EDGE_PERCENTAGE,
 } from "./utils.js";
 
 export interface EdgeValidationResult {
-	isValid: boolean;
-	maxDistance: number;
-	avgColor: RGB;
-	percentageWithinThreshold: number;
+  isValid: boolean;
+  maxDistance: number;
+  avgColor: RGB;
+  percentageWithinThreshold: number;
 }
 
 /**
@@ -31,73 +31,73 @@ export interface EdgeValidationResult {
  * @returns Validation result with distance metric, average color, and percentage
  */
 export async function hasValidSolidLeftEdge(
-	buffer: Buffer,
+  buffer: Buffer,
 ): Promise<EdgeValidationResult> {
-	try {
-		// Decode PNG using fast-png
-		const png = decode(buffer);
-		const { width, height, data, depth, channels, palette } = png;
+  try {
+    // Decode PNG using fast-png
+    const png = decode(buffer);
+    const { width, height, data, depth, channels, palette } = png;
 
-		if (!width || !height || !data || data.length === 0) {
-			return {
-				isValid: false,
-				maxDistance: 0,
-				avgColor: { r: 0, g: 0, b: 0 },
-				percentageWithinThreshold: 0,
-			};
-		}
+    if (!width || !height || !data || data.length === 0) {
+      return {
+        isValid: false,
+        maxDistance: 0,
+        avgColor: { r: 0, g: 0, b: 0 },
+        percentageWithinThreshold: 0,
+      };
+    }
 
-		const pngData: PngData = {
-			width,
-			height,
-			data: data as Uint8Array,
-			depth,
-			channels,
-			palette,
-		};
+    const pngData: PngData = {
+      width,
+      height,
+      data: data as Uint8Array,
+      depth,
+      channels,
+      palette,
+    };
 
-		// Get all pixels from leftmost edge
-		const leftEdgePixels: RGB[] = [];
-		const edgeWidth = Math.min(LEFT_EDGE_WIDTH, width);
-		for (let x = 0; x < edgeWidth; x++) {
-			for (let y = 0; y < height; y++) {
-				leftEdgePixels.push(getPixelFromPngData(pngData, x, y));
-			}
-		}
+    // Get all pixels from leftmost edge
+    const leftEdgePixels: RGB[] = [];
+    const edgeWidth = Math.min(LEFT_EDGE_WIDTH, width);
+    for (let x = 0; x < edgeWidth; x++) {
+      for (let y = 0; y < height; y++) {
+        leftEdgePixels.push(getPixelFromPngData(pngData, x, y));
+      }
+    }
 
-		// Calculate average color of left edge
-		const avgColor = calculateAverageColor(leftEdgePixels);
+    // Calculate average color of left edge
+    const avgColor = calculateAverageColor(leftEdgePixels);
 
-		// Count how many pixels are within threshold and track max distance
-		let maxDistance = 0;
-		let pixelsWithinThreshold = 0;
+    // Count how many pixels are within threshold and track max distance
+    let maxDistance = 0;
+    let pixelsWithinThreshold = 0;
 
-		for (const pixel of leftEdgePixels) {
-			const distance = calculateColorDistance(pixel, avgColor);
-			maxDistance = Math.max(maxDistance, distance);
+    for (const pixel of leftEdgePixels) {
+      const distance = calculateColorDistance(pixel, avgColor);
+      maxDistance = Math.max(maxDistance, distance);
 
-			if (distance <= PERCEPTUAL_COLOR_THRESHOLD) {
-				pixelsWithinThreshold++;
-			}
-		}
+      if (distance <= PERCEPTUAL_COLOR_THRESHOLD) {
+        pixelsWithinThreshold++;
+      }
+    }
 
-		const percentageWithinThreshold =
-			pixelsWithinThreshold / leftEdgePixels.length;
-		const isValid = percentageWithinThreshold >= SOLID_EDGE_PERCENTAGE;
+    const percentageWithinThreshold =
+      pixelsWithinThreshold / leftEdgePixels.length;
+    const isValid = percentageWithinThreshold >= SOLID_EDGE_PERCENTAGE;
 
-		return {
-			isValid,
-			maxDistance,
-			avgColor,
-			percentageWithinThreshold,
-		};
-	} catch (error) {
-		console.error("   ❌ Error validating image:", error);
-		return {
-			isValid: false,
-			maxDistance: 0,
-			avgColor: { r: 0, g: 0, b: 0 },
-			percentageWithinThreshold: 0,
-		};
-	}
+    return {
+      isValid,
+      maxDistance,
+      avgColor,
+      percentageWithinThreshold,
+    };
+  } catch (error) {
+    console.error("   ❌ Error validating image:", error);
+    return {
+      isValid: false,
+      maxDistance: 0,
+      avgColor: { r: 0, g: 0, b: 0 },
+      percentageWithinThreshold: 0,
+    };
+  }
 }

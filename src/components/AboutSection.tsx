@@ -14,6 +14,7 @@ const HandIcon = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
     className="rotate-45"
+    aria-hidden="true"
   >
     <path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2" />
     <path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2" />

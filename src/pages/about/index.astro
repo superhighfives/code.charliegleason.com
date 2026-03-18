@@ -1,15 +1,12 @@
 ---
 import { getCollection, render } from "astro:content";
-import { differenceInMonths, format } from "date-fns";
-import Layout from "~/layouts/Layout.astro";
-import Visual from "~/components/Visual.astro";
-import Picture from "~/components/Picture.astro";
-import Icon from "~/components/Icon.astro";
-import LiveCodeBlock from "~/components/LiveCodeBlock";
-import VideoMasthead from "~/components/VideoMasthead";
-import EditOnGitHub from "~/components/EditOnGitHub.astro";
-import LinkBlock from "~/components/LinkBlock.astro";
-import LinkInline from "~/components/LinkInline";
+import Icon from "../../components/Icon.astro";
+import LinkBlock from "../../components/LinkBlock.astro";
+import LinkInline from "../../components/LinkInline.tsx";
+import Picture from "../../components/Picture.astro";
+import VideoMasthead from "../../components/VideoMasthead.tsx";
+import Visual from "../../components/Visual.astro";
+import Layout from "../../layouts/Layout.astro";
 
 // Find the about post
 const posts = await getCollection("posts");
@@ -49,7 +46,7 @@ if (post.data.data) {
 }
 
 // Prepare links for display
-const links = post.data.links 
+const links = post.data.links
   ? Object.entries(post.data.links).map(([key, value]) => {
       const url = new URL(value as string);
       return { key, value: value as string, hostname: url.hostname };

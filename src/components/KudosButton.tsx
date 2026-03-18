@@ -96,7 +96,11 @@ export function KudosButton({
         body: JSON.stringify({ slug, fingerprint }),
       });
 
-      const result = await response.json();
+      const result = (await response.json()) as {
+        ok?: boolean;
+        total?: number;
+        you?: number;
+      };
 
       if (result.ok) {
         // Update with server values

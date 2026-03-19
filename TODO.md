@@ -101,16 +101,30 @@ const { ref, replay } = useScramble({
 3. **Content Excerpts:** Slight differences in excerpt text extraction
 
 ### ❌ Issues Fixed
+
+#### Initial Fixes (First Pass)
 1. ✅ NavMenuItem crash on hydration
 2. ✅ Missing `step` class on blink animation
 3. ✅ Nav link border styling
 4. ✅ Syntax highlighting `!important` rules
 
+#### Additional Issues Found During User Testing
+5. ✅ **Dark mode flash on navigation** - Added FOUC prevention with theme-ready class
+6. ✅ **Video masthead animation** - Fixed viewTransitionName to be dynamic per slug, removed object-cover
+7. ✅ **Navigation loading state** - Added spinner overlay to NavBlock during navigation
+8. ⚠️ **Live editor width** - Investigated, appears similar to production (may need further verification)
+
 ## Files Modified
 
+### Initial Fixes
 1. **src/layouts/Layout.astro** - Added `step` class to terminal cursor
-2. **src/components/NavMenuItem.tsx** - Fixed hydration crash + enhanced border styling
+2. **src/components/NavMenuItem.tsx** - Fixed hydration crash + enhanced border styling  
 3. **src/styles/global.css** - Fixed syntax highlighting with `!important`
+
+### Additional Fixes (User Testing)
+4. **src/layouts/Layout.astro** - Added FOUC prevention for dark mode, theme-ready class
+5. **src/components/VideoMasthead.tsx** - Dynamic viewTransitionName per slug, removed object-cover
+6. **src/components/NavBlock.astro** - Added loading spinner overlay for navigation feedback
 
 ## Key Findings
 

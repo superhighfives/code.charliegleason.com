@@ -47,6 +47,7 @@ const targetPath = `${url}/${index + 1}`;
 
 <a
   href={targetPath}
+  data-nav-block
   style={`--background: ${backgroundColor}; --text: ${textColor};`}
   class:list={[
     "nav-block @container text-[var(--text)] bg-[var(--background)] overflow-hidden flex group rounded-md relative ring-transparent ring-offset-1 dark:ring-offset-gray-950 hover:ring-[var(--background)] hover:ring-3 focus-visible:ring-[var(--background)] focus-visible:ring-3 outline-none transition-opacity duration-300",
@@ -54,6 +55,9 @@ const targetPath = `${url}/${index + 1}`;
     className
   ]}
 >
+  <div class="nav-loading-overlay absolute inset-0 bg-[var(--background)]/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-md opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="w-10 h-10 border-3 border-[var(--text)] border-t-transparent rounded-full animate-spin" />
+  </div>
   <div class="flex flex-col p-4 flex-1 min-h-0 justify-between">
     <div class="space-y-2 sm:space-y-4 flex-shrink-0">
       <div class="flex justify-between relative z-10">
@@ -129,3 +133,16 @@ const targetPath = `${url}/${index + 1}`;
     />
   </div>
 </a>
+
+<script>
+  // Handle nav block clicks to show loading state
+  document.querySelectorAll('[data-nav-block]').forEach(block => {
+    block.addEventListener('click', function() {
+      const overlay = this.querySelector('.nav-loading-overlay');
+      if (overlay) {
+        overlay.classList.remove('opacity-0', 'pointer-events-none');
+        overlay.classList.add('opacity-100');
+      }
+    });
+  });
+</script>

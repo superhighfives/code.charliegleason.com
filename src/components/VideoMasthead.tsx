@@ -123,8 +123,8 @@ export default function VideoMasthead({
             autoPlay
             muted
             playsInline
-            className="size-full object-cover"
-            style={{ viewTransitionName: "post-visual" }}
+            className="size-full"
+            style={{ viewTransitionName: `post-visual-${slug}` }}
             initial={hasChanged ? { x: "100%" } : undefined}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}

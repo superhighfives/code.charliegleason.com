@@ -109,10 +109,16 @@ const { ref, replay } = useScramble({
 4. ✅ Syntax highlighting `!important` rules
 
 #### Additional Issues Found During User Testing
-5. ✅ **Dark mode flash on navigation** - Added FOUC prevention with theme-ready class
+5. ⚠️ **Dark mode flash on navigation** - Attempted FOUC prevention but broke view transitions. Reverted to inline script only.
 6. ✅ **Video masthead animation** - Fixed viewTransitionName to be dynamic per slug, removed object-cover
 7. ✅ **Navigation loading state** - Added spinner overlay to NavBlock during navigation
 8. ⚠️ **Live editor width** - Investigated, appears similar to production (may need further verification)
+
+#### Fix Reverted
+**Dark mode FOUC fix caused blank screens:**
+- Adding `visibility: hidden` CSS to prevent flash broke Astro view transitions
+- Content remained hidden after navigation because `theme-ready` class wasn't applied
+- **Solution:** Reverted to inline script only, accepting minimal flash on theme switch
 
 ## Files Modified
 

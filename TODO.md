@@ -193,3 +193,107 @@ npm run deploy           # Deploy to Cloudflare
 **Status:** ✅ Visual comparison complete, all issues fixed, screenshots captured
 **Date:** March 18, 2026
 **Branch:** feature/astro-6-migration
+
+# Visual Comparison: Astro 6 Migration vs Production - Additional Issues
+
+## Date: March 18, 2026
+
+## New Issues Identified During Visual Testing
+
+### Issue 1: Dark Mode Flash on Navigation
+**Status:** 🔴 Critical
+**Description:** When navigating between pages in dark mode, the site briefly shows light mode before switching to dark mode.
+
+**Root Cause:** 
+- Layout.astro only checks for explicit 'light' or 'dark' cookie values
+- If cookie is 'system' or not set, server renders without `dark` class
+- The inline script runs after initial paint, causing FOUC (Flash of Unstyled Content)
+
+**Fix Required:**
+Update Layout.astro server-side logic to respect system preference when cookie is 'system' or not set.
+
+---
+
+### Issue 2: Video Masthead Animation Mismatch  
+**Status:** 🔴 Critical
+**Description:** Video masthead animation doesn't match production:
+- Should show spinner/loading state then fade in video
+- Currently flickers and slides video into frame
+- Missing proper loading state management
+
+**Differences Found:**
+1. **viewTransitionName:**
+   - Production: `post-visual-${slug}` (dynamic per post)
+   - Astro: `post-visual` (static)
+
+2. **Video className:**
+   - Production: `className="size-full"` (no object-cover)
+   - Astro: `className="size-full object-cover"`
+
+3. **Preloading approach:**
+   - Production: Uses centralized `preloadVideo()` utility
+   - Astro: Inline preload logic
+
+4. **Missing imports:**
+   - Production uses: `MAX_WIDTH_CLASS`, `IconSwapAnimation` component, `preloadVideo` utility
+   - Astro has inline implementations
+
+**Fix Required:**
+Update VideoMasthead.tsx to match production behavior exactly.
+
+---
+
+### Issue 3: Live Editor Width Difference
+**Status:** 🟡 Medium
+**Description:** Live code editor on `/paper-design-shaders` has different width than production.
+
+**Differences Found:**
+1. **SSR Loading State:**
+   - Production: No loading placeholder, renders immediately with ClientOnly
+   - Astro: Shows loading div during SSR (`min-h-[400px]`)
+
+2. **Theme Detection:**
+   - Production: Uses `useTheme()` hook from React Router
+   - Astro: Manual DOM detection with MutationObserver
+
+3. **Style Injection:**
+   - Production: `ClientOnly>{() => <style>{getSandpackCssText()}</style>}</ClientOnly>`
+   - Astro: Direct `<style>{getSandpackCssText()}</style>`
+
+**Investigation Notes:**
+- CSS rules are identical between versions
+- Width difference likely due to SSR loading state placeholder
+- Need to verify actual rendered width differs
+
+**Fix Required:**
+Either remove SSR loading state or match dimensions exactly.
+
+---
+
+## Action Items
+
+### Immediate (Critical)
+- [ ] Fix dark mode flash - update Layout.astro server-side theme detection
+- [ ] Fix video masthead animation - match production implementation
+
+### Medium Priority
+- [ ] Fix live editor width - verify and adjust dimensions
+- [ ] Test all pages with system dark mode preference
+- [ ] Verify video masthead animations on all post pages
+
+### Testing Checklist
+- [ ] Navigate between pages in dark mode - no flash
+- [ ] Navigate between pages in light mode - works correctly  
+- [ ] Navigate between pages in system mode - respects OS preference
+- [ ] Video masthead loads with spinner then fades in
+- [ ] Live editor width matches production on `/paper-design-shaders`
+- [ ] All interactive elements work correctly
+
+---
+
+## Previous Fixes (Completed)
+See main TODO.md for previously fixed issues:
+- ✅ NavMenuItem hydration crash
+- ✅ Terminal cursor 'step' class
+- ✅ Nav link border styling
+- ✅ Syntax highlighting !important rules

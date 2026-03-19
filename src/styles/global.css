@@ -197,8 +197,15 @@ body {
 
 /* Dark mode - use dark theme colors */
 html.dark .shiki,
-html.dark .shiki span {
+html.dark .shiki span,
+html.dark .astro-code,
+html.dark .astro-code span {
   color: var(--shiki-dark) !important;
+}
+
+/* Handle Astro's dual-theme code blocks */
+html.dark .astro-code {
+  background-color: var(--shiki-dark-bg) !important;
 }
 
 .shiki:focus-visible {

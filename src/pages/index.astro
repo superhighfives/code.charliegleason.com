@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import AboutSection from "../components/AboutSection.tsx";
+import About from "../components/About.astro";
 import NavBlock from "../components/NavBlock.astro";
 import Layout from "../layouts/Layout.astro";
 
@@ -102,7 +102,7 @@ function extractExcerpt(content: string, paragraphCount = 8): string {
       ❯ cd ~/code.charliegleason.com
     </h1>
     
-    <AboutSection client:load />
+    <About />
     
     <div class="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-950 grid gap-4">
       <div class="nav-blocks-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-4">

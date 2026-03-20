@@ -191,24 +191,26 @@ body {
 
 /* Light mode - use light theme colors */
 .shiki,
-.shiki span {
-  color: var(--shiki-light) !important;
+.shiki span,
+.astro-code,
+.astro-code span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
 }
 
-/* Dark mode - use dark theme colors */
+/* Dark mode - use dark theme colors.
+   !important is required to override Shiki's inline styles (background-color, color)
+   which are set directly on the element by the dual-theme renderer. */
 html.dark .shiki,
 html.dark .shiki span,
 html.dark .astro-code,
 html.dark .astro-code span {
   color: var(--shiki-dark) !important;
-}
-
-/* Handle Astro's dual-theme code blocks */
-html.dark .astro-code {
   background-color: var(--shiki-dark-bg) !important;
 }
 
-.shiki:focus-visible {
+.shiki:focus-visible,
+.astro-code:focus-visible {
   outline: none;
   border-radius: 2px;
   @apply ring-4 ring-offset-2 ring-indigo-100 bg-indigo-100 ring-offset-indigo-100 dark:ring-indigo-900 dark:bg-indigo-900 dark:ring-offset-indigo-900;
@@ -452,15 +454,6 @@ strong {
 
 .command + .markdown-alert {
   @apply mt-0.5;
-}
-
-/*************************************************************/
-/* Nav block hover effects */
-/*************************************************************/
-
-.nav-blocks-grid:has(.nav-block:hover, .nav-block:focus-visible)
-> .nav-block:not(:hover):not(:focus-visible) {
-  opacity: 0.8;
 }
 
 /*************************************************************/

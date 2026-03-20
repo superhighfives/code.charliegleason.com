@@ -21,66 +21,40 @@ const imageIndices = Array.from({ length: VISUAL_COUNT }, (_, i) => i);
 ---
 
 <Layout title={`Social Grid for ${post.data.title} ❯ ~/code.charliegleason.com`} description={post.data.description}>
-  <div class="space-y-4">
-    <div class="flex flex-wrap gap-y-2 max-w-4xl font-mono">
-      <a
-        href="/"
-        class="font-semibold group link-primary focus-ring-primary"
-      >
-        ❯ cd ~/code.charliegleason.com
-      </a>
-      <span class="text-yellow-500 dark:text-yellow-400 px-1">/</span>
-      <a href={`/${slug}`} class="font-semibold text-yellow-500 dark:text-yellow-400 hover:text-yellow-600 dark:hover:text-yellow-300">
-        {slug}
-      </a>
-      <span class="text-yellow-500 dark:text-yellow-400 px-1">/</span>
-    </div>
-    <h1 class="font-heading font-semibold text-gray-900 dark:text-gray-100 text-3xl max-w-4xl">
-      Social Grid
-    </h1>
-    
-    <p class="text-gray-500 dark:text-gray-400 font-mono text-sm max-w-4xl">
-      Click on an image to view it full size. Hover to preview the video.
-    </p>
-    
-    <div class="grid grid-cols-3 gap-4 max-w-4xl">
-      {imageIndices.map((index) => {
-        // Convert internal index to user-facing for URLs
-        const userIndex = index + 1;
-        const imageUrl = `/${slug}/${userIndex}.png`;
-        const videoUrl = `/posts/${slug}/${index}.mp4`;
-        
-        return (
-          <div class="card relative group">
-            <a
-              href={imageUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="block relative overflow-hidden rounded-lg"
-              data-video-url={videoUrl}
-            >
-              <img
-                src={imageUrl}
-                alt={`Visual ${userIndex} for ${post.data.title}`}
-                loading="lazy"
-                class="w-full aspect-square object-cover transition-opacity"
+  <div class="grid grid-cols-3 gap-4">
+    {imageIndices.map((index) => {
+      // Convert internal index to user-facing for URLs
+      const userIndex = index + 1;
+      const imageUrl = `/${slug}/${userIndex}.png`;
+      const videoUrl = `/posts/${slug}/${index}.mp4`;
+
+      return (
+        <div class="card relative">
+          <a
+            href={imageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group"
+            data-video-url={videoUrl}
+          >
+            <img
+              src={imageUrl}
+              alt=""
+              loading="lazy"
+              class="transition-opacity"
+            />
+            <div class="absolute inset-0 left-auto z-10">
+              <video
+                src={videoUrl}
+                muted
+                class="size-full object-fit opacity-0 group-hover:opacity-100 transition-opacity"
+                style="mask: linear-gradient(to right, transparent 0%, black 25%);"
               />
-              <div class="absolute inset-0 left-auto z-10 pointer-events-none">
-                <video
-                  src={videoUrl}
-                  muted
-                  class="size-full object-cover opacity-0 group-hover:opacity-100 transition-opacity"
-                  style="mask: linear-gradient(to right, transparent 0%, black 25%);"
-                />
-              </div>
-            </a>
-            <span class="absolute bottom-2 right-2 bg-black/50 text-white text-xs font-mono px-2 py-1 rounded">
-              {userIndex}/{VISUAL_COUNT}
-            </span>
-          </div>
-        );
-      })}
-    </div>
+            </div>
+          </a>
+        </div>
+      );
+    })}
   </div>
 </Layout>
 
@@ -90,7 +64,7 @@ const imageIndices = Array.from({ length: VISUAL_COUNT }, (_, i) => i);
   const container = document.querySelector('.grid');
   if (container && !container.hasAttribute('data-listeners-attached')) {
     container.setAttribute('data-listeners-attached', 'true');
-    
+
     container.addEventListener('mouseenter', (e) => {
       const card = (e.target as Element).closest('.card');
       if (!card) return;
@@ -100,7 +74,7 @@ const imageIndices = Array.from({ length: VISUAL_COUNT }, (_, i) => i);
         video.play();
       }
     }, true);
-    
+
     container.addEventListener('mouseleave', (e) => {
       const card = (e.target as Element).closest('.card');
       if (!card) return;

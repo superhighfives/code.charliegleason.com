@@ -82,8 +82,8 @@ const isAbout = currentPath === "/about" || currentPath === "/about/";
               <span>❯</span>
               <span class="animate-blink step">█</span>
             </a>
-            <NavMenuItem client:load href="/" isActive={isHome}>Home</NavMenuItem>
-            <NavMenuItem client:load href="/about" isActive={isAbout}>About</NavMenuItem>
+            <NavMenuItem client:load href="/" isActive={isHome} label="Home" />
+            <NavMenuItem client:load href="/about" isActive={isAbout} label="About" />
           </div>
           <div class="flex gap-6">
             <ThemeToggle client:load initialTheme={theme as "light" | "dark" | undefined} />

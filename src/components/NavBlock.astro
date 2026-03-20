@@ -137,8 +137,8 @@ const targetPath = `${url}/${index + 1}`;
 <script>
   // Handle nav block clicks to show loading state
   document.querySelectorAll('[data-nav-block]').forEach(block => {
-    block.addEventListener('click', function() {
-      const overlay = this.querySelector('.nav-loading-overlay');
+    block.addEventListener('click', (e) => {
+      const overlay = (e.currentTarget as Element).querySelector('.nav-loading-overlay');
       if (overlay) {
         overlay.classList.remove('opacity-0', 'pointer-events-none');
         overlay.classList.add('opacity-100');

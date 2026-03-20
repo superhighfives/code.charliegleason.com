@@ -4,20 +4,20 @@ import { scrambleOptions } from "~/utils/scramble";
 
 interface NavMenuItemProps {
   href: string;
-  children: string;
+  label: string;
   isActive: boolean;
 }
 
 export default function NavMenuItem({
   href,
-  children,
+  label,
   isActive,
 }: NavMenuItemProps) {
   const [mounted, setMounted] = useState(false);
 
   const { ref, replay } = useScramble({
     ...scrambleOptions,
-    text: mounted ? children : "",
+    text: label,
   });
 
   useEffect(() => {
@@ -42,13 +42,13 @@ export default function NavMenuItem({
   return (
     <a
       href={href}
-      ref={mounted ? ref : undefined}
+      ref={ref}
       className={`${baseClass} ${isActive ? activeClass : inactiveClass}`}
       onMouseEnter={mounted ? replay : undefined}
       onFocus={mounted ? replay : undefined}
       onClick={handleClick}
     >
-      {children}
+      {label}
     </a>
   );
 }

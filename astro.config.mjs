@@ -1,5 +1,6 @@
 // @ts-check
 
+import path from "node:path";
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
@@ -16,13 +17,13 @@ export default defineConfig({
   integrations: [mdx(), react()],
   vite: {
     plugins: [/** @type {any} */ (tailwindcss())],
-    // Fix React hooks SSR errors by preventing multiple React copies
-    ssr: {
-      noExternal: ["use-scramble", "framer-motion"],
-    },
-    optimizeDeps: {
-      exclude: ["use-scramble"],
-      include: [
+    resolve: {
+      alias: {
+        "~": path.resolve("./src"),
+      },
+      // Ensure a single React instance across all SSR deps (prevents hooks errors
+      // when packages like use-scramble bundle their own CJS copy of React)
+      dedupe: [
         "react",
         "react-dom",
         "react/jsx-runtime",

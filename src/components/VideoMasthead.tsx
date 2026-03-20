@@ -30,7 +30,7 @@ function randomVideoIndexExcluding(exclude: number, count: number): number {
 }
 
 function extractModelName(url: string): string {
-  const match = url.match(/replicate\.com\/([^/]+\/[^/]+)/);
+  const match = url.match(/replicate\.com\/[^/]+\/([^/?#]+)/);
   return match ? match[1] : url;
 }
 

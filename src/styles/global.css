@@ -205,7 +205,9 @@ html.dark .shiki,
 html.dark .shiki span,
 html.dark .astro-code,
 html.dark .astro-code span {
+  /* biome-ignore lint/complexity/noImportantStyles: Shiki writes inline styles via its dual-theme renderer; !important is required to override them in dark mode */
   color: var(--shiki-dark) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: same as above */
   background-color: var(--shiki-dark-bg) !important;
 }
 

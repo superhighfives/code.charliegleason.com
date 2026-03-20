@@ -27,14 +27,11 @@ if (Number.isNaN(parsedIndex) || parsedIndex < 1 || parsedIndex > visualCount) {
 const internalIndex = parsedIndex - 1;
 
 // Set cookie and redirect
-const cookieName = `visual-index-${slug}`;
-const cookieValue = `${cookieName}=${internalIndex}; path=/; max-age=60; samesite=lax`;
-
-return new Response(null, {
-  status: 302,
-  headers: {
-    Location: `/${slug}`,
-    "Set-Cookie": cookieValue,
-  },
+Astro.cookies.set(`visual-index-${slug}`, String(internalIndex), {
+  path: "/",
+  maxAge: 60,
+  sameSite: "lax",
 });
+
+return Astro.redirect(`/${slug}`, 302);
 ---

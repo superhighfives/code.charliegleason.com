@@ -35,7 +35,9 @@ const cookieName = `visual-index-${slug}`;
 const cookieRaw = Astro.cookies.get(cookieName)?.value;
 const cookieParsed = cookieRaw !== undefined ? parseInt(cookieRaw, 10) : NaN;
 const videoIndex =
-  !Number.isNaN(cookieParsed) && cookieParsed >= 0 && cookieParsed < VISUAL_COUNT
+  !Number.isNaN(cookieParsed) &&
+  cookieParsed >= 0 &&
+  cookieParsed < VISUAL_COUNT
     ? cookieParsed
     : null;
 

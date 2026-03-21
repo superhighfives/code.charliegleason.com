@@ -45,7 +45,7 @@
     "@cloudflare/vite-plugin": "1.7.5",
     "@cloudflare/workers-types": "^4.20250926.0",
     "@react-router/dev": "7.6.3",
-    "@tailwindcss/vite": "4.1.4",
+    "@tailwindcss/vite": "4.2.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",

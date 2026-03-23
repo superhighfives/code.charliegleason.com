@@ -51,17 +51,23 @@ const isAbout = currentPath === "/about" || currentPath === "/about/";
     <!-- Prevent FOUC - detect theme before paint -->
     <script is:inline>
       (function() {
-        const themeCookie = document.cookie.match(/en_theme=([^;]+)/)?.[1];
-        if (themeCookie === 'dark') {
-          document.documentElement.classList.add('dark');
-        } else if (themeCookie === 'light') {
-          document.documentElement.classList.remove('dark');
-        } else {
-          // Check system preference for "system" mode or no cookie
-          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        function applyTheme() {
+          const themeCookie = document.cookie.match(/en_theme=([^;]+)/)?.[1];
+          if (themeCookie === 'dark') {
             document.documentElement.classList.add('dark');
+          } else if (themeCookie === 'light') {
+            document.documentElement.classList.remove('dark');
+          } else {
+            // Check system preference for "system" mode or no cookie
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
           }
         }
+        applyTheme();
+        document.addEventListener('astro:after-swap', applyTheme);
       })();
     </script>
   </head>

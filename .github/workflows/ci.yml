@@ -141,12 +141,13 @@ jobs:
         with:
           script: |
             const output = `${{ steps.deploy.outputs.command-output }}`;
-            const versionMatch = output.match(/Version ID:\s+([a-f0-9-]+)/i);
+            const urlMatch = output.match(/Version Preview URL:\s+(https:\/\/\S+)/i);
+            const versionMatch = output.match(/Worker Version ID:\s+([a-f0-9-]+)/i);
+            const previewUrl = urlMatch ? urlMatch[1] : null;
             const versionId = versionMatch ? versionMatch[1] : null;
-            
+
             let body;
-            if (versionId) {
-              const previewUrl = `https://${versionId}.code-astro.workers.dev`;
+            if (previewUrl) {
               body = `## Preview Deploy\n\n🚀 **Preview URL:** ${previewUrl}\n\n<details>\n<summary>Version details</summary>\n\n- Version ID: \`${versionId}\`\n- PR: #${{ github.event.pull_request.number }}\n\n</details>`;
             } else {
               body = `## Preview Deploy\n\n⚠️ Preview deployed but couldn't extract version URL.\n\n<details>\n<summary>Deploy output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n\n</details>`;

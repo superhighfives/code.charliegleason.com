@@ -1,28 +1,13 @@
+import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
 
-// Cloudflare env is injected via Astro's locals in the Cloudflare adapter
-// In dev mode, locals.runtime won't exist, so we return null
-
-export const GET: APIRoute = async ({ request, locals }) => {
+export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const slug = url.searchParams.get("slug");
 
   if (!slug) {
     return new Response(JSON.stringify({ total: 0 }), {
       status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  // Cloudflare runtime env is available via locals in the Cloudflare adapter
-  const runtime = (locals as { runtime?: { env?: Record<string, unknown> } })
-    .runtime;
-  const env = runtime?.env as { KUDOS_DO?: DurableObjectNamespace } | undefined;
-
-  // Dev mode fallback - return mock data
-  if (!env?.KUDOS_DO) {
-    console.log("[Dev] Kudos GET - returning mock data for:", slug);
-    return new Response(JSON.stringify({ total: 42, slug, dev: true }), {
       headers: { "Content-Type": "application/json" },
     });
   }
@@ -45,7 +30,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   let body: { slug?: string; fingerprint?: string } = {};
   try {
     body = await request.json();
@@ -65,21 +50,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     );
   }
 
-  // Cloudflare runtime env is available via locals in the Cloudflare adapter
-  const runtime = (locals as { runtime?: { env?: Record<string, unknown> } })
-    .runtime;
-  const env = runtime?.env as { KUDOS_DO?: DurableObjectNamespace } | undefined;
-
-  // Dev mode fallback - return mock success
-  if (!env?.KUDOS_DO) {
-    console.log("[Dev] Kudos POST - returning mock success for:", slug);
-    return new Response(
-      JSON.stringify({ ok: true, total: 43, you: 1, slug, dev: true }),
-      { headers: { "Content-Type": "application/json" } },
-    );
-  }
-
-  // Get IP from Cloudflare headers
   const ip = request.headers.get("cf-connecting-ip") || "";
 
   try {
@@ -100,7 +70,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       reason?: string;
     } = await response.json();
 
-    // Set cookie with user's kudos count if successful
     const headers = new Headers({ "Content-Type": "application/json" });
     if (result.ok && result.you !== undefined) {
       headers.append(

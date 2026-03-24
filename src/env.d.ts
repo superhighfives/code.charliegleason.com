@@ -1,12 +1,11 @@
 /// <reference path="../.astro/types.d.ts" />
 /// <reference types="@cloudflare/workers-types" />
 
-interface CloudflareEnv {
-  VISUAL_ASSETS: R2Bucket;
-  KUDOS_DO: DurableObjectNamespace;
-}
-
-// Astro v6: cloudflare:workers module provides env access
-declare module "cloudflare:workers" {
-  export const env: CloudflareEnv;
+// Augment the Cloudflare.Env interface with our bindings
+// This is used by cloudflare:workers module's env export
+declare namespace Cloudflare {
+  interface Env {
+    VISUAL_ASSETS: R2Bucket;
+    KUDOS_DO: DurableObjectNamespace;
+  }
 }

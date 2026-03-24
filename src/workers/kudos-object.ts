@@ -1,7 +1,7 @@
 export class KudosObject implements DurableObject {
   private storage: DurableObjectStorage;
 
-  constructor(state: DurableObjectState, _env: CloudflareEnv) {
+  constructor(state: DurableObjectState, _env: Cloudflare.Env) {
     this.storage = state.storage;
   }
 

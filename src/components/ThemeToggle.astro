@@ -1,0 +1,174 @@
+---
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+
+// Get current theme from cookie
+const themeCookie = Astro.cookies.get("en_theme")?.value;
+const theme =
+  themeCookie === "light" || themeCookie === "dark" ? themeCookie : "system";
+
+// Calculate next theme in cycle: system -> light -> dark -> system
+const nextTheme =
+  theme === "system" ? "light" : theme === "light" ? "dark" : "system";
+
+const labels = {
+  light: "Switch to dark mode",
+  dark: "Switch to system theme",
+  system: "Switch to light mode",
+};
+---
+
+<form
+  method="POST"
+  action="/api/theme-switch"
+  class="theme-toggle-form"
+  data-current-theme={theme}
+>
+  <input type="hidden" name="redirectTo" value={currentPath} />
+  <input type="hidden" name="theme" value={nextTheme} />
+  <button
+    type="submit"
+    class="flex size-5 cursor-pointer items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors focus-ring-primary"
+    aria-label={labels[theme]}
+    title={labels[theme]}
+  >
+    {/* Sun icon - light mode */}
+    <svg
+      class:list={["theme-icon", theme !== "light" && "hidden"]}
+      data-theme="light"
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </svg>
+    
+    {/* Moon icon - dark mode */}
+    <svg
+      class:list={["theme-icon", theme !== "dark" && "hidden"]}
+      data-theme="dark"
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+    
+    {/* Laptop icon - system mode */}
+    <svg
+      class:list={["theme-icon", theme !== "system" && "hidden"]}
+      data-theme="system"
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16" />
+    </svg>
+  </button>
+</form>
+
+<script>
+  function setupThemeToggle(form: HTMLFormElement) {
+    const button = form.querySelector("button");
+    if (!button) return;
+
+    const getNextTheme = (current: string) =>
+      current === "system" ? "light" : current === "light" ? "dark" : "system";
+
+    const labels: Record<string, string> = {
+      light: "Switch to dark mode",
+      dark: "Switch to system theme",
+      system: "Switch to light mode",
+    };
+
+    const applyTheme = (theme: string) => {
+      const resolved =
+        theme === "system"
+          ? window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light"
+          : theme;
+      document.documentElement.classList.toggle("dark", resolved === "dark");
+    };
+
+    const updateIcon = (theme: string) => {
+      form.querySelectorAll(".theme-icon").forEach((icon) => {
+        const iconTheme = (icon as HTMLElement).dataset.theme;
+        icon.classList.toggle("hidden", iconTheme !== theme);
+      });
+      button.setAttribute("aria-label", labels[theme]);
+      button.setAttribute("title", labels[theme]);
+    };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const currentTheme = form.dataset.currentTheme || "system";
+      const nextTheme = getNextTheme(currentTheme);
+
+      // Update state
+      form.dataset.currentTheme = nextTheme;
+      const themeInput = form.querySelector<HTMLInputElement>('input[name="theme"]');
+      if (themeInput) {
+        themeInput.value = getNextTheme(nextTheme);
+      }
+
+      // Apply immediately
+      applyTheme(nextTheme);
+      updateIcon(nextTheme);
+
+      // Persist to server
+      const formData = new FormData();
+      formData.append("theme", nextTheme);
+
+      try {
+        await fetch("/api/theme-switch", {
+          method: "POST",
+          body: formData,
+        });
+      } catch (error) {
+        console.error("Failed to save theme preference:", error);
+      }
+    });
+  }
+
+  // Initialize on page load
+  document.querySelectorAll<HTMLFormElement>(".theme-toggle-form").forEach(setupThemeToggle);
+
+  // Re-initialize after View Transitions
+  document.addEventListener("astro:after-swap", () => {
+    document.querySelectorAll<HTMLFormElement>(".theme-toggle-form").forEach(setupThemeToggle);
+  });
+</script>

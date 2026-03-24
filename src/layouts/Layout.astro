@@ -1,8 +1,8 @@
 ---
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
-import NavMenuItem from "../components/NavMenuItem.tsx";
-import ThemeToggle from "../components/ThemeToggle.tsx";
+import NavMenuItem from "../components/NavMenuItem.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
 
 interface Props {
   title?: string;
@@ -11,13 +11,13 @@ interface Props {
 
 const { title = "❯ ~/code.charliegleason.com", description } = Astro.props;
 
-// Get theme from cookie
+// Get theme from cookie for initial HTML class
 const themeCookie = Astro.cookies.get("en_theme")?.value;
 const theme =
   themeCookie === "light" || themeCookie === "dark" ? themeCookie : null;
 
-// For SSR, we can't detect system preference, so we default to light
-// The inline script will correct this on the client before first paint
+// Current path for theme toggle redirect (no-JS fallback)
+const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -83,11 +83,11 @@ const theme =
               <span>❯</span>
               <span class="animate-blink step">█</span>
             </a>
-            <NavMenuItem client:load href="/" label="Home" />
-            <NavMenuItem client:load href="/about" label="About" />
+            <NavMenuItem href="/" label="Home" currentPath={currentPath} />
+            <NavMenuItem href="/about" label="About" currentPath={currentPath} />
           </div>
           <div class="flex gap-6">
-            <ThemeToggle client:load initialTheme={theme as "light" | "dark" | undefined} />
+            <ThemeToggle currentPath={currentPath} />
           </div>
         </div>
       </nav>

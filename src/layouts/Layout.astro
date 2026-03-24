@@ -18,11 +18,6 @@ const theme =
 
 // For SSR, we can't detect system preference, so we default to light
 // The inline script will correct this on the client before first paint
-
-// Get current path for nav highlighting
-const currentPath = Astro.url.pathname;
-const isHome = currentPath === "/";
-const isAbout = currentPath === "/about" || currentPath === "/about/";
 ---
 
 <!doctype html>
@@ -88,8 +83,8 @@ const isAbout = currentPath === "/about" || currentPath === "/about/";
               <span>❯</span>
               <span class="animate-blink step">█</span>
             </a>
-            <NavMenuItem client:load href="/" isActive={isHome} label="Home" />
-            <NavMenuItem client:load href="/about" isActive={isAbout} label="About" />
+            <NavMenuItem client:load href="/" label="Home" />
+            <NavMenuItem client:load href="/about" label="About" />
           </div>
           <div class="flex gap-6">
             <ThemeToggle client:load initialTheme={theme as "light" | "dark" | undefined} />

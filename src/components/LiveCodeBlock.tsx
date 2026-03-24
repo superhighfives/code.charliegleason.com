@@ -139,11 +139,11 @@ export default function LiveCodeBlock({ code, theme }: LiveCodeBlockProps) {
     return () => observer.disconnect();
   }, []);
 
-  // SSR fallback - show static code block when JS is disabled
+  // SSR fallback - show static code block matching Sandpack height
   if (!mounted) {
     return (
       <div className="not-prose code">
-        <pre className="py-4 overflow-x-auto">
+        <pre className="py-4 overflow-x-auto h-[300px]">
           <code>{cleanedCode}</code>
         </pre>
       </div>

@@ -90,7 +90,7 @@ const links = post.data.links
   <div class="grid gap-y-4 relative">
     {slug && post.data.visual && (
       <VideoMasthead
-        client:load
+        client:only="react"
         slug={slug}
         video={randomVideo}
         visual={post.data.visual}
@@ -137,7 +137,7 @@ const links = post.data.links
     {/* Kudos and Edit on GitHub - side by side like original */}
     {slug && (
       <div class="flex flex-wrap justify-start sm:px-4 items-center gap-4">
-        <KudosButton client:load slug={slug} />
+        <KudosButton client:only="react" slug={slug} />
         {date && <EditOnGitHub date={date.toISOString()} slug={slug} />}
       </div>
     )}

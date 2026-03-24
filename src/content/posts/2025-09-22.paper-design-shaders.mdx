@@ -65,7 +65,7 @@ Here's what that looks like in action:
 
 import LiveCodeBlock from '~/components/LiveCodeBlock';
 
-<LiveCodeBlock client:load code={`import { MeshGradient } from '@paper-design/shaders-react' // ^0.0.55
+<LiveCodeBlock client:only="react" code={`import { MeshGradient } from '@paper-design/shaders-react' // ^0.0.55
 
 export default function App() {
   return (

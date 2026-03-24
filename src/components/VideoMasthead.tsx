@@ -103,15 +103,18 @@ export default function VideoMasthead({
     };
   }, [slug, nextVideo]);
 
-  // SSR fallback - show static image when JS is disabled or not yet loaded
+  // SSR fallback - video plays natively, buttons just aren't interactive
   if (!mounted) {
     return (
       <div className="font-mono relative -top-12 -mb-6 flex items-end flex-wrap xs:flex-nowrap gap-4 max-w-4xl">
         <div className="bg-gray-100 dark:bg-gray-900 w-full aspect-square xs:size-72 sm:size-96 shrink-0 relative overflow-hidden shadow-lg rounded-lg -rotate-1">
-          <img
-            src={`/posts/${slug}/${initialVideo}.png`}
-            alt={visual.prompt}
-            className="size-full object-cover"
+          <video
+            src={`/posts/${slug}/${initialVideo}.mp4`}
+            autoPlay
+            muted
+            playsInline
+            loop
+            className="size-full"
             style={{ viewTransitionName: `post-visual-${slug}` }}
           />
         </div>

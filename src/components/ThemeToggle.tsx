@@ -128,13 +128,14 @@ export default function ThemeToggle({
     }
   };
 
-  // Prevent hydration mismatch
+  // SSR fallback - show system theme icon (visible, just not interactive)
   if (!mounted) {
     return (
       <button
         type="button"
-        className="flex size-5 cursor-pointer items-center justify-center opacity-0"
+        className="flex size-5 cursor-pointer items-center justify-center text-gray-600 dark:text-gray-400"
         aria-label="Toggle theme"
+        title="Toggle theme"
       >
         <LaptopIcon />
       </button>

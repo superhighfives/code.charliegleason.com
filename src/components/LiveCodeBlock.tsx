@@ -139,13 +139,13 @@ export default function LiveCodeBlock({ code, theme }: LiveCodeBlockProps) {
     return () => observer.disconnect();
   }, []);
 
-  // Show nothing during SSR to avoid hydration mismatch
+  // SSR fallback - show static code block when JS is disabled
   if (!mounted) {
     return (
       <div className="not-prose code">
-        <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 min-h-[400px] flex items-center justify-center">
-          <span className="text-gray-400">Loading live editor...</span>
-        </div>
+        <pre className="py-4 overflow-x-auto">
+          <code>{cleanedCode}</code>
+        </pre>
       </div>
     );
   }

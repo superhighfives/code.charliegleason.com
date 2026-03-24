@@ -52,6 +52,7 @@ export function KudosButton({
   initialTotal = 0,
   initialYou = 0,
 }: KudosButtonProps) {
+  const [mounted, setMounted] = useState(false);
   const [total, setTotal] = useState(initialTotal);
   const [you, setYou] = useState(initialYou);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,6 +61,7 @@ export function KudosButton({
 
   // Generate fingerprint on client only (avoids hydration mismatch)
   useEffect(() => {
+    setMounted(true);
     setFingerprint(generateFingerprint());
   }, []);
 
@@ -123,6 +125,29 @@ export function KudosButton({
   const removeConfettiBurst = (id: string) => {
     setConfettiBursts((prev) => prev.filter((burst) => burst.id !== id));
   };
+
+  // SSR fallback - show static button
+  if (!mounted) {
+    return (
+      <div className="relative inline-block isolate">
+        <button
+          type="button"
+          disabled
+          aria-label="Give kudos"
+          title="Give kudos"
+          className="font-mono bg-white dark:bg-gray-950 relative z-10 inline-flex items-center gap-2 px-3 py-2 border border-indigo-600/50 dark:border-indigo-400/50 text-indigo-600 dark:text-indigo-400 cursor-not-allowed"
+        >
+          <span role="img" aria-hidden="true">
+            <ThumbsUp size={16} />
+          </span>
+          <span className="font-semibold">{initialTotal ?? "—"}</span>
+          <span className="text-xs opacity-70">
+            ({Math.max(0, 50 - initialYou)} left)
+          </span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative inline-block isolate">

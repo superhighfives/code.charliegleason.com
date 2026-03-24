@@ -76,6 +76,7 @@ export default function VideoMasthead({
   visual: VisualConfig;
 }) {
   const visualCount = visual.colors?.length ?? 9;
+  const [mounted, setMounted] = useState(false);
 
   const [currentVideo, setCurrentVideo] = useState(initialVideo);
   const [nextVideo, setNextVideo] = useState(() =>
@@ -84,6 +85,11 @@ export default function VideoMasthead({
   const [rotationCount, setRotationCount] = useState(0);
   const [hasChanged, setHasChanged] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Set mounted state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Preload next video
   useEffect(() => {
@@ -96,6 +102,69 @@ export default function VideoMasthead({
       link.remove();
     };
   }, [slug, nextVideo]);
+
+  // SSR fallback - show static image when JS is disabled or not yet loaded
+  if (!mounted) {
+    return (
+      <div className="font-mono relative -top-12 -mb-6 flex items-end flex-wrap xs:flex-nowrap gap-4 max-w-4xl">
+        <div className="bg-gray-100 dark:bg-gray-900 w-full aspect-square xs:size-72 sm:size-96 shrink-0 relative overflow-hidden shadow-lg rounded-lg -rotate-1">
+          <img
+            src={`/posts/${slug}/${initialVideo}.png`}
+            alt={visual.prompt}
+            className="size-full object-cover"
+            style={{ viewTransitionName: `post-visual-${slug}` }}
+          />
+        </div>
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <p className="text-gray-500 dark:text-gray-400 text-xs text-pretty max-w-72 leading-5">
+              "{visual.prompt}"
+            </p>
+            <p className="text-gray-400 dark:text-gray-500 text-2xs max-w-48 leading-4">
+              Generated with{" "}
+              <a
+                href={visual.image.url}
+                className="underline underline-offset-1 hover:text-gray-600 dark:hover:text-gray-300 outline-none focus-visible:text-gray-600 dark:focus-visible:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {extractModelName(visual.image.url)}
+              </a>
+              {visual.video && (
+                <>
+                  {" and "}
+                  <a
+                    href={visual.video.url}
+                    className="underline underline-offset-1 hover:text-gray-600 dark:hover:text-gray-300 outline-none focus-visible:text-gray-600 dark:focus-visible:text-gray-300 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 rounded-sm decoration-clone"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {extractModelName(visual.video.url)}
+                  </a>
+                </>
+              )}
+              .
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="flex -mx-1 items-center gap-1.5 text-xs rounded-full px-2 py-0.5">
+              <RefreshCw
+                className="text-gray-500 dark:text-gray-400"
+                size={12}
+              />
+              <span className="text-gray-400 dark:text-gray-500">
+                {toUserIndex(initialVideo)}/{visualCount}
+              </span>
+            </span>
+            <span className="flex -mx-1 items-center gap-1.5 text-xs rounded-full px-2 py-0.5">
+              <Share2 className="text-gray-500 dark:text-gray-400" size={12} />
+              <span className="text-gray-400 dark:text-gray-500">Share</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const changeVideo = () => {
     setCurrentVideo(nextVideo);

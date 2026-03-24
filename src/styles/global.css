@@ -189,17 +189,18 @@ body {
 /* Syntax highlighting */
 /*************************************************************/
 
-/* Light mode - use light theme colors */
+/* Light mode - use light theme colors, transparent bg lets .code wrapper show through */
 .shiki,
 .shiki span,
 .astro-code,
 .astro-code span {
   color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
+  /* biome-ignore lint/complexity/noImportantStyles: Shiki writes inline styles; !important overrides them to use .code wrapper bg */
+  background-color: transparent !important;
 }
 
 /* Dark mode - use dark theme colors.
-   !important is required to override Shiki's inline styles (background-color, color)
+   !important is required to override Shiki's inline styles (color)
    which are set directly on the element by the dual-theme renderer. */
 html.dark .shiki,
 html.dark .shiki span,
@@ -207,8 +208,8 @@ html.dark .astro-code,
 html.dark .astro-code span {
   /* biome-ignore lint/complexity/noImportantStyles: Shiki writes inline styles via its dual-theme renderer; !important is required to override them in dark mode */
   color: var(--shiki-dark) !important;
-  /* biome-ignore lint/complexity/noImportantStyles: same as above */
-  background-color: var(--shiki-dark-bg) !important;
+  /* biome-ignore lint/complexity/noImportantStyles: same as above - ensures uniform background from .code wrapper */
+  background-color: transparent !important;
 }
 
 .shiki:focus-visible,
@@ -398,12 +399,29 @@ html.dark .astro-code span {
   @apply overflow-x-scroll max-w-[calc(100vw)] -mx-4 sm:-mx-12 border-y border-gray-200 dark:border-gray-700/50 dark:bg-gray-900/50 bg-gray-50 text-gray-400 [&>*]:mx-8 sm:[&>*]:mx-12 [&>*]:inline-block;
 }
 
+/* Add vertical padding to pre elements inside .code wrapper */
+.code > pre {
+  @apply py-4;
+}
+
 /*************************************************************/
 /* Text styles */
 /*************************************************************/
 
 strong {
   @apply font-semibold;
+}
+
+/* Inline code styling - only code NOT inside pre elements */
+:not(pre) > code {
+  word-break: break-word;
+  @apply px-0.5 text-green-600 font-normal dark:text-green-300 rounded-xs bg-green-100 dark:bg-gray-800 ring-2 ring-green-100 dark:ring-gray-800;
+}
+
+/* Remove prose backtick decorations from inline code */
+:not(pre) > code::before,
+:not(pre) > code::after {
+  content: none;
 }
 
 /*************************************************************/

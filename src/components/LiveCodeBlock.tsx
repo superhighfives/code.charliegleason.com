@@ -110,11 +110,20 @@ export default function LiveCodeBlock({ code, theme }: LiveCodeBlockProps) {
   // Track the current code state across theme changes
   const [currentCode, setCurrentCode] = useState(cleanedCode);
 
-  // Detect theme from DOM on mount
+  // Detect theme from DOM on mount and inject Sandpack CSS
   useEffect(() => {
     setMounted(true);
     const isDark = document.documentElement.classList.contains("dark");
     setCurrentTheme(isDark ? "dark" : "light");
+
+    // Inject Sandpack CSS into head
+    const styleId = "sandpack-css";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = getSandpackCssText();
+      document.head.appendChild(style);
+    }
 
     // Listen for theme changes
     const observer = new MutationObserver((mutations) => {
@@ -133,15 +142,16 @@ export default function LiveCodeBlock({ code, theme }: LiveCodeBlockProps) {
   // Show nothing during SSR to avoid hydration mismatch
   if (!mounted) {
     return (
-      <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 min-h-[400px] flex items-center justify-center">
-        <span className="text-gray-400">Loading live editor...</span>
+      <div className="not-prose code">
+        <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 min-h-[400px] flex items-center justify-center">
+          <span className="text-gray-400">Loading live editor...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <>
-      <style>{getSandpackCssText()}</style>
+    <div className="not-prose code">
       <SandpackProvider
         theme={currentTheme === "dark" ? sandpackMocha : sandpackLatte}
         files={{
@@ -167,6 +177,6 @@ export default function LiveCodeBlock({ code, theme }: LiveCodeBlockProps) {
       >
         <SandpackContent onCodeChange={setCurrentCode} />
       </SandpackProvider>
-    </>
+    </div>
   );
 }

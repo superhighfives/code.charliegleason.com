@@ -193,7 +193,9 @@ body {
 .shiki,
 .shiki span,
 .astro-code,
-.astro-code span {
+.astro-code span,
+.code pre,
+.code pre span {
   color: var(--shiki-light);
   /* biome-ignore lint/complexity/noImportantStyles: Shiki writes inline styles; !important overrides them to use .code wrapper bg */
   background-color: transparent !important;
@@ -205,7 +207,9 @@ body {
 html.dark .shiki,
 html.dark .shiki span,
 html.dark .astro-code,
-html.dark .astro-code span {
+html.dark .astro-code span,
+html.dark .code pre,
+html.dark .code pre span {
   /* biome-ignore lint/complexity/noImportantStyles: Shiki writes inline styles via its dual-theme renderer; !important is required to override them in dark mode */
   color: var(--shiki-dark) !important;
   /* biome-ignore lint/complexity/noImportantStyles: same as above - ensures uniform background from .code wrapper */

@@ -101,6 +101,10 @@ const labels = {
 
 <script>
   function setupThemeToggle(form: HTMLFormElement) {
+    // Prevent duplicate initialization
+    if (form.dataset.initialized) return;
+    form.dataset.initialized = "true";
+    
     const button = form.querySelector("button");
     if (!button) return;
 

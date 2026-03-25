@@ -18,10 +18,16 @@ const theme =
 
 // Current path for theme toggle redirect (no-JS fallback)
 const currentPath = Astro.url.pathname;
+
+// Determine HTML classes:
+// - "dark" if explicitly set to dark
+// - "system-theme" if no preference set (allows CSS media query fallback)
+const htmlClass =
+  theme === "dark" ? "dark" : theme === "light" ? "" : "system-theme";
 ---
 
 <!doctype html>
-<html lang="en" class={theme === "dark" ? "dark" : ""}>
+<html lang="en" class={htmlClass}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1" />
@@ -43,11 +49,38 @@ const currentPath = Astro.url.pathname;
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     
+    <!-- CSS fallback for system theme when JS is disabled -->
+    <style is:inline>
+      @media (prefers-color-scheme: dark) {
+        html.system-theme {
+          color-scheme: dark;
+        }
+        /* Body background */
+        html.system-theme body {
+          background-color: #0c0a09; /* gray-950 */
+        }
+        /* Main text color */
+        html.system-theme .grid {
+          color: #a5b4fc; /* indigo-400 */
+        }
+        /* Nav background and border */
+        html.system-theme nav {
+          background-color: #18181b; /* gray-900 */
+          border-color: #27272a; /* gray-800 */
+        }
+        html.system-theme nav > div {
+          border-color: #27272a; /* gray-800 */
+        }
+      }
+    </style>
+    
     <!-- Prevent FOUC - detect theme before paint -->
     <script is:inline>
       (function() {
         function applyTheme() {
           const themeCookie = document.cookie.match(/en_theme=([^;]+)/)?.[1];
+          // Remove system-theme class once JS runs (we handle it via dark class)
+          document.documentElement.classList.remove('system-theme');
           if (themeCookie === 'dark') {
             document.documentElement.classList.add('dark');
           } else if (themeCookie === 'light') {

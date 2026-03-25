@@ -3,6 +3,7 @@ import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import NavMenuItem from "../components/NavMenuItem.astro";
 import ThemeToggle from "../components/ThemeToggle.astro";
+import { getClientHintCheckScript, getHints } from "../utils/client-hints";
 
 interface Props {
   title?: string;
@@ -11,28 +12,34 @@ interface Props {
 
 const { title = "❯ ~/code.charliegleason.com", description } = Astro.props;
 
-// Get theme from cookie for initial HTML class
+// Get client hints (system color scheme preference)
+const hints = getHints(Astro.request);
+
+// Get explicit theme preference from cookie
 const themeCookie = Astro.cookies.get("en_theme")?.value;
-const theme =
+const userTheme =
   themeCookie === "light" || themeCookie === "dark" ? themeCookie : null;
+
+// Resolve theme: explicit preference > system preference
+const theme = userTheme ?? hints.theme ?? "light";
 
 // Current path for theme toggle redirect (no-JS fallback)
 const currentPath = Astro.url.pathname;
 
-// Determine HTML classes:
-// - "dark" if explicitly set to dark
-// - "system-theme" if no preference set (allows CSS media query fallback)
-const htmlClass =
-  theme === "dark" ? "dark" : theme === "light" ? "" : "system-theme";
+// Client hint check script - sets cookie with system preference
+const clientHintCheckScript = getClientHintCheckScript();
 ---
 
 <!doctype html>
-<html lang="en" class={htmlClass}>
+<html lang="en" class={theme === "dark" ? "dark" : ""}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <meta name="generator" content={Astro.generator} />
+    
+    <!-- Client hint check - detects system color scheme and sets cookie -->
+    <script is:inline set:html={clientHintCheckScript} />
     
     <!-- Enable client-side routing with view transitions -->
     <ClientRouter />
@@ -49,52 +56,23 @@ const htmlClass =
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     
-    <!-- CSS fallback for system theme when JS is disabled -->
-    <style is:inline>
-      @media (prefers-color-scheme: dark) {
-        html.system-theme {
-          color-scheme: dark;
-        }
-        /* Body background */
-        html.system-theme body {
-          background-color: #0c0a09; /* gray-950 */
-        }
-        /* Main text color */
-        html.system-theme .grid {
-          color: #a5b4fc; /* indigo-400 */
-        }
-        /* Nav background and border */
-        html.system-theme nav {
-          background-color: #18181b; /* gray-900 */
-          border-color: #27272a; /* gray-800 */
-        }
-        html.system-theme nav > div {
-          border-color: #27272a; /* gray-800 */
-        }
-      }
-    </style>
-    
-    <!-- Prevent FOUC - detect theme before paint -->
+    <!-- Apply theme based on cookie changes (for View Transitions) -->
     <script is:inline>
       (function() {
         function applyTheme() {
           const themeCookie = document.cookie.match(/en_theme=([^;]+)/)?.[1];
-          // Remove system-theme class once JS runs (we handle it via dark class)
-          document.documentElement.classList.remove('system-theme');
+          const hintCookie = document.cookie.match(/CH-prefers-color-scheme=([^;]+)/)?.[1];
+          
           if (themeCookie === 'dark') {
             document.documentElement.classList.add('dark');
           } else if (themeCookie === 'light') {
             document.documentElement.classList.remove('dark');
+          } else if (hintCookie === 'dark') {
+            document.documentElement.classList.add('dark');
           } else {
-            // Check system preference for "system" mode or no cookie
-            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-              document.documentElement.classList.add('dark');
-            } else {
-              document.documentElement.classList.remove('dark');
-            }
+            document.documentElement.classList.remove('dark');
           }
         }
-        applyTheme();
         document.addEventListener('astro:after-swap', applyTheme);
       })();
     </script>

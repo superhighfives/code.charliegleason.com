@@ -34,6 +34,7 @@
     "@astrojs/rss": "^4.0.17",
     "@codesandbox/sandpack-react": "^2.20.0",
     "@codesandbox/sandpack-themes": "^2.0.21",
+    "@epic-web/client-hints": "^1.3.8",
     "@resvg/resvg-wasm": "^2.6.2",
     "@tailwindcss/typography": "^0.5.19",
     "astro": "^6.0.4",

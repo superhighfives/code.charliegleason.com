@@ -1,0 +1,82 @@
+---
+interface Props {
+  href: string;
+}
+
+const { href } = Astro.props;
+---
+
+<a
+  href={href}
+  class="link-inline link-primary focus-ring-primary decoration-clone"
+  data-href={href}
+>
+  <slot />
+</a>
+
+<script>
+  import { scrambleOptions } from "~/utils/scramble";
+
+  function setupLinkInline(link: HTMLAnchorElement) {
+    if (link.dataset.initialized) return;
+    link.dataset.initialized = "true";
+
+    const label = link.textContent || "";
+    const chars = label.split("");
+
+    const scramble = () => {
+      const speed = scrambleOptions.speed ?? 0.35;
+      const range = scrambleOptions.range ?? [];
+      let frame = 0;
+      const maxFrames = Math.ceil(chars.length / speed);
+
+      const getRandomChar = () => {
+        if (range.length > 0) {
+          return String.fromCharCode(
+            range[Math.floor(Math.random() * range.length)],
+          );
+        }
+        return String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      };
+
+      const animate = () => {
+        frame++;
+        const progress = frame / maxFrames;
+
+        const result = chars
+          .map((char, i) => {
+            const charProgress = progress * chars.length - i;
+            if (charProgress >= 1) return char;
+            if (charProgress <= 0) return char;
+            return Math.random() < 0.5 ? getRandomChar() : char;
+          })
+          .join("");
+
+        link.textContent = result;
+
+        if (frame < maxFrames) {
+          requestAnimationFrame(animate);
+        } else {
+          link.textContent = label;
+        }
+      };
+
+      requestAnimationFrame(animate);
+    };
+
+    link.addEventListener("mouseenter", scramble);
+    link.addEventListener("focus", scramble);
+  }
+
+  // Initialize all inline links
+  document
+    .querySelectorAll<HTMLAnchorElement>(".link-inline")
+    .forEach(setupLinkInline);
+
+  // Re-initialize after View Transitions
+  document.addEventListener("astro:after-swap", () => {
+    document
+      .querySelectorAll<HTMLAnchorElement>(".link-inline")
+      .forEach(setupLinkInline);
+  });
+</script>

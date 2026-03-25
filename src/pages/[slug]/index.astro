@@ -6,6 +6,7 @@ import EditOnGitHub from "../../components/EditOnGitHub.astro";
 import Icon from "../../components/Icon.astro";
 import { KudosButton } from "../../components/KudosButton.tsx";
 import LinkBlock from "../../components/LinkBlock.astro";
+import LinkInline from "../../components/LinkInline.astro";
 import Picture from "../../components/Picture.astro";
 import VideoMasthead from "../../components/VideoMasthead.tsx";
 import Visual from "../../components/Visual.astro";
@@ -86,17 +87,21 @@ const links = post.data.links
     })
   : [];
 
-// Fetch kudos count
+// Fetch kudos count (may fail in local dev without Durable Objects)
 let kudosTotal = 0;
 let kudosYou = 0;
 try {
-  const id = env.KUDOS_DO.idFromName(`kudos:${slug}`);
-  const stub = env.KUDOS_DO.get(id);
-  const response = await stub.fetch(new URL("/count", Astro.url.origin));
-  const result: { total?: number } = await response.json();
-  kudosTotal = result.total ?? 0;
-} catch (error) {
-  console.error("Failed to fetch kudos:", error);
+  if (env.KUDOS_DO) {
+    const id = env.KUDOS_DO.idFromName(`kudos:${slug}`);
+    const stub = env.KUDOS_DO.get(id);
+    const response = await stub.fetch(new URL("/count", Astro.url.origin));
+    if (response.ok) {
+      const result: { total?: number } = await response.json();
+      kudosTotal = result.total ?? 0;
+    }
+  }
+} catch {
+  // Silently fail - kudos just won't show counts in dev
 }
 
 // Get user's kudos count from cookie
@@ -154,7 +159,7 @@ const currentPath = Astro.url.pathname;
     )}
 
     <div class="post" style="view-transition-name: post-content">
-      <Content components={{ Visual, Picture, Icon }} />
+      <Content components={{ Visual, Picture, Icon, a: LinkInline }} />
     </div>
 
     {/* Kudos and Edit on GitHub - side by side like original */}

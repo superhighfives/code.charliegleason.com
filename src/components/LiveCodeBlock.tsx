@@ -6,7 +6,8 @@ import {
   SandpackProvider,
   useSandpack,
 } from "@codesandbox/sandpack-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { extractDependencies } from "~/utils/extract-dependencies";
 import LiveEditorBadge from "./LiveEditorBadge";
 import { sandpackLatte, sandpackMocha } from "./themes";
 
@@ -37,38 +38,6 @@ height: 100%;
 h1 {
 font-size: 1.5rem;
 }`;
-
-function extractDependencies(code: string): {
-  dependencies: Record<string, string>;
-  cleanedCode: string;
-} {
-  // Match import statements with optional version comment
-  // Example: import { MeshGradient } from '@paper-design/shaders-react' // ^0.0.55
-  const importRegex =
-    /import\s+.*?\s+from\s+['"]([^'"]+)['"](?:\s*\/\/\s*(.+))?/g;
-  const dependencies: Record<string, string> = {};
-  let cleanedCode = code;
-  let match = importRegex.exec(code);
-
-  while (match !== null) {
-    const packageName = match[1];
-    const version = match[2]?.trim();
-    // Only include external packages (not relative imports)
-    if (!packageName.startsWith(".") && !packageName.startsWith("/")) {
-      dependencies[packageName] = version || "latest";
-      // Remove version comment from the code if it exists
-      if (version) {
-        cleanedCode = cleanedCode.replace(
-          match[0],
-          match[0].replace(/\s*\/\/\s*.+$/, ""),
-        );
-      }
-    }
-    match = importRegex.exec(code);
-  }
-
-  return { dependencies, cleanedCode };
-}
 
 function SandpackContent({
   onCodeChange,
@@ -106,6 +75,7 @@ export default function LiveCodeBlock({ code, theme }: LiveCodeBlockProps) {
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">(
     theme || "light",
   );
+  const ref = useRef<HTMLDivElement>(null);
 
   // Track the current code state across theme changes
   const [currentCode, setCurrentCode] = useState(cleanedCode);
@@ -115,6 +85,12 @@ export default function LiveCodeBlock({ code, theme }: LiveCodeBlockProps) {
     setMounted(true);
     const isDark = document.documentElement.classList.contains("dark");
     setCurrentTheme(isDark ? "dark" : "light");
+
+    // Signal to the Astro wrapper that Sandpack has hydrated so it can
+    // hide the Shiki fallback via CSS (.sandpack-mounted .live-code-block-fallback)
+    ref.current
+      ?.closest(".live-code-block-container")
+      ?.classList.add("sandpack-mounted");
 
     // Inject Sandpack CSS into head
     const styleId = "sandpack-css";
@@ -139,19 +115,13 @@ export default function LiveCodeBlock({ code, theme }: LiveCodeBlockProps) {
     return () => observer.disconnect();
   }, []);
 
-  // SSR fallback - show static code block matching Sandpack height
-  if (!mounted) {
-    return (
-      <div className="not-prose code">
-        <pre className="py-4 overflow-x-auto">
-          <code>{cleanedCode}</code>
-        </pre>
-      </div>
-    );
-  }
+  // Hidden until mounted — the Astro wrapper renders a Shiki-highlighted
+  // fallback that's visible before hydration, so we don't need to render
+  // anything here during SSR or before the component mounts.
+  if (!mounted) return <div ref={ref} />;
 
   return (
-    <div className="not-prose code">
+    <div ref={ref} className="not-prose code">
       <SandpackProvider
         theme={currentTheme === "dark" ? sandpackMocha : sandpackLatte}
         files={{

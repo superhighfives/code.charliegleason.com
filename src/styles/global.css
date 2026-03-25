@@ -405,7 +405,7 @@ html.dark .code pre span {
 
 /* Add vertical padding to pre elements inside .code wrapper */
 .code > pre {
-  @apply py-4;
+  @apply py-4 w-full;
 }
 
 /*************************************************************/

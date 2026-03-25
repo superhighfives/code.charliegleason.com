@@ -1,0 +1,40 @@
+---
+import { Code } from "astro:components";
+import { extractDependencies } from "~/utils/extract-dependencies";
+import LiveCodeBlockReact from "./LiveCodeBlock";
+
+interface Props {
+  code: string;
+  theme?: "light" | "dark";
+}
+
+const { code, theme } = Astro.props;
+const { cleanedCode } = extractDependencies(code);
+---
+
+<div class="live-code-block-container">
+  {/* SSR fallback: Shiki-highlighted static block, hidden once React hydrates */}
+  <div class="not-prose code live-code-block-fallback">
+    <Code
+      code={cleanedCode}
+      lang="tsx"
+      themes={{ light: "catppuccin-latte", dark: "catppuccin-mocha" }}
+      defaultColor={false}
+    />
+  </div>
+
+  {/* Interactive Sandpack editor, replaces the fallback on hydration */}
+  <LiveCodeBlockReact client:load code={code} theme={theme} />
+</div>
+
+<style>
+  /* display: contents makes the container invisible to layout so .code children
+     can bleed out of the prose column exactly as they would without a wrapper */
+  .live-code-block-container {
+    display: contents;
+  }
+
+  .live-code-block-container.sandpack-mounted .live-code-block-fallback {
+    display: none;
+  }
+</style>

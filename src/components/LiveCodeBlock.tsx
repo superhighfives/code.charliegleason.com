@@ -143,7 +143,7 @@ export default function LiveCodeBlock({ code, theme }: LiveCodeBlockProps) {
   if (!mounted) {
     return (
       <div className="not-prose code">
-        <pre className="py-4 overflow-x-auto h-[300px]">
+        <pre className="py-4 overflow-x-auto">
           <code>{cleanedCode}</code>
         </pre>
       </div>

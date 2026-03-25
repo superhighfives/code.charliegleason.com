@@ -1,9 +1,10 @@
 ---
 import { getCollection, render } from "astro:content";
+import { env } from "cloudflare:workers";
 import { differenceInMonths, format } from "date-fns";
 import EditOnGitHub from "../../components/EditOnGitHub.astro";
 import Icon from "../../components/Icon.astro";
-import { KudosButton } from "../../components/KudosButton.tsx";
+import KudosButton from "../../components/KudosButton.astro";
 import LinkBlock from "../../components/LinkBlock.astro";
 import Picture from "../../components/Picture.astro";
 import VideoMasthead from "../../components/VideoMasthead.tsx";
@@ -84,6 +85,28 @@ const links = post.data.links
       return { key, value: value as string, hostname: url.hostname };
     })
   : [];
+
+// Fetch kudos count
+let kudosTotal = 0;
+let kudosYou = 0;
+try {
+  const id = env.KUDOS_DO.idFromName(`kudos:${slug}`);
+  const stub = env.KUDOS_DO.get(id);
+  const response = await stub.fetch(new URL("/count", Astro.url.origin));
+  const result: { total?: number } = await response.json();
+  kudosTotal = result.total ?? 0;
+} catch (error) {
+  console.error("Failed to fetch kudos:", error);
+}
+
+// Get user's kudos count from cookie
+const kudosCookie = Astro.cookies.get(`kudos_${slug}`)?.value;
+if (kudosCookie) {
+  kudosYou = Number.parseInt(kudosCookie, 10) || 0;
+}
+
+// Current path for form redirect
+const currentPath = Astro.url.pathname;
 ---
 
 <Layout title={`${post.data.title} ❯ ~/code.charliegleason.com`} description={post.data.description}>
@@ -137,7 +160,7 @@ const links = post.data.links
     {/* Kudos and Edit on GitHub - side by side like original */}
     {slug && (
       <div class="flex flex-wrap justify-start sm:px-4 items-center gap-4">
-        <KudosButton client:load slug={slug} />
+        <KudosButton slug={slug} total={kudosTotal} you={kudosYou} currentPath={currentPath} />
         {date && <EditOnGitHub date={date.toISOString()} slug={slug} />}
       </div>
     )}

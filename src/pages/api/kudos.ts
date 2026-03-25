@@ -1,6 +1,15 @@
 import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
 
+// Validate redirect URL to prevent open redirect attacks
+function getSafeRedirect(redirectTo: string | null): string | null {
+  if (!redirectTo) return null;
+  if (!redirectTo.startsWith("/")) return null;
+  if (redirectTo.startsWith("//")) return null;
+  if (redirectTo.includes("://")) return null;
+  return redirectTo;
+}
+
 export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const slug = url.searchParams.get("slug");
@@ -30,20 +39,48 @@ export const GET: APIRoute = async ({ request }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request }) => {
-  let body: { slug?: string; fingerprint?: string } = {};
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ ok: false, error: "invalid_json" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+export const POST: APIRoute = async ({ request, cookies }) => {
+  const contentType = request.headers.get("content-type") || "";
+  const isFormData = contentType.includes("application/x-www-form-urlencoded");
+
+  let slug: string | null = null;
+  let fingerprint: string | null = null;
+  let redirectTo: string | null = null;
+
+  if (isFormData) {
+    const formData = await request.formData();
+    slug = formData.get("slug") as string | null;
+    redirectTo = formData.get("redirectTo") as string | null;
+    // For form submissions, generate fingerprint from IP + cookie
+    const clientId = cookies.get("kudos_client_id")?.value;
+    const ip = request.headers.get("cf-connecting-ip") || "";
+    fingerprint = clientId ? `${clientId}:${ip}` : ip;
+  } else {
+    try {
+      const body = (await request.json()) as {
+        slug?: string;
+        fingerprint?: string;
+      };
+      slug = body.slug ?? null;
+      fingerprint = body.fingerprint ?? null;
+    } catch {
+      return new Response(
+        JSON.stringify({ ok: false, error: "invalid_json" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
   }
 
-  const { slug, fingerprint } = body;
-
   if (!slug || !fingerprint) {
+    if (redirectTo) {
+      const safeRedirect = getSafeRedirect(redirectTo);
+      if (safeRedirect) {
+        return new Response(null, {
+          status: 302,
+          headers: { Location: safeRedirect },
+        });
+      }
+    }
     return new Response(
       JSON.stringify({ ok: false, error: "missing_fields" }),
       { status: 400, headers: { "Content-Type": "application/json" } },
@@ -70,7 +107,9 @@ export const POST: APIRoute = async ({ request }) => {
       reason?: string;
     } = await response.json();
 
-    const headers = new Headers({ "Content-Type": "application/json" });
+    const headers = new Headers();
+
+    // Set kudos count cookie
     if (result.ok && result.you !== undefined) {
       headers.append(
         "Set-Cookie",
@@ -78,6 +117,17 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    // For form submissions, redirect back
+    if (isFormData && redirectTo) {
+      const safeRedirect = getSafeRedirect(redirectTo);
+      if (safeRedirect) {
+        headers.set("Location", safeRedirect);
+        return new Response(null, { status: 302, headers });
+      }
+    }
+
+    // For JSON requests, return JSON
+    headers.set("Content-Type", "application/json");
     return new Response(
       JSON.stringify({
         ok: result.ok,
@@ -90,6 +140,17 @@ export const POST: APIRoute = async ({ request }) => {
     );
   } catch (error) {
     console.error("Kudos POST error:", error);
+
+    if (isFormData && redirectTo) {
+      const safeRedirect = getSafeRedirect(redirectTo);
+      if (safeRedirect) {
+        return new Response(null, {
+          status: 302,
+          headers: { Location: safeRedirect },
+        });
+      }
+    }
+
     return new Response(
       JSON.stringify({ ok: false, error: "internal_error" }),
       { status: 500, headers: { "Content-Type": "application/json" } },

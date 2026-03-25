@@ -17,66 +17,132 @@ const { href } = Astro.props;
 <script>
   import { scrambleOptions } from "~/utils/scramble";
 
-  function setupLinkInline(link: HTMLAnchorElement) {
-    if (link.dataset.initialized) return;
-    link.dataset.initialized = "true";
+  function setupLinkInline(el: HTMLElement) {
+    if (el.dataset.scrambleInit) return;
+    el.dataset.scrambleInit = "true";
 
-    const label = link.textContent || "";
-    const chars = label.split("");
+    const text = el.textContent || "";
 
-    const scramble = () => {
-      const speed = scrambleOptions.speed ?? 0.35;
-      const range = scrambleOptions.range ?? [];
-      let frame = 0;
-      const maxFrames = Math.ceil(chars.length / speed);
+    // Ported from use-scramble
+    const speed = scrambleOptions.speed ?? 1;
+    const step = scrambleOptions.step ?? 1;
+    const tick = scrambleOptions.tick ?? 1;
+    const scrambleFrames = scrambleOptions.scramble ?? 1;
+    const range = scrambleOptions.range ?? [65, 125];
+    const ignore = scrambleOptions.ignore ?? [" "];
 
-      const getRandomChar = () => {
-        if (range.length > 0) {
-          return String.fromCharCode(
-            range[Math.floor(Math.random() * range.length)],
-          );
-        }
-        return String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      };
+    const getRandomInt = (min: number, max: number) =>
+      Math.floor(Math.random() * (max - min + 1)) + min;
 
-      const animate = () => {
-        frame++;
-        const progress = frame / maxFrames;
-
-        const result = chars
-          .map((char, i) => {
-            const charProgress = progress * chars.length - i;
-            if (charProgress >= 1) return char;
-            if (charProgress <= 0) return char;
-            return Math.random() < 0.5 ? getRandomChar() : char;
-          })
-          .join("");
-
-        link.textContent = result;
-
-        if (frame < maxFrames) {
-          requestAnimationFrame(animate);
-        } else {
-          link.textContent = label;
-        }
-      };
-
-      requestAnimationFrame(animate);
+    const getRandomChar = () => {
+      if (range.length === 2) {
+        return String.fromCharCode(getRandomInt(range[0], range[1]));
+      }
+      return String.fromCharCode(range[getRandomInt(0, range.length - 1)]);
     };
 
-    link.addEventListener("mouseenter", scramble);
-    link.addEventListener("focus", scramble);
+    // Control array: number = frames left to scramble, string = settled/original char
+    // Initialize with text characters (playOnMount: false behavior)
+    let control: (number | string)[] = text.split("");
+    let scrambleIndex = text.length;
+    let stepCount = 0;
+    let rafId = 0;
+    let elapsed = 0;
+    const fpsInterval = 1000 / (60 * speed);
+
+    const stepForward = () => {
+      for (let i = 0; i < step; i++) {
+        if (scrambleIndex < text.length) {
+          const char = text[scrambleIndex];
+          // Ignored chars stay as-is, others get scramble count
+          if (ignore.includes(char)) {
+            control[scrambleIndex] = char;
+          } else {
+            control[scrambleIndex] = scrambleFrames + getRandomInt(0, Math.ceil(scrambleFrames / 2));
+          }
+          scrambleIndex++;
+        }
+      }
+    };
+
+    const draw = () => {
+      let result = "";
+      let allSettled = true;
+      
+      for (let i = 0; i < text.length; i++) {
+        const val = control[i];
+        
+        if (typeof val === "number" && val > 0) {
+          // Still scrambling - show random char, decrement counter
+          result += getRandomChar();
+          control[i] = val - 1;
+          allSettled = false;
+        } else if (typeof val === "number" && val <= 0) {
+          // Scramble finished - show real char and settle
+          result += text[i];
+          control[i] = text[i];
+        } else if (typeof val === "string") {
+          // String: either not yet reached by scrambleIndex, or already settled
+          result += val;
+        }
+      }
+      
+      el.textContent = result;
+      
+      // Done when all chars have been stepped through AND all have settled
+      const done = scrambleIndex >= text.length && allSettled;
+      return done;
+    };
+
+    const animate = (time: number) => {
+      rafId = requestAnimationFrame(animate);
+      const delta = time - elapsed;
+      if (delta > fpsInterval) {
+        elapsed = time;
+        if (stepCount % tick === 0) {
+          stepForward();
+        }
+        const done = draw();
+        stepCount++;
+        if (done) {
+          cancelAnimationFrame(rafId);
+        }
+      }
+    };
+
+    const play = () => {
+      cancelAnimationFrame(rafId);
+      // Reset index only, keep control array (overflow: true + playOnMount: false)
+      scrambleIndex = 0;
+      stepCount = 0;
+      elapsed = 0;
+      rafId = requestAnimationFrame(animate);
+    };
+
+    el.addEventListener("mouseenter", play);
+    el.addEventListener("focus", play);
+    
+    // Also listen on parent if this is a span inside a link
+    const parent = el.parentElement;
+    if (parent && parent.tagName === "A") {
+      parent.addEventListener("mouseenter", play);
+      parent.addEventListener("focus", play);
+    }
   }
 
-  // Initialize all inline links
-  document
-    .querySelectorAll<HTMLAnchorElement>(".link-inline")
-    .forEach(setupLinkInline);
+  // Initialize all elements with link-inline class (wait for DOM if needed)
+  function init() {
+    document
+      .querySelectorAll<HTMLElement>(".link-inline")
+      .forEach(setupLinkInline);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 
   // Re-initialize after View Transitions
-  document.addEventListener("astro:after-swap", () => {
-    document
-      .querySelectorAll<HTMLAnchorElement>(".link-inline")
-      .forEach(setupLinkInline);
-  });
+  document.addEventListener("astro:after-swap", init);
 </script>

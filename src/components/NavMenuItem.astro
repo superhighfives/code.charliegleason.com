@@ -66,44 +66,96 @@ const inactiveClass =
       }
     };
 
-    // Scramble animation on hover/focus (simplified from use-scramble)
-    const scramble = () => {
+    // Scramble animation on hover/focus (ported from use-scramble)
+    const createScrambler = () => {
       const speed = scrambleOptions.speed ?? 0.35;
-      const range = scrambleOptions.range ?? [];
-      let frame = 0;
-      const maxFrames = Math.ceil(chars.length / speed);
+      const step = scrambleOptions.step ?? 1;
+      const tick = scrambleOptions.tick ?? 1;
+      const scrambleCount = scrambleOptions.scramble ?? 4;
+      const range = scrambleOptions.range ?? [65, 90];
+      const ignore = scrambleOptions.ignore ?? [" "];
+
+      const getRandomInt = (min: number, max: number) =>
+        Math.floor(Math.random() * (max - min + 1)) + min;
 
       const getRandomChar = () => {
-        if (range.length > 0) {
-          return String.fromCharCode(range[Math.floor(Math.random() * range.length)]);
+        if (range.length === 2) {
+          return String.fromCharCode(getRandomInt(range[0], range[1]));
         }
-        return String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        return String.fromCharCode(range[getRandomInt(0, range.length - 1)]);
       };
 
-      const animate = () => {
-        frame++;
-        const progress = frame / maxFrames;
+      // Control array: number = scramble frames left, string = settled char
+      // Initialize with original characters so text is visible from start
+      let control: (number | string)[] = chars.slice();
+      let scrambleIndex = chars.length;
+      let stepCount = 0;
+      let rafId = 0;
+      let elapsed = 0;
+      const fpsInterval = 1000 / (60 * speed);
 
-        const result = chars
-          .map((char, i) => {
-            const charProgress = progress * chars.length - i;
-            if (charProgress >= 1) return char;
-            if (charProgress <= 0) return char;
-            return Math.random() < 0.5 ? getRandomChar() : char;
-          })
-          .join("");
+      const reset = () => {
+        // Keep control array intact (overflow: true behavior)
+        // Just reset the index so we re-scramble from the start
+        scrambleIndex = 0;
+        stepCount = 0;
+      };
 
+      const stepForward = () => {
+        for (let i = 0; i < step; i++) {
+          if (scrambleIndex < chars.length) {
+            const char = chars[scrambleIndex];
+            control[scrambleIndex] = ignore.includes(char)
+              ? char
+              : scrambleCount + getRandomInt(0, Math.ceil(scrambleCount / 2));
+            scrambleIndex++;
+          }
+        }
+      };
+
+      const draw = () => {
+        let result = "";
+        for (let i = 0; i < chars.length; i++) {
+          const val = control[i];
+          if (typeof val === "number" && val > 0) {
+            result += getRandomChar();
+            control[i] = val - 1;
+          } else if (typeof val === "number" && val <= 0) {
+            result += chars[i];
+            control[i] = chars[i];
+          } else {
+            // String value - show as-is (original or settled char)
+            result += val;
+          }
+        }
         link.textContent = result;
+        return result === label;
+      };
 
-        if (frame < maxFrames) {
-          requestAnimationFrame(animate);
-        } else {
-          link.textContent = label;
+      const animate = (time: number) => {
+        rafId = requestAnimationFrame(animate);
+        const delta = time - elapsed;
+        if (delta > fpsInterval) {
+          elapsed = time;
+          if (stepCount % tick === 0) {
+            stepForward();
+          }
+          const done = draw();
+          stepCount++;
+          if (done) {
+            cancelAnimationFrame(rafId);
+          }
         }
       };
 
-      requestAnimationFrame(animate);
+      return () => {
+        cancelAnimationFrame(rafId);
+        reset();
+        rafId = requestAnimationFrame(animate);
+      };
     };
+
+    const scramble = createScrambler();
 
     link.addEventListener("click", (e) => {
       if (checkActive()) {

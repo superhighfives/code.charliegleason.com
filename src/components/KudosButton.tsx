@@ -1,5 +1,6 @@
 import { ThumbsUp } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useScramble } from "use-scramble";
 import { Confetti } from "./Confetti";
 
 interface KudosButtonProps {
@@ -12,6 +13,19 @@ interface KudosButtonProps {
 interface ConfettiBurst {
   id: string;
 }
+
+// Scramble animation options for numbers
+const scrambleOptions = {
+  speed: 0.35,
+  tick: 1,
+  step: 1,
+  scramble: 4,
+  overdrive: false,
+  playOnMount: false,
+  overflow: true,
+  ignore: ["-", " "],
+  range: [48, 57] as [number, number], // ASCII codes for 0-9
+};
 
 // Generate a client-side fingerprint for rate limiting
 function generateFingerprint(): string {
@@ -58,6 +72,17 @@ export function KudosButton({
 
   const remaining = Math.max(0, 50 - you);
   const disabled = remaining <= 0 || !fingerprint;
+
+  // Scramble animations for numbers (only when mounted)
+  const { ref: totalRef } = useScramble({
+    ...scrambleOptions,
+    text: mounted ? (total?.toString() ?? "—") : "",
+  });
+
+  const { ref: remainingRef } = useScramble({
+    ...scrambleOptions,
+    text: mounted ? (remaining?.toString() ?? "—") : "",
+  });
 
   const handleClick = useCallback(async () => {
     if (disabled || isSubmitting) return;
@@ -153,8 +178,12 @@ export function KudosButton({
         <span role="img" aria-hidden="true">
           <ThumbsUp size={16} />
         </span>
-        <span className="font-semibold">{total ?? "—"}</span>
-        <span className="text-xs opacity-70">({remaining} left)</span>
+        <span ref={totalRef} className="font-semibold">
+          {total ?? "—"}
+        </span>
+        <span className="text-xs opacity-70">
+          (<span ref={remainingRef}>{remaining}</span> left)
+        </span>
       </button>
     </div>
   );

@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
-import NavMenuItem from "../components/NavMenuItem.astro";
+import NavMenuItem from "../components/NavMenuItem.tsx";
 import ThemeToggle from "../components/ThemeToggle.astro";
 import { getClientHintCheckScript, getHints } from "../utils/client-hints";
 
@@ -94,8 +94,8 @@ const clientHintCheckScript = getClientHintCheckScript();
               <span>❯</span>
               <span class="animate-blink step">█</span>
             </a>
-            <NavMenuItem href="/" label="Home" currentPath={currentPath} />
-            <NavMenuItem href="/about" label="About" currentPath={currentPath} />
+            <NavMenuItem client:load href="/" label="Home" />
+            <NavMenuItem client:load href="/about" label="About" />
           </div>
           <div class="flex gap-6">
             <ThemeToggle currentPath={currentPath} />

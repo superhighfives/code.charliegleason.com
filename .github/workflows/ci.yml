@@ -136,25 +136,28 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: versions upload --message "PR #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}"
 
-      - name: Save deploy output
-        run: echo '${{ steps.deploy.outputs.command-output }}' > /tmp/deploy-output.txt
+      - name: Extract deploy info
+        id: extract
+        env:
+          DEPLOY_OUTPUT: ${{ steps.deploy.outputs.command-output }}
+        run: |
+          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'Version Preview URL:\s*\K(https://\S+)' || true)
+          VERSION_ID=$(echo "$DEPLOY_OUTPUT" | grep -oP 'Worker Version ID:\s*\K([a-f0-9-]+)' || true)
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "version_id=$VERSION_ID" >> $GITHUB_OUTPUT
 
       - name: Comment preview URL
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
-            const output = fs.readFileSync('/tmp/deploy-output.txt', 'utf8');
-            const urlMatch = output.match(/Version Preview URL:\s+(https:\/\/\S+)/i);
-            const versionMatch = output.match(/Worker Version ID:\s+([a-f0-9-]+)/i);
-            const previewUrl = urlMatch ? urlMatch[1] : null;
-            const versionId = versionMatch ? versionMatch[1] : null;
+            const previewUrl = '${{ steps.extract.outputs.preview_url }}' || null;
+            const versionId = '${{ steps.extract.outputs.version_id }}' || null;
 
             let body;
             if (previewUrl) {
               body = `## Preview Deploy\n\n🚀 **Preview URL:** ${previewUrl}\n\n<details>\n<summary>Version details</summary>\n\n- Version ID: \`${versionId}\`\n- PR: #${{ github.event.pull_request.number }}\n\n</details>`;
             } else {
-              body = `## Preview Deploy\n\n⚠️ Preview deployed but couldn't extract version URL.\n\n<details>\n<summary>Deploy output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n\n</details>`;
+              body = `## Preview Deploy\n\n⚠️ Preview deployed but couldn't extract version URL.`;
             }
             
             const comments = await github.rest.issues.listComments({

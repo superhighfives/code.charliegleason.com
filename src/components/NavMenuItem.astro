@@ -1,0 +1,184 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  currentPath: string;
+}
+
+const { href, label, currentPath } = Astro.props;
+
+// Determine if this nav item is active
+const isActive =
+  href === "/"
+    ? currentPath === "/"
+    : currentPath === href || currentPath === `${href}/`;
+
+const baseClass =
+  "border-b-2 font-semibold link-primary focus-ring-primary nav-menu-item";
+const activeClass =
+  "text-indigo-500 dark:text-indigo-300 border-indigo-500 dark:border-indigo-300";
+const inactiveClass =
+  "border-indigo-600/20 dark:border-indigo-400/30 hover:border-current hover:border-indigo-600/20 hover:dark:border-indigo-400/30 focus-visible:border-current focus-visible:border-indigo-600/20 focus-visible:dark:border-indigo-400/30";
+---
+
+<a
+  href={href}
+  class:list={[baseClass, isActive ? activeClass : inactiveClass]}
+  data-href={href}
+  data-active={isActive}
+>
+  {label}
+</a>
+
+<script>
+  import { scrambleOptions } from "~/utils/scramble";
+
+  function setupNavMenuItem(link: HTMLAnchorElement) {
+    // Prevent double initialization
+    if (link.dataset.initialized) return;
+    link.dataset.initialized = "true";
+
+    const href = link.dataset.href || "/";
+    const label = link.textContent || "";
+    const chars = label.split("");
+
+    const activeClass =
+      "text-indigo-500 dark:text-indigo-300 border-indigo-500 dark:border-indigo-300";
+    const inactiveClass = "border-indigo-600/20 dark:border-indigo-400/30";
+
+    const checkActive = () => {
+      const currentPath = window.location.pathname;
+      return href === "/"
+        ? currentPath === "/"
+        : currentPath === href || currentPath === `${href}/`;
+    };
+
+    const updateActiveState = () => {
+      const isActive = checkActive();
+      link.dataset.active = String(isActive);
+
+      if (isActive) {
+        link.classList.remove(...inactiveClass.split(" "));
+        link.classList.add(...activeClass.split(" "));
+      } else {
+        link.classList.remove(...activeClass.split(" "));
+        link.classList.add(...inactiveClass.split(" "));
+      }
+    };
+
+    // Scramble animation on hover/focus (ported from use-scramble)
+    const createScrambler = () => {
+      const speed = scrambleOptions.speed ?? 0.35;
+      const step = scrambleOptions.step ?? 1;
+      const tick = scrambleOptions.tick ?? 1;
+      const scrambleCount = scrambleOptions.scramble ?? 4;
+      const range = scrambleOptions.range ?? [65, 90];
+      const ignore = scrambleOptions.ignore ?? [" "];
+
+      const getRandomInt = (min: number, max: number) =>
+        Math.floor(Math.random() * (max - min + 1)) + min;
+
+      const getRandomChar = () => {
+        if (range.length === 2) {
+          return String.fromCharCode(getRandomInt(range[0], range[1]));
+        }
+        return String.fromCharCode(range[getRandomInt(0, range.length - 1)]);
+      };
+
+      // Control array: number = scramble frames left, string = settled char
+      // Initialize with original characters so text is visible from start
+      let control: (number | string)[] = chars.slice();
+      let scrambleIndex = chars.length;
+      let stepCount = 0;
+      let rafId = 0;
+      let elapsed = 0;
+      const fpsInterval = 1000 / (60 * speed);
+
+      const reset = () => {
+        // Keep control array intact (overflow: true behavior)
+        // Just reset the index so we re-scramble from the start
+        scrambleIndex = 0;
+        stepCount = 0;
+      };
+
+      const stepForward = () => {
+        for (let i = 0; i < step; i++) {
+          if (scrambleIndex < chars.length) {
+            const char = chars[scrambleIndex];
+            control[scrambleIndex] = ignore.includes(char)
+              ? char
+              : scrambleCount + getRandomInt(0, Math.ceil(scrambleCount / 2));
+            scrambleIndex++;
+          }
+        }
+      };
+
+      const draw = () => {
+        let result = "";
+        for (let i = 0; i < chars.length; i++) {
+          const val = control[i];
+          if (typeof val === "number" && val > 0) {
+            result += getRandomChar();
+            control[i] = val - 1;
+          } else if (typeof val === "number" && val <= 0) {
+            result += chars[i];
+            control[i] = chars[i];
+          } else {
+            // String value - show as-is (original or settled char)
+            result += val;
+          }
+        }
+        link.textContent = result;
+        return result === label;
+      };
+
+      const animate = (time: number) => {
+        rafId = requestAnimationFrame(animate);
+        const delta = time - elapsed;
+        if (delta > fpsInterval) {
+          elapsed = time;
+          if (stepCount % tick === 0) {
+            stepForward();
+          }
+          const done = draw();
+          stepCount++;
+          if (done) {
+            cancelAnimationFrame(rafId);
+          }
+        }
+      };
+
+      return () => {
+        cancelAnimationFrame(rafId);
+        reset();
+        rafId = requestAnimationFrame(animate);
+      };
+    };
+
+    const scramble = createScrambler();
+
+    link.addEventListener("click", (e) => {
+      if (checkActive()) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+
+    link.addEventListener("mouseenter", scramble);
+    link.addEventListener("focus", scramble);
+
+    document.addEventListener("astro:after-swap", updateActiveState);
+
+    updateActiveState();
+  }
+
+  document
+    .querySelectorAll<HTMLAnchorElement>(".nav-menu-item")
+    .forEach(setupNavMenuItem);
+
+  document.addEventListener("astro:after-swap", () => {
+    document
+      .querySelectorAll<HTMLAnchorElement>(".nav-menu-item")
+      .forEach(setupNavMenuItem);
+  });
+</script>

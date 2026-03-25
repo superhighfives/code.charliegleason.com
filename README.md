@@ -1,68 +1,67 @@
 # code.charliegleason.com
 
-This is a little code blog, built with React Router 7 and deployed on Cloudflare Workers. I wanted a fast, flexible, themable setup where I could write in MDX and include live, editable code examples in the posts.
+A personal code blog built with Astro 6 and deployed on Cloudflare Workers. Previously built with React Router 7.
 
-## What it does
+## Tech stack
 
-- 🚀 **React Router 7** with server-side rendering
-- ⚡ **Cloudflare Workers** - everything runs on the edge
-- 🎨 **AI-generated visuals** via Replicate with user-controlled variations per post
-- 🍪 **Cookie-based routing** for clean URLs between index and posts
-- 💻 **Live code blocks** powered by Sandpack
-- 🤓 **WASM-powered** syntax highlighting with Shiki and OG image generation with Satori
-- 📝 **MDX content** with full React component support
-- 🖼️ **Dynamic social images** generated on-the-fly
-- 🌓 **Dark and light themes** that respect system preferences
-- 📡 **RSS feed** for your favorite feed reader
+- **Framework**: Astro 6 with SSR
+- **Runtime**: Cloudflare Workers (edge)
+- **Content**: MDX via Astro content collections
+- **Styling**: Tailwind CSS v4
+- **Code highlighting**: Shiki (built into Astro)
+- **Interactive code**: Sandpack
+- **AI visuals**: Replicate API
+- **Testing**: Vitest
 
-## How it works
+## Why Astro
 
-Built with [React Router 7](https://reactrouter.com/) and deployed on [Cloudflare Workers](https://workers.cloudflare.com/).
+The site was migrated from React Router 7. The main wins:
 
-Content is written in MDX. Code blocks are syntax-highlighted on the server using [Shiki](https://shiki.style/) with [Catppuccin themes](https://github.com/catppuccin/catppuccin). Interactive code blocks use [Sandpack](https://sandpack.codesandbox.io/) to provide a full in-browser editing experience with live preview. Open Graph images are generated dynamically using [Satori](https://github.com/vercel/satori), which renders React components to SVG.
+- **Less JavaScript by default.** The home page went from a React SPA bundle to zero client-side islands — the about section, post grid, and breadcrumb all render as static HTML. React is only loaded where it's actually needed (theme toggle, video masthead, kudos button).
+- **Islands architecture.** Interactive components hydrate independently and lazily (`client:load`, `client:idle`) instead of the whole page being a React tree. Non-interactive components that were React components in React Router are now plain `.astro` files.
+- **Server-side cookie access.** Astro's SSR has `Astro.cookies` available in every page, so theme detection and visual index routing happen on the server before the first byte is sent. No client hints, no hydration flash, no `useEffect` to read cookies.
+- **File-based routing.** Routes are files. No `routes.ts` config to keep in sync with the file system.
+- **Content collections.** MDX posts have a typed schema enforced at build time. The old app loaded MDX at runtime via a custom manifest system; Astro handles this natively with `getCollection()` and `render()`.
+- **Native view transitions.** Astro's `<ClientRouter>` replaces React Router's `viewTransition` prop on `<Link>`. The nav bar persists across navigations with `transition:persist` instead of being manually excluded from the transition tree.
 
-## Running it locally
-
-Prerequisites:
-- Node.js 18 or later
-- npm
-
-Install dependencies:
+## Development
 
 ```bash
 npm install
+npm run dev     # http://localhost:4321
 ```
 
-Start the development server:
+## Commands
+
+| Command | Action |
+| :--- | :--- |
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run typecheck` | Type checking |
+| `npm run lint` | Check code style |
+| `npm run lint:fix` | Auto-fix lint issues |
+| `npm test` | Run tests |
+
+## Visual generation
+
+AI images and videos are generated with Replicate and stored in `public/posts/{slug}/`.
 
 ```bash
-npm run dev
-```
-
-Your application will be available at `http://localhost:5173`.
-
-Run tests:
-
-```bash
-npm test
+npm run generate:images   # Generate AI images (9 per post)
+npm run generate:videos   # Generate AI videos from images
+npm run generate:colors   # Extract color pairs from images
 ```
 
 ## Deployment
 
-Build for production:
-
 ```bash
-npm run build
+npm run deploy           # Production
+npm run deploy:staging   # Staging
 ```
 
-Deploy to Cloudflare Workers:
+Assets (videos, optimized images) are uploaded to Cloudflare R2 separately via `scripts/upload-assets.sh` and served via R2 bindings in the Worker.
 
-```bash
-npm run deploy
-```
+## License
 
-Generate types for Cloudflare bindings:
-
-```bash
-npm run typegen
-```
+MIT

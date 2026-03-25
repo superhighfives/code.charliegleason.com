@@ -1,7 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { glob } from "glob";
 import matter from "gray-matter";
-import { VISUAL_COUNT } from "../app/config/constants";
+
+// Number of video/image variations generated per post
+const VISUAL_COUNT = 9;
 
 export interface ModelConfig {
   url: string;
@@ -24,7 +26,7 @@ export interface PostData {
 
 export const IMAGES_PER_POST = VISUAL_COUNT;
 export const OUTPUT_DIR = "public/posts";
-export const POSTS_DIR = "posts";
+export const POSTS_DIR = "src/content/posts";
 
 // Image validation constants
 export const COLOR_THRESHOLD = 15; // RGB units tolerance for "very close" colors (per-channel, legacy)

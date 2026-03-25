@@ -1,15 +1,15 @@
 /**
  * Image validation utilities for Node.js scripts
- * Uses shared PNG utilities from app/utils
+ * Uses shared PNG utilities from src/utils
  */
 
 import { decode } from "fast-png";
-import type { PngData, RGB } from "../app/utils/png-utils.js";
+import type { PngData, RGB } from "../src/utils/png-utils.js";
 import {
   calculateAverageColor,
   calculateColorDistance,
   getPixelFromPngData,
-} from "../app/utils/png-utils.js";
+} from "../src/utils/png-utils.js";
 import {
   LEFT_EDGE_WIDTH,
   PERCEPTUAL_COLOR_THRESHOLD,

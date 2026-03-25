@@ -5,7 +5,7 @@ import matter from "gray-matter";
 import {
   detectEdgeColors,
   detectImageColors,
-} from "../app/utils/edge-colors.js";
+} from "../src/utils/edge-colors.js";
 import { IMAGES_PER_POST, OUTPUT_DIR, POSTS_DIR } from "./utils.js";
 
 interface ColorData {

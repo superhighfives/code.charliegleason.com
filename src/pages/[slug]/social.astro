@@ -1,0 +1,88 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+// Get the slug from the URL params
+const { slug } = Astro.params;
+
+// Find the post by slug
+const posts = await getCollection("posts");
+const post = posts.find((p) => p.data.slug === slug);
+
+if (!post) {
+  return Astro.redirect("/404");
+}
+
+// Get the number of visuals from the colors array or default to 9
+const VISUAL_COUNT = post.data.visual?.colors?.length ?? 9;
+
+// Generate array of image indices
+const imageIndices = Array.from({ length: VISUAL_COUNT }, (_, i) => i);
+---
+
+<Layout title={`Social Grid for ${post.data.title} ❯ ~/code.charliegleason.com`} description={post.data.description}>
+  <div class="grid grid-cols-3 gap-4">
+    {imageIndices.map((index) => {
+      // Convert internal index to user-facing for URLs
+      const userIndex = index + 1;
+      const imageUrl = `/${slug}/${userIndex}.png`;
+      const videoUrl = `/posts/${slug}/${index}.mp4`;
+
+      return (
+        <div class="card relative">
+          <a
+            href={imageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group"
+            data-video-url={videoUrl}
+          >
+            <img
+              src={imageUrl}
+              alt=""
+              loading="lazy"
+              class="transition-opacity"
+            />
+            <div class="absolute inset-0 left-auto z-10">
+              <video
+                src={videoUrl}
+                muted
+                class="size-full object-fit opacity-0 group-hover:opacity-100 transition-opacity"
+                style="mask: linear-gradient(to right, transparent 0%, black 25%);"
+              />
+            </div>
+          </a>
+        </div>
+      );
+    })}
+  </div>
+</Layout>
+
+<script>
+  // Add hover behavior to play/pause videos using event delegation
+  // This avoids duplicate listeners when navigating with View Transitions
+  const container = document.querySelector('.grid');
+  if (container && !container.hasAttribute('data-listeners-attached')) {
+    container.setAttribute('data-listeners-attached', 'true');
+
+    container.addEventListener('mouseenter', (e) => {
+      const card = (e.target as Element).closest('.card');
+      if (!card) return;
+      const video = card.querySelector('video') as HTMLVideoElement;
+      if (video) {
+        video.currentTime = 0;
+        video.play();
+      }
+    }, true);
+
+    container.addEventListener('mouseleave', (e) => {
+      const card = (e.target as Element).closest('.card');
+      if (!card) return;
+      const video = card.querySelector('video') as HTMLVideoElement;
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    }, true);
+  }
+</script>

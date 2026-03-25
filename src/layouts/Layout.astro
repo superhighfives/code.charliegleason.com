@@ -1,0 +1,107 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import NavMenuItem from "../components/NavMenuItem.tsx";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import { getClientHintCheckScript, getHints } from "../utils/client-hints";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "❯ ~/code.charliegleason.com", description } = Astro.props;
+
+// Get client hints (system color scheme preference)
+const hints = getHints(Astro.request);
+
+// Get explicit theme preference from cookie
+const themeCookie = Astro.cookies.get("en_theme")?.value;
+const userTheme =
+  themeCookie === "light" || themeCookie === "dark" ? themeCookie : null;
+
+// Resolve theme: explicit preference > system preference
+const theme = userTheme ?? hints.theme ?? "light";
+
+// Current path for theme toggle redirect (no-JS fallback)
+const currentPath = Astro.url.pathname;
+
+// Client hint check script - sets cookie with system preference
+const clientHintCheckScript = getClientHintCheckScript();
+---
+
+<!doctype html>
+<html lang="en" class={theme === "dark" ? "dark" : ""}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Client hint check - detects system color scheme and sets cookie -->
+    <script is:inline set:html={clientHintCheckScript} />
+    
+    <!-- Enable client-side routing with view transitions -->
+    <ClientRouter />
+    
+    <!-- Preload fonts -->
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Inter-SemiBold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/JetBrainsMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin />
+    
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml" />
+    
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    
+    <!-- Apply theme based on cookie changes (for View Transitions) -->
+    <script is:inline>
+      (function() {
+        function applyTheme() {
+          const themeCookie = document.cookie.match(/en_theme=([^;]+)/)?.[1];
+          const hintCookie = document.cookie.match(/CH-prefers-color-scheme=([^;]+)/)?.[1];
+          
+          if (themeCookie === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else if (themeCookie === 'light') {
+            document.documentElement.classList.remove('dark');
+          } else if (hintCookie === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        }
+        document.addEventListener('astro:after-swap', applyTheme);
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="grid grid-rows-layout gap-8 min-h-dvh p-4 sm:p-8 [padding-bottom:calc(env(safe-area-inset-bottom)+2.5rem)] sm:[padding-bottom:calc(env(safe-area-inset-bottom)+6rem)] text-indigo-600 dark:text-indigo-400 overflow-x-hidden">
+      <div class="content-end">
+        <slot />
+      </div>
+      
+      <!-- Fixed bottom navigation -->
+      <nav class="z-50 fixed inset-x-0 bottom-0 bg-gray-50 dark:bg-gray-900 drop-shadow-2xl font-mono" style="view-transition-name: navigation" transition:persist>
+        <div class="flex justify-between border-t dark:border-gray-800 px-8 pt-4 pb-4 sm:pb-12">
+          <div class="flex gap-6">
+            <a
+              href="/"
+              class="flex gap-1 leading-tight select-none focus-ring-primary"
+            >
+              <span>❯</span>
+              <span class="animate-blink step">█</span>
+            </a>
+            <NavMenuItem client:load href="/" label="Home" />
+            <NavMenuItem client:load href="/about" label="About" />
+          </div>
+          <div class="flex gap-6">
+            <ThemeToggle currentPath={currentPath} />
+          </div>
+        </div>
+      </nav>
+    </div>
+  </body>
+</html>

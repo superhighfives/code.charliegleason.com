@@ -1,0 +1,118 @@
+---
+import { getCollection, render } from "astro:content";
+import Icon from "../../components/Icon.astro";
+import LinkBlock from "../../components/LinkBlock.astro";
+import LinkInline from "../../components/LinkInline.astro";
+import Picture from "../../components/Picture.astro";
+import VideoMasthead from "../../components/VideoMasthead.tsx";
+import Visual from "../../components/Visual.astro";
+import Layout from "../../layouts/Layout.astro";
+
+// Find the about post
+const posts = await getCollection("posts");
+const post = posts.find((p) => p.data.slug === "about");
+
+if (!post) {
+  return Astro.redirect("/404");
+}
+
+const { Content } = await render(post);
+
+// About page doesn't have a date in filename
+const date = null;
+
+// Generate random video index based on available visuals
+const VISUAL_COUNT = post.data.visual?.colors?.length ?? 9;
+const randomVideo = Math.floor(Math.random() * VISUAL_COUNT);
+
+// Build metadata matching original processArticleData
+const metadata: Array<{ label: string; value: string }> = [];
+
+// Overview (description) first
+if (post.data.description) {
+  metadata.push({ label: "Overview", value: post.data.description });
+}
+
+// Tags
+if (post.data.tags?.length) {
+  metadata.push({ label: "Tags", value: post.data.tags.join(", ") });
+}
+
+// Add custom data entries
+if (post.data.data) {
+  for (const [key, value] of Object.entries(post.data.data)) {
+    metadata.push({ label: key, value: String(value) });
+  }
+}
+
+// Prepare links for display
+const links = post.data.links
+  ? Object.entries(post.data.links).map(([key, value]) => {
+      const url = new URL(value as string);
+      return { key, value: value as string, hostname: url.hostname };
+    })
+  : [];
+---
+
+<Layout title={`${post.data.title} ❯ ~/code.charliegleason.com`} description={post.data.description}>
+  <div class="grid gap-y-4 relative">
+    {post.data.visual && (
+      <VideoMasthead
+        client:load
+        slug="about"
+        video={randomVideo}
+        visual={post.data.visual}
+      />
+    )}
+    
+    <div class="flex flex-wrap gap-y-2 max-w-4xl" style="view-transition-name: post-breadcrumb">
+      <a
+        href="/"
+        class="font-mono font-semibold group link-primary focus-ring-primary pr-2"
+      >
+        ❯ cd ~/code<span class="hidden sm:inline">.</span><span class="hidden sm:inline">charliegleason</span><span class="hidden sm:inline">.com</span>
+      </a>
+      <span class="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
+      <h1 class="font-heading font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 text-3xl w-full">
+        {post.data.title}
+      </h1>
+    </div>
+
+    {/* Metadata - bordered dl grid layout matching original */}
+    {metadata.length > 0 && (
+      <dl class="font-mono text-sm divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 max-w-4xl" style="view-transition-name: post-metadata">
+        {metadata.map(({ label, value }) => (
+          <div class="sm:px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 leading-6">
+            <dt class="font-semibold text-gray-400 dark:text-gray-500">{label}</dt>
+            <dd class="mt-1 text-gray-700 dark:text-gray-300 sm:col-span-2 sm:mt-0">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    )}
+
+    <div class="post prose prose-gray dark:prose-invert prose-headings:font-heading prose-headings:font-semibold prose-a:text-indigo-600 dark:prose-a:text-indigo-400 max-w-4xl" style="view-transition-name: post-content">
+      <Content components={{ Visual, Picture, Icon, a: LinkInline }} />
+    </div>
+
+    {/* Links section - styled like original */}
+    {links.length > 0 && (
+      <dl class="pt-2 max-w-4xl">
+        <dt class="sm:px-4 font-semibold leading-6 text-gray-900 dark:text-gray-500 font-mono">
+          Links
+        </dt>
+        <dd class="mt-2 text-gray-900 bg-white dark:bg-gray-950">
+          <div class="divide-y divide-gray-100 dark:divide-gray-900 rounded-md overflow-hidden border border-gray-200 dark:border-gray-800">
+            {links.map((link) => (
+              <LinkBlock
+                title={link.key}
+                caption={link.hostname}
+                action="Open"
+                href={link.value}
+              />
+            ))}
+          </div>
+        </dd>
+      </dl>
+    )}
+  </div>
+</Layout>

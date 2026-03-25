@@ -1,0 +1,29 @@
+---
+interface Props {
+  caption: string;
+  type?: "diagram" | "image";
+  size?: "small" | "medium" | "large";
+}
+
+const { caption, type = "image", size = "medium" } = Astro.props;
+---
+
+<figure class="my-10 space-y-6 [&>svg]:max-w-full [&>svg]:h-auto">
+  <slot />
+  {type === "diagram" ? (
+    <figcaption class="text-balance flex gap-4">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="px-1.5 py-1.5 shrink-0 h-full box-content border rounded dark:border-gray-600">
+        <path d="m18 15-6-6-6 6"/>
+      </svg>
+      <div>
+        <span class="leading-relaxed border-b dark:border-gray-700 inline -ml-4 pl-4">
+          {caption}
+        </span>
+      </div>
+    </figcaption>
+  ) : (
+    <figcaption class="text-center leading-relaxed text-balance mb-2 text-gray-600 dark:text-gray-400 text-sm">
+      {caption}
+    </figcaption>
+  )}
+</figure>

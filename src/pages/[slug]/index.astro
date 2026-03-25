@@ -4,7 +4,7 @@ import { env } from "cloudflare:workers";
 import { differenceInMonths, format } from "date-fns";
 import EditOnGitHub from "../../components/EditOnGitHub.astro";
 import Icon from "../../components/Icon.astro";
-import KudosButton from "../../components/KudosButton.astro";
+import { KudosButton } from "../../components/KudosButton.tsx";
 import LinkBlock from "../../components/LinkBlock.astro";
 import Picture from "../../components/Picture.astro";
 import VideoMasthead from "../../components/VideoMasthead.tsx";
@@ -160,7 +160,7 @@ const currentPath = Astro.url.pathname;
     {/* Kudos and Edit on GitHub - side by side like original */}
     {slug && (
       <div class="flex flex-wrap justify-start sm:px-4 items-center gap-4">
-        <KudosButton slug={slug} total={kudosTotal} you={kudosYou} currentPath={currentPath} />
+        <KudosButton client:load slug={slug} initialTotal={kudosTotal} initialYou={kudosYou} currentPath={currentPath} />
         {date && <EditOnGitHub date={date.toISOString()} slug={slug} />}
       </div>
     )}

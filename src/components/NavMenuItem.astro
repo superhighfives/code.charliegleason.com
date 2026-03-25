@@ -34,6 +34,10 @@ const inactiveClass =
   import { scrambleOptions } from "~/utils/scramble";
 
   function setupNavMenuItem(link: HTMLAnchorElement) {
+    // Prevent double initialization
+    if (link.dataset.initialized) return;
+    link.dataset.initialized = "true";
+
     const href = link.dataset.href || "/";
     const label = link.textContent || "";
     const chars = label.split("");
@@ -123,11 +127,6 @@ const inactiveClass =
   document.addEventListener("astro:after-swap", () => {
     document
       .querySelectorAll<HTMLAnchorElement>(".nav-menu-item")
-      .forEach((link) => {
-        if (!link.dataset.initialized) {
-          link.dataset.initialized = "true";
-          setupNavMenuItem(link);
-        }
-      });
+      .forEach(setupNavMenuItem);
   });
 </script>

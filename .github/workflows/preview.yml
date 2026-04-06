@@ -1,0 +1,158 @@
+name: Preview Deployment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore upload cache
+        uses: actions/cache@v4
+        with:
+          path: .upload-cache.json
+          key: r2-upload-cache-preview-${{ github.event.pull_request.number }}-${{ github.sha }}
+          restore-keys: |
+            r2-upload-cache-preview-${{ github.event.pull_request.number }}-
+
+      - name: Build project
+        run: npm run build:staging
+
+      - name: Install PNG optimization tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pngquant
+          wget -q https://github.com/shssoichiro/oxipng/releases/download/v9.1.5/oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
+          echo "571e69fcb06a3675fe247998d845619075631b01ac2246e8a88206c723a472e2  oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz" | sha256sum -c -
+          tar xzf oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
+          sudo mv oxipng-9.1.5-x86_64-unknown-linux-musl/oxipng /usr/local/bin/
+          pngquant --version
+          oxipng --version
+
+      - name: Upload assets to R2 (staging)
+        run: npm run upload:assets:staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Remove videos from deployment bundle
+        run: npm run clean:videos:build
+
+      - name: Generate preview wrangler config
+        run: |
+          node -e "
+            const config = require('./wrangler.json');
+            const previewName = 'code-pr-${{ github.event.pull_request.number }}';
+            const preview = {
+              ...config,
+              name: previewName,
+              routes: undefined,
+              r2_buckets: [{
+                bucket_name: 'visual-assets-staging',
+                binding: 'VISUAL_ASSETS'
+              }],
+              durable_objects: {
+                bindings: [{
+                  name: 'KUDOS_DO',
+                  class_name: 'KudosObject',
+                  script_name: previewName
+                }]
+              },
+              vars: {
+                ...config.vars,
+                VALUE_FROM_CLOUDFLARE: 'Hello from Cloudflare (Preview PR #${{ github.event.pull_request.number }})'
+              },
+              env: undefined
+            };
+            delete preview.routes;
+            delete preview.env;
+            require('fs').writeFileSync('wrangler.preview.json', JSON.stringify(preview, null, 2));
+          "
+
+      - name: Deploy preview
+        id: deploy
+        run: |
+          DEPLOY_OUTPUT=$(npx wrangler deploy --config wrangler.preview.json 2>&1)
+          echo "$DEPLOY_OUTPUT"
+          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1)
+          if [ -z "$PREVIEW_URL" ]; then
+            PREVIEW_URL="https://code-pr-${{ github.event.pull_request.number }}.${CLOUDFLARE_WORKERS_SUBDOMAIN:-workers}.dev"
+          fi
+          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Find existing preview comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- cloudflare-preview -->'
+
+      - name: Create or update preview comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            <!-- cloudflare-preview -->
+            ## Cloudflare Preview Deployment
+
+            | | |
+            |---|---|
+            | **Status** | Deployed |
+            | **Preview URL** | ${{ steps.deploy.outputs.preview_url }} |
+            | **Worker** | `code-pr-${{ github.event.pull_request.number }}` |
+            | **Commit** | ${{ github.sha }} |
+
+  cleanup-preview:
+    name: Cleanup Preview
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Delete preview worker
+        run: npx wrangler delete --name code-pr-${{ github.event.pull_request.number }} --force
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        continue-on-error: true

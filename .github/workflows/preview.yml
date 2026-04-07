@@ -94,8 +94,21 @@ jobs:
           fi
           PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oE 'https://[^ ]+\.workers\.dev' | head -1)
           if [ -z "$PREVIEW_URL" ]; then
-            echo "::error::Could not determine preview URL from wrangler output"
-            exit 1
+            # Wrangler may output just the hostname without https://
+            WORKER_HOST=$(echo "$DEPLOY_OUTPUT" | grep -oE '[^ ]+\.workers\.dev' | head -1)
+            if [ -n "$WORKER_HOST" ]; then
+              PREVIEW_URL="https://$WORKER_HOST"
+            fi
+          fi
+          if [ -z "$PREVIEW_URL" ]; then
+            # Fall back to querying the workers.dev subdomain
+            SUBDOMAIN=$(npx wrangler whoami 2>&1 | grep -oE 'workers\.dev subdomain: [^ ]+' | cut -d' ' -f3 || true)
+            if [ -n "$SUBDOMAIN" ]; then
+              PREVIEW_URL="https://code-pr-${{ github.event.pull_request.number }}.${SUBDOMAIN}.workers.dev"
+            else
+              echo "::warning::Could not determine preview URL from wrangler output. Deploy succeeded but URL is unknown."
+              PREVIEW_URL="(deployed — check Cloudflare dashboard for URL)"
+            fi
           fi
           echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
         env:

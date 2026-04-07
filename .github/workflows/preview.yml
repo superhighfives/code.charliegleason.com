@@ -70,6 +70,7 @@ jobs:
             const preview = {
               ...config,
               name: previewName,
+              workers_dev: true,
               routes: undefined,
               r2_buckets: [{
                 bucket_name: 'visual-assets-staging',
@@ -96,11 +97,18 @@ jobs:
       - name: Deploy preview
         id: deploy
         run: |
+          set +e
           DEPLOY_OUTPUT=$(npx wrangler deploy --config wrangler.preview.json 2>&1)
+          DEPLOY_EXIT=$?
+          set -e
           echo "$DEPLOY_OUTPUT"
-          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1)
+          if [ $DEPLOY_EXIT -ne 0 ]; then
+            echo "::error::Wrangler deploy failed with exit code $DEPLOY_EXIT"
+            exit $DEPLOY_EXIT
+          fi
+          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oE 'https://[^ ]+\.workers\.dev' | head -1)
           if [ -z "$PREVIEW_URL" ]; then
-            PREVIEW_URL="https://code-pr-${{ github.event.pull_request.number }}.${CLOUDFLARE_WORKERS_SUBDOMAIN:-workers}.dev"
+            PREVIEW_URL="https://code-pr-${{ github.event.pull_request.number }}.workers.dev"
           fi
           echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
         env:

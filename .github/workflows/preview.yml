@@ -16,7 +16,9 @@ jobs:
   deploy-preview:
     name: Deploy Preview
     runs-on: ubuntu-latest
-    if: github.event.action != 'closed'
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Checkout code
@@ -108,7 +110,8 @@ jobs:
           fi
           PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oE 'https://[^ ]+\.workers\.dev' | head -1)
           if [ -z "$PREVIEW_URL" ]; then
-            PREVIEW_URL="https://code-pr-${{ github.event.pull_request.number }}.workers.dev"
+            echo "::error::Could not determine preview URL from wrangler output"
+            exit 1
           fi
           echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
         env:
@@ -140,10 +143,40 @@ jobs:
             | **Worker** | `code-pr-${{ github.event.pull_request.number }}` |
             | **Commit** | ${{ github.sha }} |
 
+  skip-preview:
+    name: Skip Preview (Fork)
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name != github.repository
+
+    steps:
+      - name: Find existing preview comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- cloudflare-preview -->'
+
+      - name: Post skip comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            <!-- cloudflare-preview -->
+            ## Cloudflare Preview Deployment
+
+            Preview deployments are not available for fork PRs (secrets are not accessible). A maintainer can trigger a preview by pushing the branch to the upstream repository.
+
   cleanup-preview:
     name: Cleanup Preview
     runs-on: ubuntu-latest
-    if: github.event.action == 'closed'
+    if: >-
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Checkout code

@@ -64,43 +64,27 @@ jobs:
       - name: Remove videos from deployment bundle
         run: npm run clean:videos:build
 
-      - name: Generate preview wrangler config
+      - name: Patch wrangler.json for preview
         run: |
           node -e "
-            const config = require('./wrangler.json');
+            const fs = require('fs');
+            const config = JSON.parse(fs.readFileSync('wrangler.json', 'utf8'));
             const previewName = 'code-pr-${{ github.event.pull_request.number }}';
-            const preview = {
-              ...config,
-              name: previewName,
-              workers_dev: true,
-              routes: undefined,
-              r2_buckets: [{
-                bucket_name: 'visual-assets-staging',
-                binding: 'VISUAL_ASSETS'
-              }],
-              durable_objects: {
-                bindings: [{
-                  name: 'KUDOS_DO',
-                  class_name: 'KudosObject',
-                  script_name: previewName
-                }]
-              },
-              vars: {
-                ...config.vars,
-                VALUE_FROM_CLOUDFLARE: 'Hello from Cloudflare (Preview PR #${{ github.event.pull_request.number }})'
-              },
-              env: undefined
-            };
-            delete preview.routes;
-            delete preview.env;
-            require('fs').writeFileSync('wrangler.preview.json', JSON.stringify(preview, null, 2));
+            config.name = previewName;
+            config.workers_dev = true;
+            delete config.routes;
+            delete config.env;
+            config.r2_buckets = [{ bucket_name: 'visual-assets-staging', binding: 'VISUAL_ASSETS' }];
+            config.durable_objects.bindings[0].script_name = previewName;
+            config.vars.VALUE_FROM_CLOUDFLARE = 'Hello from Cloudflare (Preview PR #${{ github.event.pull_request.number }})';
+            fs.writeFileSync('wrangler.json', JSON.stringify(config, null, 2));
           "
 
       - name: Deploy preview
         id: deploy
         run: |
           set +e
-          DEPLOY_OUTPUT=$(npx wrangler deploy --config wrangler.preview.json 2>&1)
+          DEPLOY_OUTPUT=$(npx wrangler deploy 2>&1)
           DEPLOY_EXIT=$?
           set -e
           echo "$DEPLOY_OUTPUT"

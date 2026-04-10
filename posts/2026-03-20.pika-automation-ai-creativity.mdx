@@ -77,7 +77,7 @@ Shipping a macOS app has a lot of overhead. You build, you archive, you sign, yo
 
 I'd been using [Claude Code](https://claude.ai/code) for a while, and at some point I had this thought - what if I built a workspace that could handle all of that for me?
 
-So I did. I set up a mono-repo that pulls together the Pika source, a release tool I built called [releasecast](https://github.com/superhighfives/releasecast), the marketing assets, and the website. Then I wrote Claude Code slash commands - `/release`, `/screenshots`, `/setup` - that orchestrate the whole thing.
+So I did. I set up a monorepo that pulls together the Pika source, a release tool I built called [releasecast](https://github.com/superhighfives/releasecast), the marketing assets, and the website. Then I wrote Claude Code slash commands - `/release`, `/screenshots`, `/setup` - that orchestrate the whole thing.
 
 The `/release` command handles the full pipeline. Build, notarize, create the DMG, generate the appcast, push to GitHub Releases, write the changelog, deploy the website. One command. What used to be an afternoon of careful copy-pasting and waiting for notarization emails turned into something I could kick off and walk away from.
 

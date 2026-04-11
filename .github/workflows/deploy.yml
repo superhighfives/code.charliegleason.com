@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -26,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Restore upload cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .upload-cache.json
           key: r2-upload-cache-production-${{ github.sha }}
@@ -41,6 +41,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pngquant
           wget -q https://github.com/shssoichiro/oxipng/releases/download/v9.1.5/oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
+          echo "571e69fcb06a3675fe247998d845619075631b01ac2246e8a88206c723a472e2  oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz" | sha256sum -c -
           tar xzf oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
           sudo mv oxipng-9.1.5-x86_64-unknown-linux-musl/oxipng /usr/local/bin/
           pngquant --version
@@ -68,10 +69,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -80,7 +81,7 @@ jobs:
         run: npm ci
 
       - name: Restore upload cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .upload-cache.json
           key: r2-upload-cache-staging-${{ github.sha }}
@@ -95,8 +96,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pngquant
           wget -q https://github.com/shssoichiro/oxipng/releases/download/v9.1.5/oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
+          echo "571e69fcb06a3675fe247998d845619075631b01ac2246e8a88206c723a472e2  oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz" | sha256sum -c -
           tar xzf oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
-          sudo mv oxipng /usr/local/bin/
+          sudo mv oxipng-9.1.5-x86_64-unknown-linux-musl/oxipng /usr/local/bin/
           pngquant --version
           oxipng --version
 

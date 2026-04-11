@@ -1,0 +1,214 @@
+name: Preview Deployment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore upload cache
+        uses: actions/cache@v4
+        with:
+          path: .upload-cache.json
+          key: r2-upload-cache-preview-${{ github.event.pull_request.number }}-${{ github.sha }}
+          restore-keys: |
+            r2-upload-cache-preview-${{ github.event.pull_request.number }}-
+            r2-upload-cache-staging-
+            r2-upload-cache-production-
+
+      - name: Seed upload cache from production
+        run: |
+          node -e "
+            const fs = require('fs');
+            if (!fs.existsSync('.upload-cache.json')) process.exit(0);
+            const cache = JSON.parse(fs.readFileSync('.upload-cache.json', 'utf8'));
+            if (cache.staging && Object.keys(cache.staging).length > 0) process.exit(0);
+            const source = cache.production || cache.staging || {};
+            if (Object.keys(source).length === 0) process.exit(0);
+            cache.staging = { ...source };
+            fs.writeFileSync('.upload-cache.json', JSON.stringify(cache, null, 2));
+            console.log('Seeded staging cache with ' + Object.keys(source).length + ' entries from existing cache');
+          "
+
+      - name: Build project
+        run: npm run build:staging
+
+      - name: Install PNG optimization tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pngquant
+          wget -q https://github.com/shssoichiro/oxipng/releases/download/v9.1.5/oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
+          echo "571e69fcb06a3675fe247998d845619075631b01ac2246e8a88206c723a472e2  oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz" | sha256sum -c -
+          tar xzf oxipng-9.1.5-x86_64-unknown-linux-musl.tar.gz
+          sudo mv oxipng-9.1.5-x86_64-unknown-linux-musl/oxipng /usr/local/bin/
+          pngquant --version
+          oxipng --version
+
+      - name: Upload assets to R2 (staging)
+        run: npm run upload:assets:staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Remove videos from deployment bundle
+        run: npm run clean:videos:build
+
+      - name: Patch wrangler.json for preview
+        run: |
+          node -e "
+            const fs = require('fs');
+            const config = JSON.parse(fs.readFileSync('build/server/wrangler.json', 'utf8'));
+            const previewName = 'code-pr-${{ github.event.pull_request.number }}';
+            config.name = previewName;
+            config.workers_dev = true;
+            delete config.routes;
+            delete config.env;
+            if (config.durable_objects && config.durable_objects.bindings) {
+              config.durable_objects.bindings[0].script_name = previewName;
+            }
+            if (!config.vars) config.vars = {};
+            config.vars.VALUE_FROM_CLOUDFLARE = 'Hello from Cloudflare (Preview PR #${{ github.event.pull_request.number }})';
+            fs.writeFileSync('build/server/wrangler.json', JSON.stringify(config, null, 2));
+          "
+
+      - name: Deploy preview
+        id: deploy
+        run: |
+          set +e
+          DEPLOY_OUTPUT=$(npx wrangler deploy 2>&1)
+          DEPLOY_EXIT=$?
+          set -e
+          echo "$DEPLOY_OUTPUT"
+          if [ $DEPLOY_EXIT -ne 0 ]; then
+            echo "::error::Wrangler deploy failed with exit code $DEPLOY_EXIT"
+            exit $DEPLOY_EXIT
+          fi
+          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oE 'https://[^ ]+\.workers\.dev' | head -1)
+          if [ -z "$PREVIEW_URL" ]; then
+            # Wrangler may output just the hostname without https://
+            WORKER_HOST=$(echo "$DEPLOY_OUTPUT" | grep -oE '[^ ]+\.workers\.dev' | head -1)
+            if [ -n "$WORKER_HOST" ]; then
+              PREVIEW_URL="https://$WORKER_HOST"
+            fi
+          fi
+          if [ -z "$PREVIEW_URL" ]; then
+            # Fall back to querying the workers.dev subdomain
+            SUBDOMAIN=$(npx wrangler whoami 2>&1 | grep -oE 'workers\.dev subdomain: [^ ]+' | cut -d' ' -f3 || true)
+            if [ -n "$SUBDOMAIN" ]; then
+              PREVIEW_URL="https://code-pr-${{ github.event.pull_request.number }}.${SUBDOMAIN}.workers.dev"
+            else
+              echo "::warning::Could not determine preview URL from wrangler output. Deploy succeeded but URL is unknown."
+              PREVIEW_URL="(deployed — check Cloudflare dashboard for URL)"
+            fi
+          fi
+          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Find existing preview comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- cloudflare-preview -->'
+
+      - name: Create or update preview comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            <!-- cloudflare-preview -->
+            ## Cloudflare Preview Deployment
+
+            | | |
+            |---|---|
+            | **Status** | Deployed |
+            | **Preview URL** | ${{ steps.deploy.outputs.preview_url }} |
+            | **Worker** | `code-pr-${{ github.event.pull_request.number }}` |
+            | **Commit** | ${{ github.sha }} |
+
+  skip-preview:
+    name: Skip Preview (Fork)
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name != github.repository
+
+    steps:
+      - name: Find existing preview comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- cloudflare-preview -->'
+
+      - name: Post skip comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            <!-- cloudflare-preview -->
+            ## Cloudflare Preview Deployment
+
+            Preview deployments are not available for fork PRs (secrets are not accessible). A maintainer can trigger a preview by pushing the branch to the upstream repository.
+
+  cleanup-preview:
+    name: Cleanup Preview
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Delete preview worker
+        run: npx wrangler delete --name code-pr-${{ github.event.pull_request.number }} --force
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        continue-on-error: true

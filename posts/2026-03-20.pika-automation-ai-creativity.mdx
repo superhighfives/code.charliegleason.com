@@ -2,8 +2,8 @@
 slug: pika-automation-ai-creativity
 title: 'Pika, automation, and reigniting creativity with AI'
 description: >-
-  How building Pika taught me that automation isn't the enemy of creativity—it's
-  the thing that clears the path back to it.
+  How building Pika taught me that automation isn't the enemy of creativity -
+  it's the thing that clears the path back to it.
 tags:
   - pika
   - automation
@@ -12,8 +12,8 @@ tags:
   - tools
 visual:
   prompt: >-
-    Paint splattering over vibrant colour swatches, purple
-    pink and electric blue palette, solid background, t-shirt design
+    A hand reaching out to touch a single glowing pixel of bright color, dark
+    background
   image:
     url: 'https://replicate.com/jakedahn/flux-latentpop'
     version: >-
@@ -22,28 +22,25 @@ visual:
   video:
     url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
     version: bytedance/seedance-1-pro-fast
-    guidance: >-
-      no text, no words, no language, paint strokes being painted in,
-      dripping and painting themselves like magic, no t-shirts in animation
   colors:
-    - text: '#ffd000'
-      background: '#0b0e18'
-    - text: '#f0d000'
-      background: '#090e1e'
-    - text: '#ffd010'
-      background: '#0c0924'
-    - text: '#d0e030'
-      background: '#110e1f'
-    - text: '#ffe020'
-      background: '#0b0a11'
-    - text: '#c0ff30'
-      background: '#12101f'
+    - text: '#50d0a0'
+      background: '#0a0a19'
+    - text: '#ff8040'
+      background: '#0e0c1c'
     - text: '#ffc020'
-      background: '#0f1125'
+      background: '#09081b'
+    - text: '#ffd020'
+      background: '#060713'
+    - text: '#70f010'
+      background: '#060a18'
     - text: '#fff000'
-      background: '#140d29'
-    - text: '#e0ff10'
-      background: '#080820'
+      background: '#0c0c1e'
+    - text: '#60f0ff'
+      background: '#060517'
+    - text: '#ffffff'
+      background: '#060515'
+    - text: '#ffff00'
+      background: '#0b0a16'
 links:
   Pika: 'https://superhighfives.com/pika'
   Pika on GitHub: 'https://github.com/superhighfives/pika'
@@ -51,25 +48,17 @@ links:
   Claude Code: 'https://claude.ai/code'
 ---
 
-I built [Pika](https://superhighfives.com/pika) because I was tired of context-switching. Picking a colour off the screen shouldn't require opening a whole application, navigating a UI, and then copying a hex value. It should be instant.
+I built [Pika](https://superhighfives.com/pika) because I was tired of context-switching. Picking a color off the screen shouldn't require opening a whole application, navigating a UI, and then copying a hex value. It should be instant.
 
 So I made it instant.
 
----
-
-What I didn't expect was what happened next.
-
----
-
 ## The thing about tools
 
-There's a version of this story where I talk about Pika's features - the WCAG contrast checking, the colour name lookup, the keyboard shortcuts, the Raycast integration. And those things are genuinely useful. But that's not the interesting part.
+There's a version of this story where I talk about Pika's features - the WCAG contrast checking, the color name lookup, the keyboard shortcuts, the Raycast integration. And those things are genuinely useful. But that's not the interesting part.
 
 The interesting part is what happens when the friction disappears.
 
 When you stop thinking about *how* to do the thing, you start thinking about *what* you're doing. And that shift - from process to purpose - is where creativity lives.
-
----
 
 ## Coding with AI, and what it changed
 
@@ -83,15 +72,13 @@ The `/release` command handles the full pipeline. Build, notarize, create the DM
 
 But the screenshots were the thing that really surprised me.
 
-I'd been putting off updating Pika's marketing assets for months. Taking screenshots of a colour picker means getting the right colours on screen, the right window positions, the right appearance mode - light and dark - and then doing it all over again for the website, the README, and the App Store. It's fiddly, repetitive, and easy to get wrong.
+I'd been putting off updating Pika's marketing assets for months. Taking screenshots of a color picker means getting the right colors on screen, the right window positions, the right appearance mode - light and dark - and then doing it all over again for the website, the README, and the App Store. It's fiddly, repetitive, and easy to get wrong.
 
-I added a `pika://` URL scheme to the app so it could be configured programmatically - set the foreground colour, the background colour, pick which window to show. Then I built a pipeline that launches Pika, triggers each shot configuration, captures the windows, and composites them into the layouts I need. Fan layouts for the website. Overlapping windows for the README. Clean PNGs for Figma.
+I added a `pika://` URL scheme to the app so it could be configured programmatically - set the foreground color, the background color, pick which window to show. Then I built a pipeline that launches Pika, triggers each shot configuration, captures the windows, and composites them into the layouts I need. Fan layouts for the website. Overlapping windows for the README. Clean PNGs for Figma.
 
 The whole thing took maybe two days to build. And now updating the screenshots for a new release takes about thirty seconds.
 
 That's the part that changed something for me. Not the time saved, exactly - although that's real. It's that the tedious stuff stopped being a reason not to ship. Every release used to come with this mental tax of all the boring work I'd need to do after the fun part was done. Now the boring part is automated, and I get to stay in the fun part longer.
-
----
 
 ## Reigniting the thing
 
@@ -99,7 +86,7 @@ I've been making things since I was a kid. Side projects, experiments, things th
 
 But there's this thing that happens with side projects where the gap between what you want to build and what you can actually ship keeps growing. You get better at knowing what good looks like, and worse at finding the time to get there. The ideas don't stop, but the energy to push through the last 20% does.
 
-What changed for me was the combination of AI and a willingness to experiment with how I work. Not just using AI to write code - although that's part of it - but using it to rethink which parts of the process need me and which parts don't. The colour accuracy improvements, the OKLCH decimal precision, fixing Xcode build issues - I could describe the problem, work through it collaboratively, and ship the fix in a fraction of the time it would have taken me alone.
+What changed for me was the combination of AI and a willingness to experiment with how I work. Not just using AI to write code - although that's part of it - but using it to rethink which parts of the process need me and which parts don't. The color accuracy improvements, the OKLCH decimal precision, fixing Xcode build issues - I could describe the problem, work through it collaboratively, and ship the fix in a fraction of the time it would have taken me alone.
 
 And that freed up space for the parts that actually need a human. The product decisions. The feel of the interactions. Whether a feature is worth adding at all.
 
@@ -107,13 +94,11 @@ There's a specific feeling when someone you've never met finds your little tool 
 
 That feeling is what keeps you making things. And anything that shortens the path from idea to shipped - anything that removes a reason to procrastinate - is worth its weight in gold.
 
----
-
 ## What's next
 
 Pika does a lot. It also doesn't do some things I want it to do yet.
 
-Palettes just landed in beta - saving and organising groups of colours, not just individual picks. There's more coming after that. I'm not sure exactly what shape it'll take, but that's the fun part.
+Palettes just landed in beta - saving and organizing groups of colors, not just individual picks. There's more coming after that. I'm not sure exactly what shape it'll take, but that's the fun part.
 
 It's a lot easier to be excited about what's next when shipping doesn't feel like a chore.
 

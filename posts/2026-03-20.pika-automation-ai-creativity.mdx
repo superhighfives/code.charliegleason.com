@@ -2,8 +2,7 @@
 slug: pika-automation-ai-creativity
 title: 'Pika, automation, and reigniting creativity with AI'
 description: >-
-  How building Pika taught me that automation isn't the enemy of creativity -
-  it's the thing that clears the path back to it.
+  Automation isn't the enemy of creativity, it's the thing that clears the path back to it.
 tags:
   - pika
   - automation
@@ -48,15 +47,15 @@ links:
   Claude Code: 'https://claude.ai/code'
 ---
 
-I built [Pika](https://superhighfives.com/pika) because I was tired of context-switching. Picking a color off the screen shouldn't require opening a whole application, navigating a UI, and then copying a hex value. It should be instant.
+I built [Pika](https://superhighfives.com/pika) because, honestly, I wanted to build a Mac App, and it was the pandemic. An ocean of time and a laptop. I'm also a designer, and I liked the idea of doing something around accessibility. Picking a color off the screen should be dead simple.
 
-So I made it instant.
+So I built Pika.
 
 ## The thing about tools
 
-There's a version of this story where I talk about Pika's features - the WCAG contrast checking, the color name lookup, the keyboard shortcuts, the Raycast integration. And those things are genuinely useful. But that's not the interesting part.
+There's a version of this where I talk about Pika's features - the WCAG contrast checking, the color name lookup, the keyboard shortcuts, the Raycast integration. And those things are genuinely useful. But that's not the interesting part.
 
-The interesting part is what happens when the friction disappears.
+The interesting part is how painful making it was. I spent hours googling, reading documentation, and trying to figure out how to do things in SwiftUI and AppKit and XCodde that should be straightforward but weren't. The friction was exhausting.
 
 When you stop thinking about *how* to do the thing, you start thinking about *what* you're doing. And that shift - from process to purpose - is where creativity lives.
 
@@ -66,7 +65,7 @@ Shipping a macOS app has a lot of overhead. You build, you archive, you sign, yo
 
 I'd been using [Claude Code](https://claude.ai/code) for a while, and at some point I had this thought - what if I built a workspace that could handle all of that for me?
 
-So I did. I set up a monorepo that pulls together the Pika source, a release tool I built called [releasecast](https://github.com/superhighfives/releasecast), the marketing assets, and the website. Then I wrote Claude Code slash commands - `/release`, `/screenshots`, `/setup` - that orchestrate the whole thing.
+So I set up a monorepo that pulls together the Pika source, a release tool I built called [releasecast](https://github.com/superhighfives/releasecast), the marketing assets, and the website. Then I wrote Claude Code slash commands - `/release`, `/screenshots`, `/setup` - that orchestrate the whole thing.
 
 The `/release` command handles the full pipeline. Build, notarize, create the DMG, generate the appcast, push to GitHub Releases, write the changelog, deploy the website. One command. What used to be an afternoon of careful copy-pasting and waiting for notarization emails turned into something I could kick off and walk away from.
 
@@ -76,7 +75,7 @@ I'd been putting off updating Pika's marketing assets for months. Taking screens
 
 I added a `pika://` URL scheme to the app so it could be configured programmatically - set the foreground color, the background color, pick which window to show. Then I built a pipeline that launches Pika, triggers each shot configuration, captures the windows, and composites them into the layouts I need. Fan layouts for the website. Overlapping windows for the README. Clean PNGs for Figma.
 
-The whole thing took maybe two days to build. And now updating the screenshots for a new release takes about thirty seconds.
+The whole thing took a couple hours to build. And now updating the screenshots for a new release takes about thirty seconds, automatically.
 
 That's the part that changed something for me. Not the time saved, exactly - although that's real. It's that the tedious stuff stopped being a reason not to ship. Every release used to come with this mental tax of all the boring work I'd need to do after the fun part was done. Now the boring part is automated, and I get to stay in the fun part longer.
 
@@ -90,7 +89,7 @@ What changed for me was the combination of AI and a willingness to experiment wi
 
 And that freed up space for the parts that actually need a human. The product decisions. The feel of the interactions. Whether a feature is worth adding at all.
 
-There's a specific feeling when someone you've never met finds your little tool useful. A tweet you didn't ask for. An email from someone who uses Pika every day. The Setapp listing that meant people could discover it without me doing anything. Small tools accrue meaning over time in a way that's hard to predict and impossible to plan for.
+There's a specific feeling when someone you've never met finds your little tool useful. A tweet you didn't ask for or an email from someone who uses Pika every day. Small tools accrue meaning over time in a way that's hard to predict and impossible to plan for.
 
 That feeling is what keeps you making things. And anything that shortens the path from idea to shipped - anything that removes a reason to procrastinate - is worth its weight in gold.
 
@@ -104,4 +103,4 @@ It's a lot easier to be excited about what's next when shipping doesn't feel lik
 
 The tools we build reflect how we want to work. I want to work fast, stay focused, and spend more time on the parts that require a human.
 
-That's the automation manifesto, I guess.
+So yeah, that's it. That's the automation manifesto, I guess.

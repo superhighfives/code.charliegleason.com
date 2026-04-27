@@ -84,16 +84,18 @@ jobs:
         run: |
           node -e "
             const fs = require('fs');
-            const config = JSON.parse(fs.readFileSync('wrangler.json', 'utf8'));
+            const config = JSON.parse(fs.readFileSync('build/server/wrangler.json', 'utf8'));
             const previewName = 'code-pr-${{ github.event.pull_request.number }}';
             config.name = previewName;
             config.workers_dev = true;
             delete config.routes;
             delete config.env;
-            config.r2_buckets = [{ bucket_name: 'visual-assets-staging', binding: 'VISUAL_ASSETS' }];
-            config.durable_objects.bindings[0].script_name = previewName;
+            if (config.durable_objects && config.durable_objects.bindings) {
+              config.durable_objects.bindings[0].script_name = previewName;
+            }
+            if (!config.vars) config.vars = {};
             config.vars.VALUE_FROM_CLOUDFLARE = 'Hello from Cloudflare (Preview PR #${{ github.event.pull_request.number }})';
-            fs.writeFileSync('wrangler.json', JSON.stringify(config, null, 2));
+            fs.writeFileSync('build/server/wrangler.json', JSON.stringify(config, null, 2));
           "
 
       - name: Deploy preview

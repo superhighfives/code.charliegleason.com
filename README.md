@@ -25,18 +25,18 @@ Content is written in MDX. Code blocks are syntax-highlighted on the server usin
 
 Prerequisites:
 - Node.js 18 or later
-- npm
+- pnpm
 
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Start the development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Your application will be available at `http://localhost:5173`.
@@ -44,7 +44,7 @@ Your application will be available at `http://localhost:5173`.
 Run tests:
 
 ```bash
-npm test
+pnpm test
 ```
 
 ## Deployment
@@ -52,17 +52,17 @@ npm test
 Build for production:
 
 ```bash
-npm run build
+pnpm build
 ```
 
 Deploy to Cloudflare Workers:
 
 ```bash
-npm run deploy
+pnpm deploy
 ```
 
 Generate types for Cloudflare bindings:
 
 ```bash
-npm run typegen
+pnpm typegen
 ```

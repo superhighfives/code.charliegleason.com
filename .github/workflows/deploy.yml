@@ -16,14 +16,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Restore upload cache
         uses: actions/cache@v5
@@ -34,7 +37,7 @@ jobs:
             r2-upload-cache-production-
 
       - name: Build project
-        run: npm run build
+        run: pnpm build
 
       - name: Install PNG optimization tools
         run: |
@@ -48,16 +51,16 @@ jobs:
           oxipng --version
 
       - name: Upload assets to R2
-        run: npm run upload:assets:production
+        run: pnpm upload:assets:production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Remove videos from deployment bundle
-        run: npm run clean:videos:build
+        run: pnpm clean:videos:build
 
       - name: Deploy to Cloudflare
-        run: npx wrangler deploy
+        run: pnpm exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -71,14 +74,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Restore upload cache
         uses: actions/cache@v5
@@ -89,7 +95,7 @@ jobs:
             r2-upload-cache-staging-
 
       - name: Build project (staging)
-        run: npm run build:staging
+        run: pnpm build:staging
 
       - name: Install PNG optimization tools
         run: |
@@ -103,16 +109,16 @@ jobs:
           oxipng --version
 
       - name: Upload assets to R2 (staging)
-        run: npm run upload:assets:staging
+        run: pnpm upload:assets:staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Remove videos from deployment bundle (staging)
-        run: npm run clean:videos:build
+        run: pnpm clean:videos:build
 
       - name: Deploy to Cloudflare (staging)
-        run: npx wrangler deploy
+        run: pnpm exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

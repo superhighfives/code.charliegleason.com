@@ -5,7 +5,46 @@ import Command from "~/components/command";
 import LiveCodeBlock from "~/components/live-code-block";
 import { Code } from "~/components/static-code-block";
 import { customMdxParse } from "./custom-mdx-parser";
+import mermaidManifest from "./mermaid-manifest.json";
 import type { MDXComponents, MdxAttributes, PostLoaderData } from "./types";
+
+function normalizeMermaidSource(source: string): string {
+  return source.replace(/\r\n/g, "\n").trim();
+}
+
+function MermaidDiagram({ source, width }: { source: string; width?: string }) {
+  const hash = (mermaidManifest as Record<string, string>)[
+    normalizeMermaidSource(source)
+  ];
+  if (!hash) {
+    return (
+      <pre className="not-prose mermaid-missing">
+        <code>{source}</code>
+      </pre>
+    );
+  }
+  const style = width
+    ? { maxWidth: /^\d+(\.\d+)?$/.test(width) ? `${width}px` : width }
+    : undefined;
+  return (
+    <figure className="mermaid-diagram not-prose" style={style}>
+      <img
+        className="mermaid-light"
+        src={`/diagrams/${hash}.svg`}
+        alt="Diagram"
+        loading="lazy"
+        decoding="async"
+      />
+      <img
+        className="mermaid-dark"
+        src={`/diagrams/${hash}.dark.svg`}
+        alt="Diagram"
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+  );
+}
 
 function parseMetaString(
   meta?: string | null,
@@ -37,6 +76,12 @@ export function useMdxComponent(components?: MDXComponents) {
     (node: MyRootContent) => {
       if (node.type === "code") {
         const meta = parseMetaString(node.meta);
+        if (node.lang === "mermaid") {
+          // The server-side highlighter in post.tsx also skips mermaid, so we
+          // mustn't increment the index here either.
+          const width = typeof meta.width === "string" ? meta.width : undefined;
+          return <MermaidDiagram source={node.value} width={width} />;
+        }
         if (meta.live) {
           return (
             <div className="not-prose code">

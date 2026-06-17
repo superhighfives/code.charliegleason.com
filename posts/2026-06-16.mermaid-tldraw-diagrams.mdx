@@ -1,0 +1,42 @@
+---
+slug: mermaid-tldraw-diagrams
+title: Mermaid diagrams, rendered by tldraw
+description: >-
+  A dummy post that exercises the new build-time mermaid renderer — fenced
+  diagram blocks turn into hand-drawn-looking tldraw SVGs, with separate
+  light and dark variants.
+---
+
+Sometimes a diagram is the fastest way to say a thing. Here's a basic flowchart:
+
+```mermaid
+flowchart TD
+  A[Write a diagram in MDX] --> B{Build runs}
+  B -->|Diagram is new| C[Playwright + tldraw renders SVG]
+  B -->|Diagram is cached| D[Skip render]
+  C --> E[Save light + dark SVG to /diagrams]
+  D --> E
+  E --> F[Runtime swaps variant via .dark class]
+```
+
+A simple sequence diagram works too — tldraw doesn't natively model these, so
+the harness falls back to mermaid's own SVG output:
+
+```mermaid
+sequenceDiagram
+  participant Author
+  participant Vite
+  participant Tldraw
+  Author->>Vite: save post.mdx
+  Vite->>Tldraw: render pending diagrams
+  Tldraw-->>Vite: light + dark svg
+  Vite-->>Author: full-reload
+```
+
+You can cap the width per-diagram with a fence meta option, handy for tall
+top-down charts:
+
+```mermaid width="380"
+flowchart TD
+  Idea --> Sketch --> Build --> Ship
+```

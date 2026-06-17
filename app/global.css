@@ -344,6 +344,27 @@ html.dark .shiki span {
 }
 
 /*************************************************************/
+/* Mermaid / tldraw diagrams */
+/*************************************************************/
+
+.mermaid-diagram {
+  @apply my-8 mx-auto flex justify-center;
+}
+
+.mermaid-diagram img {
+  @apply max-w-full h-auto;
+}
+
+.mermaid-diagram .mermaid-dark,
+.dark .mermaid-diagram .mermaid-light {
+  display: none;
+}
+
+.dark .mermaid-diagram .mermaid-dark {
+  display: block;
+}
+
+/*************************************************************/
 /* Post styles */
 /*************************************************************/
 

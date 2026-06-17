@@ -116,7 +116,7 @@ find public/posts -type f \( -name "*.mp4" -o -name "*.png" -o -name "*.jpg" -o 
     skipped=$((skipped + 1))
   else
     echo "  📤 [$count/$total_files] Uploading $relative_path..."
-    npx wrangler r2 object put "$BUCKET/$relative_path" --remote --file "$file" 2>&1 | grep -v "wrangler" || true
+    pnpm exec wrangler r2 object put "$BUCKET/$relative_path" --remote --file "$file" 2>&1 | grep -v "wrangler" || true
     uploaded=$((uploaded + 1))
 
     # Update cache with new MD5

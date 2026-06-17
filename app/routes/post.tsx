@@ -37,6 +37,10 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
       if (node.meta?.includes("live")) {
         continue;
       }
+      // Mermaid blocks are rendered as SVGs at build time, not highlighted.
+      if (node.lang === "mermaid") {
+        continue;
+      }
       const key = `code-block-${blockIndex}`;
       highlightedBlocks[key] = await highlightCode(
         node.value,

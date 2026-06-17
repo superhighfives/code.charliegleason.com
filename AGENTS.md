@@ -364,7 +364,7 @@ links:                         # Optional related links
 
 ## AI Visual Generation
 
-### Image Generation (`npm run generate:images`)
+### Image Generation (`pnpm generate:images`)
 
 **Process:**
 1. Reads Replicate model from post frontmatter
@@ -379,7 +379,7 @@ links:                         # Optional related links
 - Uses Euclidean distance in RGB space
 - Threshold: d5 units perceptual difference
 
-### Video Generation (`npm run generate:videos`)
+### Video Generation (`pnpm generate:videos`)
 
 **Process:**
 1. Uses first image (index 0) as source
@@ -393,7 +393,7 @@ links:                         # Optional related links
 
 **Note:** Videos removed from deployment bundle, served from R2
 
-### Color Generation (`npm run generate:colors`)
+### Color Generation (`pnpm generate:colors`)
 
 **Process:**
 1. Analyzes edges of all generated images
@@ -522,10 +522,10 @@ app/
 
 **Running Tests:**
 ```bash
-npm test              # Run once
-npm run test:watch    # Watch mode
-npm run test:ui       # Vitest UI
-npm run test:coverage # Coverage report
+pnpm test              # Run once
+pnpm test:watch    # Watch mode
+pnpm test:ui       # Vitest UI
+pnpm test:coverage # Coverage report
 ```
 
 ## Deployment
@@ -544,8 +544,8 @@ npm run test:coverage # Coverage report
 
 ### Workflow (`.github/workflows/deploy.yml`)
 
-1. Install dependencies (`npm ci`)
-2. Build React Router app (`npm run build`)
+1. Install dependencies (`pnpm install --frozen-lockfile`)
+2. Build React Router app (`pnpm build`)
 3. Install PNG optimization tools (pngquant, oxipng)
 4. Upload optimized assets to R2 (`upload-assets.sh`)
 5. Remove videos from bundle (served from R2)
@@ -573,10 +573,10 @@ npm run test:coverage # Coverage report
 
 ```bash
 # Production
-npm run deploy
+pnpm deploy
 
 # Staging
-npm run deploy:staging
+pnpm deploy:staging
 ```
 
 ## Development Guidelines
@@ -584,39 +584,39 @@ npm run deploy:staging
 ### Starting Development
 
 ```bash
-npm install           # Install dependencies
-npm run dev           # Start dev server (localhost:5173)
-npm run dev:staging   # Start with staging config
+pnpm install           # Install dependencies
+pnpm dev           # Start dev server (localhost:5173)
+pnpm dev:staging   # Start with staging config
 ```
 
 ### Common Tasks
 
 **Generate Visuals:**
 ```bash
-npm run generate:images      # Generate AI images
-npm run generate:videos      # Generate AI videos
-npm run generate:colors      # Extract colors
-npm run validate:images      # Check image validity
-npm run delete:invalid-images # Remove failed images
+pnpm generate:images      # Generate AI images
+pnpm generate:videos      # Generate AI videos
+pnpm generate:colors      # Extract colors
+pnpm validate:images      # Check image validity
+pnpm delete:invalid-images # Remove failed images
 ```
 
 **Type Checking:**
 ```bash
-npm run typegen      # Generate Cloudflare types
-npm run typecheck    # Run TypeScript compiler
+pnpm typegen      # Generate Cloudflare types
+pnpm typecheck    # Run TypeScript compiler
 ```
 
 **Linting:**
 ```bash
-npm run lint         # Check code style
-npm run lint:fix     # Auto-fix issues
+pnpm lint         # Check code style
+pnpm lint:fix     # Auto-fix issues
 ```
 
 **Building:**
 ```bash
-npm run build        # Production build
-npm run preview      # Preview production build
-npm run check        # Full check (types + build + dry-run)
+pnpm build        # Production build
+pnpm preview      # Preview production build
+pnpm check        # Full check (types + build + dry-run)
 ```
 
 ### Adding a New Post
@@ -624,11 +624,11 @@ npm run check        # Full check (types + build + dry-run)
 1. Create `/posts/YYYY-MM-DD.slug.mdx`
 2. Add frontmatter (see schema above)
 3. Write content with MDX components
-4. Generate visuals: `npm run generate:images`
-5. Generate videos: `npm run generate:videos`
-6. Extract colors: `npm run generate:colors`
-7. Test locally: `npm run dev`
-8. Deploy: `npm run deploy`
+4. Generate visuals: `pnpm generate:images`
+5. Generate videos: `pnpm generate:videos`
+6. Extract colors: `pnpm generate:colors`
+7. Test locally: `pnpm dev`
+8. Deploy: `pnpm deploy`
 
 ### Adding a New Component
 
@@ -784,43 +784,43 @@ const html = await highlighter.highlight(code);
 
 ```bash
 # Development
-npm run dev                    # Start dev server
-npm run dev:staging            # Dev with staging config
+pnpm dev                    # Start dev server
+pnpm dev:staging            # Dev with staging config
 
 # Building
-npm run build                  # Production build
-npm run build:staging          # Staging build
-npm run preview                # Preview prod build
+pnpm build                  # Production build
+pnpm build:staging          # Staging build
+pnpm preview                # Preview prod build
 
 # Testing
-npm test                       # Run tests
-npm run test:watch             # Watch mode
-npm run test:ui                # Vitest UI
-npm run test:coverage          # Coverage report
+pnpm test                       # Run tests
+pnpm test:watch             # Watch mode
+pnpm test:ui                # Vitest UI
+pnpm test:coverage          # Coverage report
 
 # Type Checking
-npm run typegen                # Generate types
-npm run typecheck              # Check types
+pnpm typegen                # Generate types
+pnpm typecheck              # Check types
 
 # Linting
-npm run lint                   # Check style
-npm run lint:fix               # Fix style issues
+pnpm lint                   # Check style
+pnpm lint:fix               # Fix style issues
 
 # Visuals
-npm run generate:images        # Generate images
-npm run generate:videos        # Generate videos
-npm run generate:colors        # Extract colors
-npm run validate:images        # Validate images
-npm run delete:invalid-images  # Remove invalid
+pnpm generate:images        # Generate images
+pnpm generate:videos        # Generate videos
+pnpm generate:colors        # Extract colors
+pnpm validate:images        # Validate images
+pnpm delete:invalid-images  # Remove invalid
 
 # Deployment
-npm run deploy                 # Deploy production
-npm run deploy:staging         # Deploy staging
-npm run upload:assets:production   # Upload to R2 (prod)
-npm run upload:assets:staging      # Upload to R2 (staging)
+pnpm deploy                 # Deploy production
+pnpm deploy:staging         # Deploy staging
+pnpm upload:assets:production   # Upload to R2 (prod)
+pnpm upload:assets:staging      # Upload to R2 (staging)
 
 # Utilities
-npm run check                  # Full check (types + build)
+pnpm check                  # Full check (types + build)
 ```
 
 ## Environment Variables

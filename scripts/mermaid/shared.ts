@@ -1,14 +1,17 @@
 import { createHash } from "node:crypto";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { visit } from "unist-util-visit";
+import { ACTIVE_STYLE } from "./style-config";
 
 /**
- * Bump this whenever the rendering logic (harness, export options) or tldraw
- * version changes the visual output. It is NOT part of the filename — it is
- * written as a marker inside each SVG so the renderer can detect stale files
- * and re-render in place, keeping the public URL stable (see render-mermaid.ts).
+ * Bump the trailing revision whenever the rendering logic (harness, export
+ * options) or tldraw version changes the visual output. It is NOT part of the
+ * filename — it is written as a marker inside each SVG so the renderer can
+ * detect stale files and re-render in place, keeping the public URL stable
+ * (see render-mermaid.ts). `ACTIVE_STYLE` is baked in so swapping styles also
+ * invalidates everything.
  */
-export const RENDER_VERSION = "tldraw-5.1.1-r1";
+export const RENDER_VERSION = `tldraw-5.1.1-r5-${ACTIVE_STYLE}`;
 
 /** Marker line embedded in each rendered SVG to track the render version. */
 export function renderMarker(version = RENDER_VERSION): string {

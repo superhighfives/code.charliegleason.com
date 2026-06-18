@@ -6,7 +6,8 @@
     "lib/mdx-plugin.ts",
     "lib/**/*",
     "scripts/render-mermaid.ts",
-    "scripts/mermaid/shared.ts"
+    "scripts/mermaid/shared.ts",
+    "scripts/mermaid/style-config.ts"
   ],
   "compilerOptions": {
     "composite": true,

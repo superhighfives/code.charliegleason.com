@@ -1,5 +1,5 @@
 {
-  "flowchart TD\n  A[Write a diagram in MDX] --> B{Build runs}\n  B -->|Diagram is new| C[Playwright + tldraw renders SVG]\n  B -->|Diagram is cached| D[Skip render]\n  C --> E[Save light + dark SVG to /diagrams]\n  D --> E\n  E --> F[Runtime swaps variant via .dark class]": "dbba03bf17a634a5",
+  "flowchart TD\n  A[Write a diagram in MDX] --> B{Build runs}\n  B -->|New or stale| C[Playwright + tldraw renders SVG]\n  B -->|Up to date| D[Skip render]\n  C --> E[Save light + dark SVG to /diagrams]\n  D --> E\n  E --> F[Runtime swaps variant via .dark class]": "4e2e54718875b80a",
   "flowchart TD\n  Idea --> Sketch --> Build --> Ship": "0c69db3dd3f0c83b",
   "sequenceDiagram\n  participant Author\n  participant Vite\n  participant Tldraw\n  Author->>Vite: save post.mdx\n  Vite->>Tldraw: render pending diagrams\n  Tldraw-->>Vite: light + dark svg\n  Vite-->>Author: full-reload": "475e8d3b048bc784"
 }

@@ -55,11 +55,15 @@ links:
   Mermaid: 'https://mermaid.js.org'
   Playwright: 'https://playwright.dev'
   '@tldraw/mermaid': 'https://www.npmjs.com/package/@tldraw/mermaid'
+  Sunil Pai's original post: 'https://x.com/threepointone/status/2066481114949046693'
+  Sunil's reference commit: 'https://github.com/threepointone/sunilpai-dev/commit/f4bd28a11a6eb4d9f514f13df35d4ca340f5d8d3'
 ---
 
 Diagrams are one of those things where the gap between "I want a diagram here" and "there is a diagram here" is just annoying enough to make me skip it entirely. Mermaid solves the authoring side — write plain text, get a chart — but the default SVG output is serviceable rather than beautiful. And I'd been using tldraw for whiteboarding anyway, so I kept wondering if I could pull the two together.
 
-It turns out you can. The version running on this site works like this: you write a plain mermaid fence in an MDX post, and at build time a Playwright harness renders it through tldraw, writes light and dark SVG variants to `public/diagrams/`, and embeds them via a manifest the runtime looks up. The worker bundle ships zero bytes of mermaid or tldraw code. Here's what the whole thing looks like:
+It turns out you can — and the credit for figuring out how goes to [Sunil Pai](https://x.com/threepointone/status/2066481114949046693), who shipped a plugin for his blog that does exactly this, complete with light and dark variants. He even pointed at [the commit](https://github.com/threepointone/sunilpai-dev/commit/f4bd28a11a6eb4d9f514f13df35d4ca340f5d8d3) where it all lives. What follows is me retracing his steps for this site, with a few detours of my own along the way.
+
+The version running here works like this: you write a plain mermaid fence in an MDX post, and at build time a Playwright harness renders it through tldraw, writes light and dark SVG variants to `public/diagrams/`, and embeds them via a manifest the runtime looks up. The worker bundle ships zero bytes of mermaid or tldraw code. Here's what the whole thing looks like:
 
 ```mermaid
 flowchart TD

@@ -13,8 +13,8 @@ import { ACTIVE_STYLE } from "./style-config";
  *     light and dark variants, for things that can't be expressed as props
  *     (e.g. non-token stroke widths, brand colours not in tldraw's palette).
  *
- * Switch the active style by editing `ACTIVE_STYLE` in `shared.ts` — that also
- * bumps the render marker so existing SVGs invalidate.
+ * Switch the active style by editing `ACTIVE_STYLE` in `style-config.ts` —
+ * that also bumps the render marker so existing SVGs invalidate.
  */
 interface DiagramStyle {
   shapeProps: Record<string, unknown>;

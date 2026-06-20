@@ -55,9 +55,13 @@ function isRendererSource(file: string): boolean {
  */
 export function mermaidPlugin(): Plugin {
   let scheduled: Promise<void> = Promise.resolve();
+  let isBuild = false;
 
   return {
     name: "mermaid-tldraw",
+    configResolved(config) {
+      isBuild = config.command === "build";
+    },
     async buildStart() {
       try {
         const renderDiagrams = await loadRenderer();
@@ -71,6 +75,13 @@ export function mermaidPlugin(): Plugin {
           );
         }
       } catch (err) {
+        // In `vite build` (and therefore CI), keep going past a render failure
+        // would ship a broken deploy: the manifest could point at SVGs that
+        // are stale or absent. Fail loud so the build errors out. In dev we
+        // just log so style iteration stays interactive.
+        if (isBuild) {
+          throw err;
+        }
         // eslint-disable-next-line no-console
         console.error("[mermaid] render failed:", err);
       }

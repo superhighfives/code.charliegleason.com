@@ -235,7 +235,7 @@ flowchart TD
   Idea --> Sketch --> Build --> Ship
 ```
 
-The meta string gets parsed in `scripts/mermaid/shared.ts`'s `extractMermaidBlocks`, and the value is passed through to the CSS as an inline `max-width` on the figure.
+The meta string gets parsed by `parseMetaString` in `app/mdx/mdx-hooks.tsx`, and the value is passed through to the CSS as an inline `max-width` on the figure.
 
 ## What the CSS looks like
 

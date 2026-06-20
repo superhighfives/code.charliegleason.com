@@ -12,7 +12,15 @@ function normalizeMermaidSource(source: string): string {
   return source.replace(/\r\n/g, "\n").trim();
 }
 
-function MermaidDiagram({ source, width }: { source: string; width?: string }) {
+function MermaidDiagram({
+  source,
+  width,
+  alt,
+}: {
+  source: string;
+  width?: string;
+  alt?: string;
+}) {
   const hash = (mermaidManifest as Record<string, string>)[
     normalizeMermaidSource(source)
   ];
@@ -26,21 +34,28 @@ function MermaidDiagram({ source, width }: { source: string; width?: string }) {
   const style = width
     ? { maxWidth: /^\d+(\.\d+)?$/.test(width) ? `${width}px` : width }
     : undefined;
+  // Use the author-supplied alt if present. Otherwise default to a generic
+  // label on the light variant only — the dark variant is a duplicate, so
+  // marking it decorative (`alt=""`) avoids screen readers announcing it
+  // twice when both `<img>`s are in the DOM.
+  const lightAlt = alt ?? "Mermaid diagram";
+  const darkAlt = alt ?? "";
   return (
     <figure className="mermaid-diagram not-prose" style={style}>
       <img
         className="mermaid-light"
         src={`/diagrams/${hash}.svg`}
-        alt="Diagram"
+        alt={lightAlt}
         loading="lazy"
         decoding="async"
       />
       <img
         className="mermaid-dark"
         src={`/diagrams/${hash}.dark.svg`}
-        alt="Diagram"
+        alt={darkAlt}
         loading="lazy"
         decoding="async"
+        aria-hidden={alt ? undefined : true}
       />
     </figure>
   );
@@ -80,7 +95,8 @@ export function useMdxComponent(components?: MDXComponents) {
           // The server-side highlighter in post.tsx also skips mermaid, so we
           // mustn't increment the index here either.
           const width = typeof meta.width === "string" ? meta.width : undefined;
-          return <MermaidDiagram source={node.value} width={width} />;
+          const alt = typeof meta.alt === "string" ? meta.alt : undefined;
+          return <MermaidDiagram source={node.value} width={width} alt={alt} />;
         }
         if (meta.live) {
           return (

@@ -8,7 +8,7 @@ export default defineConfig({
     environment: "happy-dom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["**/*.{test,spec}.{ts,tsx}"],
-    exclude: ["node_modules", "build", ".react-router"],
+    exclude: ["**/node_modules/**", "build", ".react-router", ".opencode"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

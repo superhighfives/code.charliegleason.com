@@ -38,12 +38,15 @@ async function optimizeVideo(
     //   minterpolate: bump to 60fps for smooth playback in both cases
     //   setpts ease-in: only applied for reversed clips, where the seam needs
     //     to be smoothed by decelerating into the loop point
-    const filterChain = nativeLoop
-      ? "minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1"
-      : "[0:v]reverse,minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,setpts='if(lt(T\\,2.5)\\,PTS\\,2.5/TB+(T-2.5)/TB+pow((T-2.5)*2\\,3)/TB)'[v]";
-    const mapArg = nativeLoop ? "" : '-map "[v]"';
+    //
+    // The native-loop branch is a single linear filter, so we use the simpler
+    // `-vf` form. The reversed branch is a labelled graph and uses
+    // `-filter_complex` + `-map "[v]"`.
+    const filterArgs = nativeLoop
+      ? `-vf "minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1"`
+      : `-filter_complex "[0:v]reverse,minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,setpts='if(lt(T\\,2.5)\\,PTS\\,2.5/TB+(T-2.5)/TB+pow((T-2.5)*2\\,3)/TB)'[v]" -map "[v]"`;
 
-    const ffmpegCommand = `ffmpeg -i "${videoPath}" -filter_complex "${filterChain}" ${mapArg} -an -c:v libx264 -crf 28 -preset medium -movflags +faststart -pix_fmt yuv420p "${tempPath}" -y`;
+    const ffmpegCommand = `ffmpeg -i "${videoPath}" ${filterArgs} -an -c:v libx264 -crf 28 -preset medium -movflags +faststart -pix_fmt yuv420p "${tempPath}" -y`;
 
     await execAsync(ffmpegCommand, { maxBuffer: 50 * 1024 * 1024 }); // 50MB buffer
 

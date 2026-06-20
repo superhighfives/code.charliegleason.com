@@ -35,6 +35,11 @@ async function optimizeVideo(
 
     // Filter chain differs depending on whether the source loops natively:
     //   reverse: only applied for non-looping sources to fake a return-to-start
+    //   crop+scale: only applied for native-loop sources (vidu), which emit a
+    //     few pixels of white grain along the frame edges. Trimming 4px off
+    //     each edge and scaling back up crops the artifact out. Cropping before
+    //     scaling keeps this dimension-agnostic (iw/ih resolve at runtime), and
+    //     even-minus-8 stays even, which yuv420p requires.
     //   minterpolate: bump to 60fps for smooth playback in both cases
     //   setpts ease-in: only applied for reversed clips, where the seam needs
     //     to be smoothed by decelerating into the loop point
@@ -43,7 +48,7 @@ async function optimizeVideo(
     // `-vf` form. The reversed branch is a labelled graph and uses
     // `-filter_complex` + `-map "[v]"`.
     const filterArgs = nativeLoop
-      ? `-vf "minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1"`
+      ? `-vf "crop=iw-8:ih-8,scale=iw+8:ih+8,minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1"`
       : `-filter_complex "[0:v]reverse,minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,setpts='if(lt(T\\,2.5)\\,PTS\\,2.5/TB+(T-2.5)/TB+pow((T-2.5)*2\\,3)/TB)'[v]" -map "[v]"`;
 
     const ffmpegCommand = `ffmpeg -i "${videoPath}" ${filterArgs} -an -c:v libx264 -crf 28 -preset medium -movflags +faststart -pix_fmt yuv420p "${tempPath}" -y`;

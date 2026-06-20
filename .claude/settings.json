@@ -1,5 +1,4 @@
 {
-  "enabledMcpjsonServers": ["beads"],
   "permissions": {
     "allow": [
       "Bash(cat:*)",
@@ -14,12 +13,6 @@
       "Bash(rm:*)",
       "Bash(tree:*)",
       "Bash(unzip:*)",
-      "Bash(bd close:*)",
-      "Bash(bd create:*)",
-      "Bash(bd import:*)",
-      "Bash(bd ready:*)",
-      "Bash(bd sync:*)",
-      "Bash(bd update:*)",
       "Bash(brew install:*)",
       "Bash(gh pr create:*)",
       "Bash(gh pr list:*)",

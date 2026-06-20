@@ -17,30 +17,33 @@ const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
  * - Removes audio track
  * - Uses H.264 codec with medium quality
  * - Optimizes for fast start (moves moov atom to beginning)
+ * - For models that don't loop natively (seedance, etc), reverses the video
+ *   and adds an ease-in to mask the seam. For loop-native models (vidu), skips
+ *   both since the source already returns to its starting state.
  * @param videoPath - Path to the MP4 file to optimize
+ * @param nativeLoop - If true, the source video already loops cleanly
  */
-async function optimizeVideo(videoPath: string): Promise<void> {
+async function optimizeVideo(
+  videoPath: string,
+  nativeLoop = false,
+): Promise<void> {
   try {
     const originalStats = await stat(videoPath);
     const originalSize = originalStats.size;
 
     const tempPath = videoPath.replace(".mp4", ".temp.mp4");
 
-    // Use ffmpeg to optimize the video:
-    // -filter_complex: Apply reverse, interpolation, and smooth ease-in at the end
-    //   [0:v]reverse: Reverse the video
-    //   minterpolate: First interpolate to high fps (60) for smooth frames
-    //   setpts with smooth ease-in in last 0.5s:
-    //     Before 2.5s: Normal speed (PTS unchanged)
-    //     Last 0.5s: Ease-in cubic formula that starts fast and decelerates smoothly
-    //     Formula inverts the cubic curve: heavy slowdown that feels smooth and natural
-    // -an: Remove audio
-    // -c:v libx264: Use H.264 codec
-    // -crf 28: Constant Rate Factor (18-28 is good, higher = smaller file, lower quality)
-    // -preset medium: Balance between encoding speed and compression
-    // -movflags +faststart: Move moov atom to beginning for fast streaming
-    // -pix_fmt yuv420p: Ensure compatibility
-    const ffmpegCommand = `ffmpeg -i "${videoPath}" -filter_complex "[0:v]reverse,minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,setpts='if(lt(T\\,2.5)\\,PTS\\,2.5/TB+(T-2.5)/TB+pow((T-2.5)*2\\,3)/TB)'[v]" -map "[v]" -an -c:v libx264 -crf 28 -preset medium -movflags +faststart -pix_fmt yuv420p "${tempPath}" -y`;
+    // Filter chain differs depending on whether the source loops natively:
+    //   reverse: only applied for non-looping sources to fake a return-to-start
+    //   minterpolate: bump to 60fps for smooth playback in both cases
+    //   setpts ease-in: only applied for reversed clips, where the seam needs
+    //     to be smoothed by decelerating into the loop point
+    const filterChain = nativeLoop
+      ? "minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1"
+      : "[0:v]reverse,minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,setpts='if(lt(T\\,2.5)\\,PTS\\,2.5/TB+(T-2.5)/TB+pow((T-2.5)*2\\,3)/TB)'[v]";
+    const mapArg = nativeLoop ? "" : '-map "[v]"';
+
+    const ffmpegCommand = `ffmpeg -i "${videoPath}" -filter_complex "${filterChain}" ${mapArg} -an -c:v libx264 -crf 28 -preset medium -movflags +faststart -pix_fmt yuv420p "${tempPath}" -y`;
 
     await execAsync(ffmpegCommand, { maxBuffer: 50 * 1024 * 1024 }); // 50MB buffer
 
@@ -144,15 +147,38 @@ async function main() {
           `   📝 Model: ${videoModelName} (${post.visual.video.version})`,
         );
 
-        const input = {
-          fps: 24,
-          image: await readFile(imagePath),
-          prompt,
-          duration: 3,
-          resolution: "480p",
-          aspect_ratio: "1:1",
-          camera_fixed: false,
-        };
+        // Vidu Q3 Pro supports start-and-end-frame control for true seamless
+        // loops. Passing the same image as both frames produces a video that
+        // returns to its starting state, removing the need for the FFmpeg
+        // reverse trick. Vidu's schema declares those fields as `format: uri`
+        // rather than the file-handle pattern other models use, so we encode
+        // the image as a base64 data URI inline. (replicate.files.create()
+        // returns an API metadata URL the model worker can't fetch.)
+        const isVidu = post.visual.video.url.includes("vidu/");
+
+        const imageBuffer = await readFile(imagePath);
+        const imageDataUri = isVidu
+          ? `data:image/png;base64,${imageBuffer.toString("base64")}`
+          : undefined;
+
+        const input: Record<string, unknown> = isVidu
+          ? {
+              start_image: imageDataUri,
+              end_image: imageDataUri,
+              prompt,
+              duration: 5,
+              resolution: "540p",
+              audio: false,
+            }
+          : {
+              fps: 24,
+              image: imageBuffer,
+              prompt,
+              duration: 3,
+              resolution: "480p",
+              aspect_ratio: "1:1",
+              camera_fixed: false,
+            };
 
         const output = (await replicate.run(
           post.visual.video.version as
@@ -194,8 +220,9 @@ async function main() {
 
         console.log(`   ✅ Saved: ${videoPath}`);
 
-        // Optimize the video to reduce file size and enable fast start
-        await optimizeVideo(videoPath);
+        // Optimize the video. Posts with `video.loop: true` already return to
+        // their starting frame, so we skip the reverse + ease-in seam-masker.
+        await optimizeVideo(videoPath, post.visual.video.loop === true);
       } catch (error) {
         console.error(`   ❌ Failed to generate video ${index}:`, error);
       }

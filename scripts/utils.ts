@@ -9,10 +9,18 @@ export interface ModelConfig {
   guidance?: string;
 }
 
+export interface VideoConfig extends ModelConfig {
+  // When true, the model produces a natively-looping clip (start frame
+  // matches end frame) and post-processing should leave the timeline alone.
+  // When false or omitted, the post-processor reverses the clip and adds an
+  // ease-in at the end to mask the seam.
+  loop?: boolean;
+}
+
 export interface VisualConfig {
   prompt: string;
   image: ModelConfig;
-  video: ModelConfig;
+  video: VideoConfig;
 }
 
 export interface PostData {
@@ -97,6 +105,9 @@ export async function getPosts(): Promise<PostData[]> {
             url: visual.video.url,
             version: visual.video.version,
             ...(visual.video.guidance && { guidance: visual.video.guidance }),
+            ...(typeof visual.video.loop === "boolean" && {
+              loop: visual.video.loop,
+            }),
           },
         },
       });

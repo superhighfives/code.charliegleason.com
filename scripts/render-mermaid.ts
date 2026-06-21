@@ -31,6 +31,7 @@ const RENDER_OPTS = { padding: 16 };
 interface Diagram {
   hash: string;
   source: string;
+  style: string;
   post: string;
 }
 
@@ -52,11 +53,19 @@ async function collectDiagrams(): Promise<Diagram[]> {
   const seen = new Set<string>();
   for (const file of files) {
     const markdown = await fs.readFile(file, "utf8");
-    for (const source of extractMermaidBlocks(markdown)) {
+    // Dedup by hash (source-only). Two fences with identical source but
+    // different `style="..."` would collide on one file; first one wins. In
+    // practice diagram sources are unique, so this never bites.
+    for (const { source, style } of extractMermaidBlocks(markdown)) {
       const hash = hashMermaid(source);
       if (seen.has(hash)) continue;
       seen.add(hash);
-      diagrams.push({ hash, source, post: path.relative(projectRoot, file) });
+      diagrams.push({
+        hash,
+        source,
+        style,
+        post: path.relative(projectRoot, file),
+      });
     }
   }
   return diagrams;
@@ -69,9 +78,9 @@ function variantPaths(hash: string): { light: string; dark: string } {
   };
 }
 
-async function hasMarker(file: string): Promise<boolean> {
+async function hasMarker(file: string, style: string): Promise<boolean> {
   try {
-    return (await fs.readFile(file, "utf8")).includes(renderMarker());
+    return (await fs.readFile(file, "utf8")).includes(renderMarker(style));
   } catch {
     return false;
   }
@@ -79,12 +88,13 @@ async function hasMarker(file: string): Promise<boolean> {
 
 /**
  * A diagram is up to date when both theme variants exist and carry the current
- * render marker. Source edits change the filename (so a missing file triggers a
- * render); render-logic changes bump the marker (so a stale marker does).
+ * render marker for its style. Source edits change the filename (so a missing
+ * file triggers a render); render-logic or per-fence style changes bump the
+ * marker (so a stale marker does).
  */
-async function isUpToDate(hash: string): Promise<boolean> {
+async function isUpToDate(hash: string, style: string): Promise<boolean> {
   const { light, dark } = variantPaths(hash);
-  return (await hasMarker(light)) && (await hasMarker(dark));
+  return (await hasMarker(light, style)) && (await hasMarker(dark, style));
 }
 
 async function pruneOrphans(keep: Set<string>): Promise<void> {
@@ -163,22 +173,24 @@ async function renderPending(pending: Diagram[]): Promise<void> {
 
     for (const diagram of pending) {
       const result = await page.evaluate(
-        ({ source, opts }) =>
+        ({ source, opts, style }) =>
           (
             window as unknown as {
               renderMermaid: (
                 s: string,
                 o: typeof opts,
+                style: string,
               ) => Promise<{ light: string; dark: string }>;
             }
-          ).renderMermaid(source, opts),
-        { source: diagram.source, opts: RENDER_OPTS },
+          ).renderMermaid(source, opts, style),
+        { source: diagram.source, opts: RENDER_OPTS, style: diagram.style },
       );
       const { light, dark } = variantPaths(diagram.hash);
-      await fs.writeFile(light, `${renderMarker()}\n${result.light}`, "utf8");
-      await fs.writeFile(dark, `${renderMarker()}\n${result.dark}`, "utf8");
+      const marker = renderMarker(diagram.style);
+      await fs.writeFile(light, `${marker}\n${result.light}`, "utf8");
+      await fs.writeFile(dark, `${marker}\n${result.dark}`, "utf8");
       console.log(
-        `[mermaid] rendered ${diagram.hash}.svg (+dark)  (${diagram.post})`,
+        `[mermaid] rendered ${diagram.hash}.svg (+dark)  [${diagram.style}]  (${diagram.post})`,
       );
     }
   } finally {
@@ -206,7 +218,7 @@ export async function renderDiagrams(): Promise<RenderSummary> {
 
   const pending: Diagram[] = [];
   for (const diagram of diagrams) {
-    if (await isUpToDate(diagram.hash)) continue;
+    if (await isUpToDate(diagram.hash, diagram.style)) continue;
     pending.push(diagram);
   }
 

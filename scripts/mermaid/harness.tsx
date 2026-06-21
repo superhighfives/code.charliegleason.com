@@ -65,8 +65,8 @@ const recolorIndigo = (svg: string, variant: "light" | "dark") => {
 
 const STYLES = {
   sleek: {
-    shapeProps: { font: "mono", dash: "solid", fill: "none", size: "m" },
-    arrowProps: { font: "mono", dash: "solid", size: "l" },
+    shapeProps: { font: "sans", dash: "solid", fill: "none", size: "m" },
+    arrowProps: { font: "sans", dash: "solid", size: "l" },
     transformSvg: splitArrowStroke,
   },
   indigo: {
@@ -77,7 +77,14 @@ const STYLES = {
   },
 } satisfies Record<string, DiagramStyle>;
 
-const STYLE: DiagramStyle = STYLES[ACTIVE_STYLE];
+/**
+ * Resolve a style name (from a fence's `style="..."` meta, defaulting to
+ * `ACTIVE_STYLE`) to its preset. Unknown names fall back to the default so a
+ * typo degrades to the site style rather than throwing mid-render.
+ */
+function resolveStyle(name: string): DiagramStyle {
+  return STYLES[name as keyof typeof STYLES] ?? STYLES[ACTIVE_STYLE];
+}
 
 interface RenderOptions {
   padding: number;
@@ -95,6 +102,7 @@ declare global {
     renderMermaid?: (
       source: string,
       opts: RenderOptions,
+      style: string,
     ) => Promise<RenderResult>;
   }
 }
@@ -133,10 +141,12 @@ function App() {
 // biome-ignore lint/style/noNonNullAssertion: #root is guaranteed by harness.html
 createRoot(document.getElementById("root")!).render(createElement(App));
 
-window.renderMermaid = async (source, opts) => {
+window.renderMermaid = async (source, opts, styleName) => {
   const editor = window.__tldrawEditor;
   if (!editor) throw new Error("tldraw editor is not mounted yet");
   await window.__tldrawReady;
+
+  const STYLE = resolveStyle(styleName);
 
   // Start from a clean page so diagrams never bleed into each other.
   const existing = [...editor.getCurrentPageShapeIds()];

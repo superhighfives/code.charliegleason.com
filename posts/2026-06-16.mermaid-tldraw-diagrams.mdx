@@ -103,14 +103,15 @@ It's the kind of invisible bug that produces the wrong output with no error, whi
 
 Each diagram's output filename is a content hash, so URLs are stable across re-renders and external links don't 404. But there's a wrinkle: when you change your styling code, the hash doesn't change, so cached SVGs won't be re-rendered even though they'd look different.
 
-The fix is a `RENDER_VERSION` marker embedded inside each SVG as an HTML comment:
+The fix is a render marker embedded inside each SVG as an HTML comment:
 
 ```ts
-export const RENDER_VERSION = `tldraw-5.1.1-r5-indigo`
-// → <!-- tldraw-mermaid render:tldraw-5.1.1-r5-indigo -->
+export const RENDER_REVISION = `tldraw-5.1.1-r6`
+export const renderVersion = (style: string) => `${RENDER_REVISION}-${style}`
+// → <!-- tldraw-mermaid render:tldraw-5.1.1-r6-sleek -->
 ```
 
-The renderer checks the marker in any existing file before deciding to skip it. The version string is a template literal that includes the tldraw package version, a manual revision counter, and the active style name. Bumping the revision (`r5` → `r6`) invalidates everything without changing any filenames. External links stay valid. The revision is cheap to bump and free to ignore when nothing style-related has changed.
+The renderer checks the marker in any existing file before deciding to skip it. The version string combines the tldraw package version, a manual revision counter, and the diagram's style name. Bumping the revision (`r6` → `r7`) invalidates everything without changing any filenames. External links stay valid. The revision is cheap to bump and free to ignore when nothing style-related has changed.
 
 One gotcha I hit: I bumped the version mid-iteration but cached SVGs still showed the previous value, because I'd changed the style name earlier and the marker already said "indigo." The renderer thought everything was current. Lesson learned — bump *before* you start tuning, not after.
 
@@ -226,16 +227,18 @@ sequenceDiagram
 
 The fallback output is mermaid's default SVG, which looks different from the tldraw ones. I'm treating this as a feature for now — sequence diagrams have a different visual character anyway. But it's worth knowing the boundary exists.
 
-## Width overrides
+## Per-fence meta options
 
-You can cap the display width per-diagram with a fence meta option. Useful for tall top-down charts that would otherwise stretch too wide:
+Fences carry meta options after the language tag. Two are wired up: `width` caps the display size, and `style` picks a different preset from the `STYLES` map. The diagram below sets both — it's capped narrow *and* rendered with the `sleek` preset (tldraw's default ink instead of the site's indigo), so you can see it sitting next to the indigo diagrams above:
 
-```mermaid width="380"
+```mermaid width="380" style="sleek"
 flowchart TD
   Idea --> Sketch --> Build --> Ship
 ```
 
-The meta string gets parsed by `parseMetaString` in `app/mdx/mdx-hooks.tsx`, and the value is passed through to the CSS as an inline `max-width` on the figure.
+`width` and `style` travel through the pipeline by different routes, because they change different things. `width` is purely presentational, so `parseMetaString` in `app/mdx/mdx-hooks.tsx` reads it at runtime and sets an inline `max-width` on the figure — the SVG itself is identical. `style` changes the *pixels*, so it has to be resolved at render time: `extractMermaidBlocks` reads it off each fence, the render script hands it to `window.renderMermaid(source, opts, style)`, and the harness looks it up in `STYLES`. The runtime never needs to know — it still maps source → hash → SVG, and the styled output is already baked into the file.
+
+The one subtlety is cache invalidation. The filename hash is source-only (for stable URLs), so swapping a fence's style wouldn't change the filename. Instead the active style is baked into each SVG's render marker (`…-r6-sleek` vs `…-r6-indigo`), so changing `style="..."` makes the marker mismatch and that one diagram re-renders in place — everything else stays cached.
 
 ## What the CSS looks like
 
@@ -257,9 +260,7 @@ The `.dark` class on the `<html>` element is already managed by the site's theme
 
 ## What to play with next
 
-The `STYLES` map is the obvious place to start experimenting — different fonts, fill styles, different brand colors. Each style entry is self-contained with its own `shapeProps`, `arrowProps`, and `transformSvg`, so you can add a new one without touching anything else.
-
-Per-fence style overrides are a natural next step — ` ```mermaid style="minimal" ` routing to a different entry. The infrastructure is already there; it just needs wiring from the meta parser through to the render call.
+The `STYLES` map is the obvious place to start experimenting — different fonts, fill styles, different brand colors. Each style entry is self-contained with its own `shapeProps`, `arrowProps`, and `transformSvg`, so you can add a new one without touching anything else. Once it's in the map, any fence can opt into it with `style="yourstyle"` (see the per-fence meta options above).
 
 And if you want finer control over the fallback path, `onUnsupportedDiagram` gets the raw mermaid source and can do anything with it — custom renderers, a placeholder, a hard error. Currently it just calls back into mermaid's own library, which is fine.
 

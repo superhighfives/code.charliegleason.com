@@ -153,15 +153,7 @@ return (
 )
 ```
 
-## Keeping indexes aligned
-
-`app/routes/post.tsx` builds `highlightedBlocks` keyed by `code-block-${N}`, incrementing `N` for each code node in the MDX AST. The runtime `renderNode` in `mdx-hooks.tsx` skips mermaid nodes; the server-side Shiki highlighter does too. Both have to agree on what counts or every subsequent code block gets the wrong highlighted HTML — off-by-one errors that show up as your TypeScript snippet getting Python highlighting.
-
-The fix is straightforward but worth being deliberate about: wherever the highlighter loop skips a node, the render hook has to skip the same node in exactly the same way.
-
 ## Styling: an honest account
-
-I went through more iterations than I'm proud of.
 
 tldraw defaults give you the hand-drawn look with `draw` font and sketchy strokes. That's tldraw's whole thing and it's lovely, but it didn't feel right for technical diagrams. First real pass: `font: "mono"`, `dash: "solid"`, `fill: "none"`, `size: "m"` on every shape.
 

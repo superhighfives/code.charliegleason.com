@@ -59,7 +59,7 @@ links:
   Sunil's reference commit: 'https://github.com/threepointone/sunilpai-dev/commit/f4bd28a11a6eb4d9f514f13df35d4ca340f5d8d3'
 ---
 
-Diagrams are one of those things where the gap between "I want a diagram here" and "there is a diagram here" is just annoying enough to make me skip it entirely. Mermaid solves the authoring side — write plain text, get a chart — but the default SVG output is serviceable rather than beautiful. And I'd been using tldraw for whiteboarding anyway, so I kept wondering if I could pull the two together.
+Diagrams are one of those things where the gap between "I want a diagram here" and "there is a diagram here" is just annoying enough to make me skip it entirely. [Mermaid](https://mermaid.js.org) solves the authoring side — write plain text, get a chart — but the default SVG output is serviceable rather than beautiful. And I'd been using tldraw for whiteboarding anyway, so I kept wondering if I could pull the two together.
 
 It turns out you can — and the credit for figuring out how goes to [Sunil Pai](https://x.com/threepointone/status/2066481114949046693), who shipped a plugin for his blog that does exactly this, complete with light and dark variants. He even pointed at [the commit](https://github.com/threepointone/sunilpai-dev/commit/f4bd28a11a6eb4d9f514f13df35d4ca340f5d8d3) where it all lives. What follows is me retracing his steps for this site, with a few detours of my own along the way.
 
@@ -85,19 +85,6 @@ There are four moving parts:
 4. **The runtime hook** — `app/mdx/mdx-hooks.tsx`, a `renderNode` override that intercepts mermaid code nodes and emits a `<figure>` with two `<img>` tags.
 
 A Vite plugin (`lib/mermaid-plugin.ts`) wires it into the dev loop: post edits trigger an in-process re-render and a full browser reload; harness or style config edits trigger a full server restart so the bundled render code actually reloads.
-
-## Extracting blocks in the render script
-
-`scripts/render-mermaid.ts` opens each MDX post, strips frontmatter (more on why in a moment), then uses `mdast-util-from-markdown` to find code nodes with `lang === "mermaid"`.
-
-The frontmatter strip matters. `mdast-util-from-markdown` has no YAML extension, so if a post's `description:` field contains the literal token ` ```mermaid ` — which mine did, because I was describing this exact feature — the parser reads it as an opening fence and eats the rest of the post. One regex strip before `fromMarkdown` fixes it:
-
-```ts
-const stripped = raw.replace(/^---[\s\S]*?---\s*/m, '')
-const tree = fromMarkdown(stripped)
-```
-
-It's the kind of invisible bug that produces the wrong output with no error, which is the worst kind.
 
 ## Hashing for stable URLs
 

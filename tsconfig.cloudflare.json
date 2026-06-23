@@ -10,6 +10,7 @@
     "lib/**/*",
     "vitest.setup.ts"
   ],
+  "exclude": ["lib/mermaid-plugin.ts"],
   "compilerOptions": {
     "composite": true,
     "strict": true,

@@ -5,6 +5,7 @@ import { defineConfig } from "vite";
 import devtoolsJson from "vite-plugin-devtools-json";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { mdxPlugin } from "./lib/mdx-plugin";
+import { mermaidPlugin } from "./lib/mermaid-plugin";
 
 export default defineConfig({
   plugins: [
@@ -13,6 +14,7 @@ export default defineConfig({
     reactRouter(),
     tsconfigPaths(),
     mdxPlugin(),
+    mermaidPlugin(),
     devtoolsJson(),
   ],
 });

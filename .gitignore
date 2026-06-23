@@ -143,3 +143,6 @@ dist
 
 # Upload cache
 .upload-cache.json
+
+# opencode agent workspace
+.opencode/

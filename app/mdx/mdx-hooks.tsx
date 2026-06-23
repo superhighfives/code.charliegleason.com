@@ -5,7 +5,61 @@ import Command from "~/components/command";
 import LiveCodeBlock from "~/components/live-code-block";
 import { Code } from "~/components/static-code-block";
 import { customMdxParse } from "./custom-mdx-parser";
+import mermaidManifest from "./mermaid-manifest.json";
 import type { MDXComponents, MdxAttributes, PostLoaderData } from "./types";
+
+function normalizeMermaidSource(source: string): string {
+  return source.replace(/\r\n/g, "\n").trim();
+}
+
+function MermaidDiagram({
+  source,
+  width,
+  alt,
+}: {
+  source: string;
+  width?: string;
+  alt?: string;
+}) {
+  const hash = (mermaidManifest as Record<string, string>)[
+    normalizeMermaidSource(source)
+  ];
+  if (!hash) {
+    return (
+      <pre className="not-prose mermaid-missing">
+        <code>{source}</code>
+      </pre>
+    );
+  }
+  const style = width
+    ? { maxWidth: /^\d+(\.\d+)?$/.test(width) ? `${width}px` : width }
+    : undefined;
+  // Use the author-supplied alt if present. Otherwise default to a generic
+  // label on the light variant only — the dark variant is a duplicate, so
+  // marking it decorative (`alt=""`) avoids screen readers announcing it
+  // twice when both `<img>`s are in the DOM.
+  const lightAlt = alt ?? "Mermaid diagram";
+  const darkAlt = alt ?? "";
+  return (
+    <figure className="mermaid-diagram not-prose" style={style}>
+      <img
+        className="mermaid-light"
+        src={`/diagrams/${hash}.svg`}
+        alt={lightAlt}
+        loading="lazy"
+        decoding="async"
+      />
+      <img
+        className="mermaid-dark"
+        src={`/diagrams/${hash}.dark.svg`}
+        alt={darkAlt}
+        loading="lazy"
+        decoding="async"
+        aria-hidden={alt ? undefined : true}
+      />
+    </figure>
+  );
+}
 
 function parseMetaString(
   meta?: string | null,
@@ -37,6 +91,13 @@ export function useMdxComponent(components?: MDXComponents) {
     (node: MyRootContent) => {
       if (node.type === "code") {
         const meta = parseMetaString(node.meta);
+        if (node.lang === "mermaid") {
+          // The server-side highlighter in post.tsx also skips mermaid, so we
+          // mustn't increment the index here either.
+          const width = typeof meta.width === "string" ? meta.width : undefined;
+          const alt = typeof meta.alt === "string" ? meta.alt : undefined;
+          return <MermaidDiagram source={node.value} width={width} alt={alt} />;
+        }
         if (meta.live) {
           return (
             <div className="not-prose code">

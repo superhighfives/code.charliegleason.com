@@ -3,8 +3,6 @@
     "allow": [
       "Bash(npm run lint)",
       "Bash(npm run lint:fix:*)",
-      "Bash(bd list:*)",
-      "Bash(bd stats:*)",
       "Bash(git show:*)"
     ],
     "deny": [],

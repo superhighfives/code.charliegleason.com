@@ -204,7 +204,7 @@ sequenceDiagram
   Vite-->>Author: full-reload
 ```
 
-The fallback output is mermaid's default SVG, which looks different from the tldraw ones. I'm treating this as a feature for now — sequence diagrams have a different visual character anyway. But it's worth knowing the boundary exists.
+Even though it takes the fallback path, the output still gets imported into tldraw and exported through the same style pass — so it comes out looking consistent with the native diagrams, same mono font and indigo palette. The boundary is structural rather than visual: tldraw doesn't model sequence diagrams as shapes, but you wouldn't know it from the result.
 
 ## Per-fence meta options
 

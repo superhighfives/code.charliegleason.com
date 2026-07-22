@@ -6,7 +6,7 @@ import NavBlock from "~/components/nav-block";
 import metatags from "~/components/utils/metatags";
 import { loadAllMdxRuntime } from "~/mdx/mdx-runtime";
 import type { Post } from "~/mdx/types";
-import { randomVideoIndex } from "~/utils/video-index";
+import { selectDiverseIndices } from "~/utils/diverse-colors";
 
 export const meta: MetaFunction = () => metatags();
 
@@ -21,12 +21,15 @@ export async function loader() {
       return b.date.getTime() - a.date.getTime();
     });
 
-  // Generate random initial videos for each post
-  // These are just for display; the redirect handler will set cookies on click
-  const videos: Record<string, number> = {};
-  for (const post of sortedPosts) {
-    videos[post.slug] = randomVideoIndex();
-  }
+  // Choose an initial visual per post, biased toward colour contrast so the
+  // grid doesn't look same-y when random picks land on similar hues.
+  // These are just for display; the redirect handler will set cookies on click.
+  const videos = selectDiverseIndices(
+    sortedPosts.map((post) => ({
+      slug: post.slug,
+      colors: post.frontmatter.visual?.colors,
+    })),
+  );
 
   return { posts: sortedPosts, videos };
 }

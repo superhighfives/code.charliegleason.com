@@ -268,6 +268,7 @@ html.dark .shiki span {
   border: 1px solid var(--github-alert-default-color);
   font-family: var(--font-mono);
   font-size: 0.875rem;
+  line-height: 1.5;
   @apply rounded-sm;
 }
 
@@ -449,6 +450,12 @@ html.dark .shiki span {
 
 .code {
   @apply overflow-x-scroll max-w-[calc(100vw)] -mx-4 sm:-mx-12 border-y border-gray-200 dark:border-gray-700/50 dark:bg-gray-900/50 bg-gray-50 text-gray-400 [&>*]:mx-8 sm:[&>*]:mx-12 [&>*]:inline-block;
+  scrollbar-width: thin;
+  scrollbar-color: theme(colors.gray.300) theme(colors.gray.50);
+}
+
+html.dark .code {
+  scrollbar-color: theme(colors.gray.700) theme(colors.gray.950);
 }
 
 /*************************************************************/

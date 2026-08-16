@@ -1,0 +1,69 @@
+AGENTS.md
+  s_330007b4c57ce3::t_32c05c1eb93caa 217-218,640
+app/components/__tests__/typography-playground.test.tsx
+  s_7ef7e19d119a1b::t_5b83350edb2bae 1-165
+app/components/__tests__/typography-settings.test.ts
+  s_d3d9da03784119::t_c83502846bdacf 1-66
+app/components/themes/definitions.ts
+  s_b1b75b29d17c1e::t_281359e0a01cb6 68,100
+app/components/typography-settings.ts
+  s_330007b4c57ce3::t_aa25e65ac7af87 1-207
+app/root.tsx
+  s_b1b75b29d17c1e::t_3581a6e90eb40d 43,50
+app/routes/__tests__/post.test.tsx
+  s_7ef7e19d119a1b::t_0c555cb518d798 1-2,5,7-29,284-312
+app/routes/post.tsx
+  s_7ef7e19d119a1b::t_929f1ec793e0ba 1,25-31,164-165,180-188,213
+app/routes/resources/og-image.tsx
+  s_b1b75b29d17c1e::t_04ce5e39f96756 119-125,131-132,134,154
+public/fonts/OFL.txt
+  s_99a329076ffb24::t_650c97994639f2 1-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "b7139f6c7214234c1a652807a45f3642ada148e9",
+  "prompts": {},
+  "sessions": {
+    "s_330007b4c57ce3": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ffe0cef65ffedARO5z2g0tIx2f",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    },
+    "s_7ef7e19d119a1b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ffe95b1bbffe6BqAgvtc4yFAz9",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    },
+    "s_99a329076ffb24": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fff72b4e1ffeGL76xXEqDX2hOh",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    },
+    "s_b1b75b29d17c1e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_00cf2ab12ffe9fJSAj7tfixe5U",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    },
+    "s_d3d9da03784119": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ffcff11a0ffeoIN6eVmOc0fywi",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Charlie Gleason <cgleason@cloudflare.com>"
+    }
+  }
+}

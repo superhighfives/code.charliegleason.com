@@ -1,7 +1,32 @@
+import { render, screen } from "@testing-library/react";
+import { useLoaderData } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { VISUAL_COUNT } from "~/config/constants";
+import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import type { Route } from "../+types/post";
-import { loader } from "../post";
+import Post, { loader } from "../post";
+
+vi.mock("react-router", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("react-router")>();
+  return {
+    ...actual,
+    Link: ({ children }: { children: React.ReactNode }) => (
+      <a href="/">{children}</a>
+    ),
+    useLoaderData: vi.fn(),
+  };
+});
+
+vi.mock("~/mdx/mdx-hooks", () => ({
+  useMdxAttributes: vi.fn(),
+  useMdxComponent: vi.fn(),
+}));
+
+vi.mock("~/components/typography-playground", () => ({
+  TypographyPlayground: () => (
+    <aside aria-label="Typography playground">Typography lab</aside>
+  ),
+}));
 
 // Mock dependencies
 vi.mock("~/mdx/mdx-runtime", () => ({
@@ -254,5 +279,34 @@ describe("Post Route Loader", () => {
       expect(response.data.isOldArticle).toBeDefined();
       expect(typeof response.data.isOldArticle).toBe("boolean");
     });
+  });
+});
+
+describe("Post typography", () => {
+  it("scopes typography controls to the post", async () => {
+    vi.mocked(useLoaderData).mockReturnValue({
+      __raw: "",
+      attributes: { title: "Test Post" },
+      highlightedBlocks: {},
+      kudosTotal: 0,
+      kudosYou: 0,
+      randomVideo: undefined,
+      nextVideo: undefined,
+      isOldArticle: false,
+    });
+    vi.mocked(useMdxAttributes).mockReturnValue({ title: "Test Post" });
+    vi.mocked(useMdxComponent).mockReturnValue(() => <p>Post body</p>);
+
+    const { container } = render(<Post />);
+
+    expect(container.firstElementChild).toHaveClass("post-typography");
+    expect(screen.getByRole("heading", { name: "Test Post" })).toHaveClass(
+      "post-title",
+    );
+    expect(
+      await screen.findByRole("complementary", {
+        name: "Typography playground",
+      }),
+    ).toBeInTheDocument();
   });
 });

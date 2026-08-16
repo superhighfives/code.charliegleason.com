@@ -214,8 +214,8 @@ links:                         # Optional related links
 
 **Fonts:**
 - Inter (sans-serif)
-- JetBrains Mono (monospace)
-- Preloaded for critical weights (400, 700)
+- Geist Mono (monospace)
+- Preloaded for critical weights (400, 600)
 
 **Color Scheme:**
 - Catppuccin Latte (light mode)

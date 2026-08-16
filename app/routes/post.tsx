@@ -1,3 +1,4 @@
+import { lazy, Suspense, useState } from "react";
 import { data, Link, useLoaderData } from "react-router";
 import EditOnGitHub from "~/components/edit-on-github";
 import { KudosButton } from "~/components/kudos-button";
@@ -20,6 +21,13 @@ import {
 } from "~/utils/video-index";
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
+
+const TypographyPlayground = import.meta.env.DEV
+  ? lazy(async () => {
+      const module = await import("~/components/typography-playground");
+      return { default: module.TypographyPlayground };
+    })
+  : null;
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
   const { content, frontmatter } = await loadMdxRuntime(request.url);
@@ -153,6 +161,8 @@ export function shouldRevalidate() {
 }
 
 export default function Post() {
+  const [typographyTarget, setTypographyTarget] =
+    useState<HTMLDivElement | null>(null);
   const {
     kudosTotal,
     kudosYou,
@@ -167,7 +177,15 @@ export default function Post() {
   const { metadata } = processArticleData({ frontmatter });
 
   return (
-    <div className="grid gap-y-4 relative">
+    <div
+      ref={setTypographyTarget}
+      className="post-typography grid gap-y-4 relative"
+    >
+      {TypographyPlayground && typographyTarget ? (
+        <Suspense fallback={null}>
+          <TypographyPlayground target={typographyTarget} />
+        </Suspense>
+      ) : null}
       {slug && video !== undefined && nextVideo !== undefined && visual && (
         <VideoMasthead
           slug={slug}
@@ -192,7 +210,7 @@ export default function Post() {
           <span className="hidden sm:inline">.com</span>
         </Link>
         <span className="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
-        <h1 className="font-heading font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 text-3xl w-full">
+        <h1 className="post-title font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 w-full">
           {title}
         </h1>
       </div>

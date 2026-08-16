@@ -58,40 +58,40 @@
   src: url("/fonts/Inter-SemiBoldItalic.woff2") format("woff2");
 }
 
-/* JetBrains Mono - Regular */
+/* Geist Mono - Regular */
 @font-face {
-  font-family: "JetBrains Mono";
+  font-family: "Geist Mono";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+  src: url("/fonts/GeistMono-Regular.woff2") format("woff2");
 }
 
-/* JetBrains Mono - Regular Italic */
+/* Geist Mono - Regular Italic */
 @font-face {
-  font-family: "JetBrains Mono";
+  font-family: "Geist Mono";
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/JetBrainsMono-Italic.woff2") format("woff2");
+  src: url("/fonts/GeistMono-Italic.woff2") format("woff2");
 }
 
-/* JetBrains Mono - SemiBold */
+/* Geist Mono - SemiBold */
 @font-face {
-  font-family: "JetBrains Mono";
+  font-family: "Geist Mono";
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
+  src: url("/fonts/GeistMono-SemiBold.woff2") format("woff2");
 }
 
-/* JetBrains Mono - SemiBold Italic */
+/* Geist Mono - SemiBold Italic */
 @font-face {
-  font-family: "JetBrains Mono";
+  font-family: "Geist Mono";
   font-style: italic;
   font-weight: 600;
   font-display: swap;
-  src: url("/fonts/JetBrainsMono-SemiBoldItalic.woff2") format("woff2");
+  src: url("/fonts/GeistMono-SemiBoldItalic.woff2") format("woff2");
 }
 
 /*************************************************************/
@@ -109,8 +109,8 @@
     "PolySans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:
-    "JetBrains Mono", "ui-monospace", "SFMono-Regular", '"Roboto Mono"',
-    '"Courier New"', "monospace";
+    "Geist Mono", "ui-monospace", "SFMono-Regular", "Roboto Mono",
+    "Courier New", monospace;
   --text-2xs: 0.625rem;
 
   /* Breakpoints */
@@ -390,19 +390,26 @@ html.dark .shiki span {
 
 /* Base prose setup with content width constraints */
 @utility post-prose {
-  @apply prose dark:prose-invert max-w-none text-pretty border border-transparent sm:px-4 text-lg;
-  @apply [&>*:not(.code)]:max-w-[calc(var(--container-4xl)-1rem-2px)];
-  @apply [&>:first-child]:mt-0 [&>:last-child]:mb-0 leading-8;
+  @apply prose dark:prose-invert max-w-none text-pretty border border-transparent sm:px-4;
+  @apply [&>*:not(.code)]:max-w-[var(--post-measure,calc(var(--container-4xl)-1rem-2px))];
+  @apply [&>:first-child]:mt-0 [&>:last-child]:mb-0;
   @apply prose-li:my-1.5;
   @apply [&_li_p]:my-0;
+  font-family: var(--post-body-font, var(--font-sans));
+  font-size: var(--post-body-size, 1.125rem);
+  line-height: var(--post-body-leading, 2rem);
+  letter-spacing: var(--post-body-tracking, normal);
 }
 
 /* Heading typography and hash prefixes */
 @utility post-headings {
-  @apply prose-headings:font-mono prose-headings:text-lg;
   @apply prose-h1:before:content-['#'] prose-h2:before:content-['##'] prose-h3:before:content-['###'];
   @apply prose-h4:before:content-['####'] prose-h5:before:content-['#####'] prose-h6:before:content-['######'];
-  @apply prose-headings:before:mr-2 prose-headings:before:tracking-widest prose-headings:before:text-indigo-400;
+  @apply prose-headings:before:font-mono prose-headings:before:mr-2 prose-headings:before:tracking-widest prose-headings:before:text-indigo-400;
+  :where(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--post-display-font, var(--font-mono));
+    font-size: calc(1.125rem * var(--post-heading-scale, 1));
+  }
 }
 
 /* Heading borders and spacing */
@@ -429,6 +436,12 @@ html.dark .shiki span {
 /* Composed post class for backward compatibility */
 .post {
   @apply post-prose post-headings post-heading-borders post-links sm:my-8;
+}
+
+.post-title {
+  font-family: var(--post-display-font, var(--font-heading));
+  font-size: calc(1.875rem * var(--post-heading-scale, 1));
+  line-height: 1.2;
 }
 
 @utility prose {

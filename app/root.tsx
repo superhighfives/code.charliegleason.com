@@ -40,14 +40,14 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "preload",
-    href: "/fonts/JetBrainsMono-Regular.woff2",
+    href: "/fonts/GeistMono-Regular.woff2",
     as: "font",
     type: "font/woff2",
     crossOrigin: "anonymous",
   },
   {
     rel: "preload",
-    href: "/fonts/JetBrainsMono-SemiBold.woff2",
+    href: "/fonts/GeistMono-SemiBold.woff2",
     as: "font",
     type: "font/woff2",
     crossOrigin: "anonymous",

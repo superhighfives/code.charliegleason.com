@@ -116,14 +116,22 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     }
     // If visual is missing, aiImageBase64 stays null and we use text-only layout
 
+    const geistMonoResponse = await context.assets.fetch(
+      new URL("/fonts/GeistMono-SemiBold.ttf", request.url),
+    );
+    if (!geistMonoResponse.ok) {
+      throw new Error("Geist Mono font not found");
+    }
+
     const options: SatoriOptions = {
       width: OG_IMAGE_WIDTH,
       height: OG_IMAGE_HEIGHT,
       fonts: [
         {
-          name: "JetBrains Mono",
-          data: await loadGoogleFont({ family: "JetBrains Mono", weight: 600 }),
+          name: "Geist Mono",
+          data: await geistMonoResponse.arrayBuffer(),
           style: "normal",
+          weight: 600,
         },
         {
           name: "Inter",
@@ -143,7 +151,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
           display: "flex",
           flexDirection: "row",
           color: textColor,
-          fontFamily: "JetBrains Mono",
+          fontFamily: "Geist Mono",
         }}
       >
         {/* Left side: Text content */}

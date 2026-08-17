@@ -65,7 +65,7 @@ export const latte: ThemeDefinition = {
   },
   font: {
     body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-    mono: '"JetBrains Mono", "ui-monospace", "SFMono-Regular", "Roboto Mono", "Courier New", "monospace"',
+    mono: '"Geist Mono", "ui-monospace", "SFMono-Regular", "Roboto Mono", "Courier New", "monospace"',
     size: "14px",
     lineHeight: "1.7142857",
   },
@@ -97,7 +97,7 @@ export const mocha: ThemeDefinition = {
   },
   font: {
     body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-    mono: '"JetBrains Mono", "ui-monospace", "SFMono-Regular", "Roboto Mono", "Courier New", "monospace"',
+    mono: '"Geist Mono", "ui-monospace", "SFMono-Regular", "Roboto Mono", "Courier New", "monospace"',
     size: "14px",
     lineHeight: "1.7142857",
   },

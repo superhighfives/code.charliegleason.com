@@ -35,7 +35,7 @@ function MermaidDiagram({
     ? { maxWidth: /^\d+(\.\d+)?$/.test(width) ? `${width}px` : width }
     : undefined;
   // Use the author-supplied alt if present. Otherwise default to a generic
-  // label on the light variant only — the dark variant is a duplicate, so
+  // label on the light variant only—the dark variant is a duplicate, so
   // marking it decorative (`alt=""`) avoids screen readers announcing it
   // twice when both `<img>`s are in the DOM.
   const lightAlt = alt ?? "Mermaid diagram";

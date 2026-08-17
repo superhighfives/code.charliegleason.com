@@ -6,7 +6,6 @@ import Metalinks from "~/components/metalinks";
 import { components } from "~/components/utils/components";
 import metatags from "~/components/utils/metatags";
 import VideoMasthead from "~/components/video-masthead";
-import { MAX_WIDTH_CLASS } from "~/config/constants";
 import { customMdxParse } from "~/mdx/custom-mdx-parser";
 import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
@@ -167,7 +166,7 @@ export default function Post() {
   const { metadata } = processArticleData({ frontmatter });
 
   return (
-    <div className="grid gap-y-4 relative">
+    <div className="post-typography grid gap-y-4 relative">
       {slug && video !== undefined && nextVideo !== undefined && visual && (
         <VideoMasthead
           slug={slug}
@@ -177,14 +176,14 @@ export default function Post() {
         />
       )}
       <div
-        className={`flex flex-wrap gap-y-2 ${MAX_WIDTH_CLASS}`}
+        className="flex flex-wrap gap-y-2 post-width-outer"
         style={{ viewTransitionName: "post-breadcrumb" }}
       >
         <Link
           to="/"
           viewTransition
           prefetch="intent"
-          className="font-mono font-semibold group link-primary focus-ring-primary pr-2"
+          className="font-mono post-mono font-semibold group link-primary focus-ring-primary pr-2"
         >
           ❯ cd ~/code
           <span className="hidden sm:inline">.</span>
@@ -192,7 +191,7 @@ export default function Post() {
           <span className="hidden sm:inline">.com</span>
         </Link>
         <span className="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
-        <h1 className="font-heading font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 text-3xl w-full">
+        <h1 className="post-title font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 w-full">
           {title}
         </h1>
       </div>
@@ -205,7 +204,7 @@ export default function Post() {
       {isOldArticle ? (
         <p
           style={{ viewTransitionName: "post-warning" }}
-          className={`font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 ${MAX_WIDTH_CLASS}`}
+          className="font-mono post-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 post-width-outer"
         >
           This has not been updated in the last three months, so this
           information miiiiiight be out of date. Here be dragons, etc.

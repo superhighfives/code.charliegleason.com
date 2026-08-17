@@ -1,7 +1,26 @@
+import { render, screen } from "@testing-library/react";
+import { useLoaderData } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { VISUAL_COUNT } from "~/config/constants";
+import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import type { Route } from "../+types/post";
-import { loader } from "../post";
+import Post, { loader } from "../post";
+
+vi.mock("react-router", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("react-router")>();
+  return {
+    ...actual,
+    Link: ({ children }: { children: React.ReactNode }) => (
+      <a href="/">{children}</a>
+    ),
+    useLoaderData: vi.fn(),
+  };
+});
+
+vi.mock("~/mdx/mdx-hooks", () => ({
+  useMdxAttributes: vi.fn(),
+  useMdxComponent: vi.fn(),
+}));
 
 // Mock dependencies
 vi.mock("~/mdx/mdx-runtime", () => ({
@@ -254,5 +273,34 @@ describe("Post Route Loader", () => {
       expect(response.data.isOldArticle).toBeDefined();
       expect(typeof response.data.isOldArticle).toBe("boolean");
     });
+  });
+});
+
+describe("Post typography", () => {
+  it("scopes the typography variables to the post", async () => {
+    vi.mocked(useLoaderData).mockReturnValue({
+      __raw: "",
+      attributes: { title: "Test Post" },
+      highlightedBlocks: {},
+      kudosTotal: 0,
+      kudosYou: 0,
+      randomVideo: undefined,
+      nextVideo: undefined,
+      isOldArticle: false,
+    });
+    vi.mocked(useMdxAttributes).mockReturnValue({ title: "Test Post" });
+    vi.mocked(useMdxComponent).mockReturnValue(() => <p>Post body</p>);
+
+    const { container } = render(<Post />);
+
+    // `.post-typography` is what lifts the heading scale to 1.6 for posts.
+    expect(container.firstElementChild).toHaveClass("post-typography");
+    expect(screen.getByRole("heading", { name: "Test Post" })).toHaveClass(
+      "post-title",
+    );
+    // The playground is kept in the tree for future use but is no longer mounted.
+    expect(
+      screen.queryByRole("complementary", { name: "Typography playground" }),
+    ).not.toBeInTheDocument();
   });
 });

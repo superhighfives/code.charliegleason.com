@@ -77,7 +77,7 @@ export default function NavBlock({
                 ))}
               </div>
               <div
-                className={`font-heading text-pretty space-x-2 flex flex-col items-start font-semibold ${hero ? "text-3xl sm:text-4xl" : "text-3xl sm:text-3xl sm:leading-8"}`}
+                className={`w-full text-pretty wrap-anywhere font-semibold ${hero ? "site-title-hero" : "site-title sm:leading-8"}`}
               >
                 {title}
               </div>
@@ -86,7 +86,7 @@ export default function NavBlock({
           {description ? (
             <div className="relative z-10">
               <div
-                className={`overflow-hidden ${hero ? "sm:text-lg" : "text-sm"} max-w-lg text-current/80 font-mono font-semibold`}
+                className={`overflow-hidden ${hero ? "sm:text-lg" : "text-sm"} max-w-lg text-current/80 font-mono font-semibold leading-6 text-pretty`}
               >
                 {description}
               </div>
@@ -95,9 +95,9 @@ export default function NavBlock({
         </div>
         {hero && excerpt ? (
           <div className="flex-1 min-h-0 relative overflow-hidden mt-4">
-            <div className="absolute inset-0 flex pointer-events-none mask-b-from-80% mask-b-to-100%">
+            <div className="absolute inset-0 flex pointer-events-none mask-b-from-0% mask-b-to-100%">
               <div
-                className={`${MAX_WIDTH_CLASS} text-base text-current/50 leading-snug whitespace-pre-wrap h-fit`}
+                className={`${MAX_WIDTH_CLASS} text-base text-current/80 whitespace-pre-wrap h-fit`}
               >
                 {excerpt}
               </div>

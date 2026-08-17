@@ -22,76 +22,58 @@
   src: url("/fonts/PolySansItalic-variable.woff2") format("woff2");
 }
 
-/* Inter - Regular */
+/* Figtree - Variable */
 @font-face {
-  font-family: "Inter";
+  font-family: "Figtree";
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url("/fonts/Figtree-variable.woff2") format("woff2");
+}
+
+/* Figtree - Variable Italic */
+@font-face {
+  font-family: "Figtree";
+  font-style: italic;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url("/fonts/FigtreeItalic-variable.woff2") format("woff2");
+}
+
+/* Geist Mono - Regular */
+@font-face {
+  font-family: "Geist Mono";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/Inter-Regular.woff2") format("woff2");
+  src: url("/fonts/GeistMono-Regular.woff2") format("woff2");
 }
 
-/* Inter - Regular Italic */
+/* Geist Mono - Regular Italic */
 @font-face {
-  font-family: "Inter";
+  font-family: "Geist Mono";
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/Inter-Italic.woff2") format("woff2");
+  src: url("/fonts/GeistMono-Italic.woff2") format("woff2");
 }
 
-/* Inter - SemiBold */
+/* Geist Mono - SemiBold */
 @font-face {
-  font-family: "Inter";
+  font-family: "Geist Mono";
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url("/fonts/Inter-SemiBold.woff2") format("woff2");
+  src: url("/fonts/GeistMono-SemiBold.woff2") format("woff2");
 }
 
-/* Inter - SemiBold Italic */
+/* Geist Mono - SemiBold Italic */
 @font-face {
-  font-family: "Inter";
+  font-family: "Geist Mono";
   font-style: italic;
   font-weight: 600;
   font-display: swap;
-  src: url("/fonts/Inter-SemiBoldItalic.woff2") format("woff2");
-}
-
-/* JetBrains Mono - Regular */
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
-}
-
-/* JetBrains Mono - Regular Italic */
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/JetBrainsMono-Italic.woff2") format("woff2");
-}
-
-/* JetBrains Mono - SemiBold */
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
-}
-
-/* JetBrains Mono - SemiBold Italic */
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: italic;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/JetBrainsMono-SemiBoldItalic.woff2") format("woff2");
+  src: url("/fonts/GeistMono-SemiBoldItalic.woff2") format("woff2");
 }
 
 /*************************************************************/
@@ -103,14 +85,14 @@
 @theme {
   /* Typography */
   --font-sans:
-    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Figtree", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --font-heading:
     "PolySans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:
-    "JetBrains Mono", "ui-monospace", "SFMono-Regular", '"Roboto Mono"',
-    '"Courier New"', "monospace";
+    "Geist Mono", "ui-monospace", "SFMono-Regular", "Roboto Mono",
+    "Courier New", monospace;
   --text-2xs: 0.625rem;
 
   /* Breakpoints */
@@ -221,6 +203,12 @@ body {
 /*************************************************************/
 /* Syntax highlighting */
 /*************************************************************/
+
+/* Highlighted blocks take the same step down as every other mono run, so a
+   fenced block sits at the weight of the prose around it. */
+.shiki {
+  font-size: calc(1em * var(--post-mono-ratio, 0.925));
+}
 
 .shiki,
 .shiki span {
@@ -389,21 +377,70 @@ html.dark .shiki span {
 /* Post styles */
 /*************************************************************/
 
+/* The typographic system, in one place. Every value below is also the fallback
+   baked into the rules that consume it, so the page renders identically whether
+   or not the dev-only typography playground is mounted and overriding them.
+   Heading scale is set per context: 1 for the index cards, 1.6 for posts. */
+:root {
+  --post-body-size: 1rem;
+  --post-body-leading: 1.8;
+  --post-body-tracking: 0em;
+  --post-measure: 740px;
+  --post-heading-scale: 1;
+  /* Geist Mono reads larger than the body sans at a matched size, so every
+     mono run on the page steps down by this much. */
+  --post-mono-ratio: 0.925;
+}
+
+.post-typography {
+  --post-heading-scale: 1.6;
+}
+
+/* How wide post content runs. Prose sits inside `.post`'s 1rem padding and 1px
+   border, so page chrome outside that box adds both back to line up with it. */
+@utility post-width {
+  max-width: var(--post-measure, 740px);
+}
+
+@utility post-width-outer {
+  max-width: calc(var(--post-measure, 740px) + 2rem + 2px);
+}
+
+/* Mono chrome — metadata, callouts, breadcrumb — tracks the reading size so the
+   two faces stay in proportion when the body size changes. */
+@utility post-mono {
+  font-size: calc(var(--post-body-size, 1rem) * var(--post-mono-ratio, 0.925));
+}
+
+/* Mono set inline in running text — code spans and prose links. Sized in `em`
+   so it steps down from whatever it sits in, headings included, rather than
+   from the body size. */
+@utility post-mono-inline {
+  font-size: calc(1em * var(--post-mono-ratio, 0.925));
+}
+
 /* Base prose setup with content width constraints */
 @utility post-prose {
-  @apply prose dark:prose-invert max-w-none text-pretty border border-transparent sm:px-4 text-lg;
-  @apply [&>*:not(.code)]:max-w-[calc(var(--container-4xl)-1rem-2px)];
-  @apply [&>:first-child]:mt-0 [&>:last-child]:mb-0 leading-8;
+  @apply prose dark:prose-invert max-w-none text-pretty border border-transparent sm:px-4;
+  @apply [&>*:not(.code)]:post-width;
+  @apply [&>:first-child]:mt-0 [&>:last-child]:mb-0;
   @apply prose-li:my-1.5;
   @apply [&_li_p]:my-0;
+  font-family: var(--post-body-font, var(--font-sans));
+  font-size: var(--post-body-size, 1rem);
+  line-height: var(--post-body-leading, 1.8);
+  letter-spacing: var(--post-body-tracking, 0em);
 }
 
 /* Heading typography and hash prefixes */
 @utility post-headings {
-  @apply prose-headings:font-mono prose-headings:text-lg;
   @apply prose-h1:before:content-['#'] prose-h2:before:content-['##'] prose-h3:before:content-['###'];
   @apply prose-h4:before:content-['####'] prose-h5:before:content-['#####'] prose-h6:before:content-['######'];
-  @apply prose-headings:before:mr-2 prose-headings:before:tracking-widest prose-headings:before:text-indigo-400;
+  @apply prose-headings:before:font-mono prose-headings:before:mr-2 prose-headings:before:tracking-widest prose-headings:before:text-indigo-400;
+  :where(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--post-display-font, var(--font-heading));
+    font-size: calc(1.125rem * var(--post-heading-scale, 1.6));
+  }
 }
 
 /* Heading borders and spacing */
@@ -416,7 +453,7 @@ html.dark .shiki span {
 
 /* Link styling with decorations and focus states */
 @utility post-links {
-  @apply prose-a:font-mono;
+  @apply prose-a:font-mono prose-a:post-mono-inline;
   @apply prose-a:text-indigo-600 dark:prose-a:text-indigo-300;
   @apply prose-a:underline prose-a:hover:underline;
   @apply prose-a:decoration-indigo-200 dark:prose-a:decoration-indigo-900;
@@ -430,6 +467,37 @@ html.dark .shiki span {
 /* Composed post class for backward compatibility */
 .post {
   @apply post-prose post-headings post-heading-borders post-links sm:my-8;
+}
+
+.post-title {
+  font-family: var(--post-display-font, var(--font-heading));
+  font-size: calc(1.875rem * var(--post-heading-scale, 1.6));
+  line-height: 1.2;
+}
+
+/*************************************************************/
+/* Homepage headings — same variables as posts, but the heading */
+/* scale stays at 1 so the cards don't outshout the post pages. */
+/* Copy on the index stays mono; only the headings use the */
+/* display face. */
+/*************************************************************/
+
+.site-title {
+  font-family: var(--post-display-font, var(--font-heading));
+  font-size: calc(1.875rem * var(--post-heading-scale, 1));
+  line-height: 1.2;
+}
+
+.site-title-hero {
+  font-family: var(--post-display-font, var(--font-heading));
+  font-size: calc(1.875rem * var(--post-heading-scale, 1));
+  line-height: 1.2;
+}
+
+@media (min-width: 40rem) {
+  .site-title-hero {
+    font-size: calc(2.25rem * var(--post-heading-scale, 1));
+  }
 }
 
 @utility prose {

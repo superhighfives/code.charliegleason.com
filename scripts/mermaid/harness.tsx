@@ -29,7 +29,7 @@ const splitArrowStroke = (svg: string) =>
 
 // Tailwind indigo tones the rest of the site uses for prose links. Arrows
 // and text take the full-strength tone; shape outlines reuse the same hex
-// with a stroke-opacity to fade against the background — automatically
+// with a stroke-opacity to fade against the background—automatically
 // lighter on light and darker on dark, with no second palette to maintain.
 const INDIGO_LIGHT_PRIMARY = "#4f46e5"; // indigo-600
 const INDIGO_LIGHT_PRIMARY_RGB = "rgb(79, 70, 229)";
@@ -48,7 +48,7 @@ const recolorIndigo = (svg: string, variant: "light" | "dark") => {
 
   // Order matters: recolor arrows first (matched by `stroke-width="4"`, which
   // splitArrowStroke produced from the size="l" export), then sweep up the
-  // remaining strokes — those belong to shape outlines and get the same hue
+  // remaining strokes—those belong to shape outlines and get the same hue
   // at reduced opacity. tldraw text uses inline `rgb(...)` rather than
   // `stroke="..."`, so it falls under the primary recolor regardless.
   return svg
@@ -165,7 +165,7 @@ window.renderMermaid = async (source, opts, styleName) => {
   if (!ids.length) throw new Error("mermaid produced no shapes");
 
   // Global style pass. Each prop is only applied if the shape actually has it
-  // (tldraw shape types have different prop sets — e.g. arrows have `dash`
+  // (tldraw shape types have different prop sets—e.g. arrows have `dash`
   // but no `fill`). Arrows and non-arrow shapes get separate prop bags so
   // stroke widths can be balanced across the two families.
   editor.updateShapes(

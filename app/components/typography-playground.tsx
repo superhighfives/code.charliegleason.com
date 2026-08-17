@@ -1,3 +1,18 @@
+/**
+ * Dev-only typography lab. Currently mothballed — the values it was used to dial
+ * in are now the site defaults (see the `:root` block in `global.css`), so it is
+ * not mounted anywhere. Kept, along with its tests, for the next round of
+ * typographic work.
+ *
+ * To bring it back, render it from a route behind `import.meta.env.DEV` and hand
+ * it the element to scope the `--post-*` variables to:
+ *
+ *   const [target, setTarget] = useState<HTMLDivElement | null>(null);
+ *   <div ref={setTarget} className="post-typography">
+ *     {import.meta.env.DEV && target ? <TypographyPlayground target={target} /> : null}
+ *
+ * Its inline styles override the stylesheet defaults, so nothing else changes.
+ */
 import { useEffect, useState } from "react";
 import {
   BODY_FONTS,
@@ -267,7 +282,7 @@ export function TypographyPlayground({
             <label className="grid gap-1" htmlFor="typography-measure">
               <span className="flex justify-between">
                 <span>Reading width</span>
-                <output>{settings.measure}ch</output>
+                <output>{settings.measure}px</output>
               </span>
               <input
                 id="typography-measure"

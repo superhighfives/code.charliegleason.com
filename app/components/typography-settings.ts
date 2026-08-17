@@ -1,5 +1,10 @@
 export const DISPLAY_FONTS = [
   {
+    id: "polysans",
+    label: "PolySans",
+    family: '"PolySans", system-ui, sans-serif',
+  },
+  {
     id: "instrument-serif",
     label: "Instrument Serif",
     family: '"Instrument Serif", Georgia, serif',
@@ -87,7 +92,7 @@ export const TYPOGRAPHY_RANGES = {
   bodySize: { min: 16, max: 22, step: 1 },
   lineHeight: { min: 1.4, max: 1.9, step: 0.05 },
   letterSpacing: { min: -0.03, max: 0.03, step: 0.005 },
-  measure: { min: 52, max: 82, step: 1 },
+  measure: { min: 600, max: 1100, step: 10 },
 } as const;
 
 type DisplayFontId = (typeof DISPLAY_FONTS)[number]["id"];
@@ -110,13 +115,13 @@ export type TypographySettings = {
 
 export const DEFAULT_TYPOGRAPHY_SETTINGS: TypographySettings = {
   version: 1,
-  displayFont: "instrument-serif",
-  bodyFont: "system",
+  displayFont: "polysans",
+  bodyFont: "figtree",
   headingScale: 1.3,
-  bodySize: 19,
-  lineHeight: 1.65,
-  letterSpacing: -0.01,
-  measure: 68,
+  bodySize: 16,
+  lineHeight: 1.8,
+  letterSpacing: 0,
+  measure: 740,
   collapsed: false,
 };
 
@@ -195,7 +200,7 @@ export function getTypographyCssVariables(
     "--post-body-size": `${settings.bodySize}px`,
     "--post-body-leading": settings.lineHeight.toString(),
     "--post-body-tracking": `${settings.letterSpacing}em`,
-    "--post-measure": `${settings.measure}ch`,
+    "--post-measure": `${settings.measure}px`,
   };
 }
 

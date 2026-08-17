@@ -33,7 +33,7 @@ function isPostMarkdown(file: string): boolean {
  * Renderer-side edits (harness, style presets, hash logic) also need to trigger
  * a re-render so style iteration in dev doesn't require a full restart. The
  * RENDER_VERSION marker inside each SVG is what decides whether anything
- * actually re-exports — if the marker still matches, the renderer no-ops.
+ * actually re-exports—if the marker still matches, the renderer no-ops.
  */
 function isRendererSource(file: string): boolean {
   const normalized = path.resolve(file);
@@ -94,7 +94,7 @@ export function mermaidPlugin(): Plugin {
       const onChange = (file: string) => {
         if (isRendererSource(file)) {
           // Renderer source (harness, style preset, render script) can't be
-          // hot-swapped in-process — esbuild bundled the original copy into
+          // hot-swapped in-process—esbuild bundled the original copy into
           // the vite.config chain. Bounce the whole server so the next
           // buildStart picks up the edit and re-renders against the new
           // RENDER_VERSION marker.

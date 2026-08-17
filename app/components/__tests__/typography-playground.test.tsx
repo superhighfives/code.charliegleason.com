@@ -44,10 +44,16 @@ describe("TypographyPlayground", () => {
       screen.getByRole("complementary", { name: "Typography playground" }),
     ).toBeInTheDocument();
     await waitFor(() => {
-      expect(target.style.getPropertyValue("--post-body-size")).toBe("19px");
+      expect(target.style.getPropertyValue("--post-body-size")).toBe(
+        `${DEFAULT_TYPOGRAPHY_SETTINGS.bodySize}px`,
+      );
     });
-    expect(screen.getByLabelText("Body font")).toHaveValue("system");
-    expect(screen.getByText("19px")).toBeInTheDocument();
+    expect(screen.getByLabelText("Body font")).toHaveValue(
+      DEFAULT_TYPOGRAPHY_SETTINGS.bodyFont,
+    );
+    expect(
+      screen.getByText(`${DEFAULT_TYPOGRAPHY_SETTINGS.bodySize}px`),
+    ).toBeInTheDocument();
   });
 
   it("restores valid settings from local storage", async () => {
@@ -75,7 +81,9 @@ describe("TypographyPlayground", () => {
       render(<TypographyPlayground target={target} />),
     ).not.toThrow();
     await waitFor(() => {
-      expect(target.style.getPropertyValue("--post-body-size")).toBe("19px");
+      expect(target.style.getPropertyValue("--post-body-size")).toBe(
+        `${DEFAULT_TYPOGRAPHY_SETTINGS.bodySize}px`,
+      );
     });
   });
 
@@ -98,8 +106,11 @@ describe("TypographyPlayground", () => {
     ).toHaveLength(1);
   });
 
-  it("does not request a stylesheet for the system font", () => {
+  it("does not request a stylesheet for the system font", async () => {
+    const user = userEvent.setup();
     render(<TypographyPlayground target={target} />);
+
+    await user.selectOptions(screen.getByLabelText("Body font"), "system");
 
     expect(
       document.head.querySelector('link[data-typography-font="system"]'),
@@ -145,8 +156,12 @@ describe("TypographyPlayground", () => {
 
     await user.click(screen.getByRole("button", { name: "Reset" }));
 
-    expect(screen.getByRole("slider", { name: /Body size/ })).toHaveValue("19");
-    expect(target.style.getPropertyValue("--post-body-size")).toBe("19px");
+    expect(screen.getByRole("slider", { name: /Body size/ })).toHaveValue(
+      String(DEFAULT_TYPOGRAPHY_SETTINGS.bodySize),
+    );
+    expect(target.style.getPropertyValue("--post-body-size")).toBe(
+      `${DEFAULT_TYPOGRAPHY_SETTINGS.bodySize}px`,
+    );
   });
 
   it("collapses without hiding its header", async () => {

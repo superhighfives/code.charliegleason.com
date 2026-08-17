@@ -6,7 +6,7 @@ import { ACTIVE_STYLE } from "./style-config";
 /**
  * Bump the trailing revision whenever the rendering logic (harness, export
  * options) or tldraw version changes the visual output. It is NOT part of the
- * filename — it is written as a marker inside each SVG so the renderer can
+ * filename—it is written as a marker inside each SVG so the renderer can
  * detect stale files and re-render in place, keeping the public URL stable
  * (see render-mermaid.ts).
  */

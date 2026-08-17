@@ -128,7 +128,7 @@ jobs:
               PREVIEW_URL="https://code-pr-${{ github.event.pull_request.number }}.${SUBDOMAIN}.workers.dev"
             else
               echo "::warning::Could not determine preview URL from wrangler output. Deploy succeeded but URL is unknown."
-              PREVIEW_URL="(deployed — check Cloudflare dashboard for URL)"
+              PREVIEW_URL="(deployed—check Cloudflare dashboard for URL)"
             fi
           fi
           echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"

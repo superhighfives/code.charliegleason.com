@@ -1,4 +1,3 @@
-import { MAX_WIDTH_CLASS } from "~/config/constants";
 import type { MetaData } from "~/mdx/types";
 import { formatDisplayDate } from "~/utils/date";
 
@@ -11,7 +10,7 @@ export default function Metadata({
 }) {
   return data?.length ? (
     <dl
-      className={`font-mono text-sm divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 ${MAX_WIDTH_CLASS}`}
+      className="font-mono post-mono divide-y divide-gray-200 dark:divide-gray-800 border-y border-gray-200 dark:border-gray-800 post-width-outer"
       style={style}
     >
       {data.map((item: { key: string; value: string }) => {

@@ -22,12 +22,6 @@ vi.mock("~/mdx/mdx-hooks", () => ({
   useMdxComponent: vi.fn(),
 }));
 
-vi.mock("~/components/typography-playground", () => ({
-  TypographyPlayground: () => (
-    <aside aria-label="Typography playground">Typography lab</aside>
-  ),
-}));
-
 // Mock dependencies
 vi.mock("~/mdx/mdx-runtime", () => ({
   loadMdxRuntime: vi.fn(),
@@ -283,7 +277,7 @@ describe("Post Route Loader", () => {
 });
 
 describe("Post typography", () => {
-  it("scopes typography controls to the post", async () => {
+  it("scopes the typography variables to the post", async () => {
     vi.mocked(useLoaderData).mockReturnValue({
       __raw: "",
       attributes: { title: "Test Post" },
@@ -299,14 +293,14 @@ describe("Post typography", () => {
 
     const { container } = render(<Post />);
 
+    // `.post-typography` is what lifts the heading scale to 1.6 for posts.
     expect(container.firstElementChild).toHaveClass("post-typography");
     expect(screen.getByRole("heading", { name: "Test Post" })).toHaveClass(
       "post-title",
     );
+    // The playground is kept in the tree for future use but is no longer mounted.
     expect(
-      await screen.findByRole("complementary", {
-        name: "Typography playground",
-      }),
-    ).toBeInTheDocument();
+      screen.queryByRole("complementary", { name: "Typography playground" }),
+    ).not.toBeInTheDocument();
   });
 });

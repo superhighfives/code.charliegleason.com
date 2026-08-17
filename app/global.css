@@ -22,40 +22,22 @@
   src: url("/fonts/PolySansItalic-variable.woff2") format("woff2");
 }
 
-/* Inter - Regular */
+/* Figtree - Variable */
 @font-face {
-  font-family: "Inter";
+  font-family: "Figtree";
   font-style: normal;
-  font-weight: 400;
+  font-weight: 300 900;
   font-display: swap;
-  src: url("/fonts/Inter-Regular.woff2") format("woff2");
+  src: url("/fonts/Figtree-variable.woff2") format("woff2");
 }
 
-/* Inter - Regular Italic */
+/* Figtree - Variable Italic */
 @font-face {
-  font-family: "Inter";
+  font-family: "Figtree";
   font-style: italic;
-  font-weight: 400;
+  font-weight: 300 900;
   font-display: swap;
-  src: url("/fonts/Inter-Italic.woff2") format("woff2");
-}
-
-/* Inter - SemiBold */
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/Inter-SemiBold.woff2") format("woff2");
-}
-
-/* Inter - SemiBold Italic */
-@font-face {
-  font-family: "Inter";
-  font-style: italic;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/Inter-SemiBoldItalic.woff2") format("woff2");
+  src: url("/fonts/FigtreeItalic-variable.woff2") format("woff2");
 }
 
 /* Geist Mono - Regular */
@@ -103,7 +85,7 @@
 @theme {
   /* Typography */
   --font-sans:
-    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Figtree", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --font-heading:
     "PolySans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -388,17 +370,50 @@ html.dark .shiki span {
 /* Post styles */
 /*************************************************************/
 
+/* The typographic system, in one place. Every value below is also the fallback
+   baked into the rules that consume it, so the page renders identically whether
+   or not the dev-only typography playground is mounted and overriding them.
+   Heading scale is set per context: 1 for the index cards, 1.6 for posts. */
+:root {
+  --post-body-size: 1rem;
+  --post-body-leading: 1.8;
+  --post-body-tracking: 0em;
+  --post-measure: 740px;
+  --post-heading-scale: 1;
+}
+
+.post-typography {
+  --post-heading-scale: 1.6;
+}
+
+/* How wide post content runs. Prose sits inside `.post`'s 1rem padding and 1px
+   border, so page chrome outside that box adds both back to line up with it. */
+@utility post-width {
+  max-width: var(--post-measure, 740px);
+}
+
+@utility post-width-outer {
+  max-width: calc(var(--post-measure, 740px) + 2rem + 2px);
+}
+
+/* Mono chrome — metadata, callouts, breadcrumb — tracks the reading size so the
+   two faces stay in proportion when the body size changes. Geist Mono reads
+   larger than the body sans at a matched size, hence the step down. */
+@utility post-mono {
+  font-size: calc(var(--post-body-size, 1rem) * 0.8125);
+}
+
 /* Base prose setup with content width constraints */
 @utility post-prose {
   @apply prose dark:prose-invert max-w-none text-pretty border border-transparent sm:px-4;
-  @apply [&>*:not(.code)]:max-w-[var(--post-measure,calc(var(--container-4xl)-1rem-2px))];
+  @apply [&>*:not(.code)]:post-width;
   @apply [&>:first-child]:mt-0 [&>:last-child]:mb-0;
   @apply prose-li:my-1.5;
   @apply [&_li_p]:my-0;
   font-family: var(--post-body-font, var(--font-sans));
-  font-size: var(--post-body-size, 1.125rem);
-  line-height: var(--post-body-leading, 2rem);
-  letter-spacing: var(--post-body-tracking, normal);
+  font-size: var(--post-body-size, 1rem);
+  line-height: var(--post-body-leading, 1.8);
+  letter-spacing: var(--post-body-tracking, 0em);
 }
 
 /* Heading typography and hash prefixes */
@@ -407,8 +422,8 @@ html.dark .shiki span {
   @apply prose-h4:before:content-['####'] prose-h5:before:content-['#####'] prose-h6:before:content-['######'];
   @apply prose-headings:before:font-mono prose-headings:before:mr-2 prose-headings:before:tracking-widest prose-headings:before:text-indigo-400;
   :where(h1, h2, h3, h4, h5, h6) {
-    font-family: var(--post-display-font, var(--font-mono));
-    font-size: calc(1.125rem * var(--post-heading-scale, 1));
+    font-family: var(--post-display-font, var(--font-heading));
+    font-size: calc(1.125rem * var(--post-heading-scale, 1.6));
   }
 }
 
@@ -440,8 +455,39 @@ html.dark .shiki span {
 
 .post-title {
   font-family: var(--post-display-font, var(--font-heading));
+  font-size: calc(1.875rem * var(--post-heading-scale, 1.6));
+  line-height: 1.2;
+}
+
+/*************************************************************/
+/* Homepage typography — same variables as posts, but the */
+/* heading scale stays at 1 so the cards don't outshout the */
+/* post pages */
+/*************************************************************/
+
+.site-title {
+  font-family: var(--post-display-font, var(--font-heading));
   font-size: calc(1.875rem * var(--post-heading-scale, 1));
   line-height: 1.2;
+}
+
+.site-title-hero {
+  font-family: var(--post-display-font, var(--font-heading));
+  font-size: calc(1.875rem * var(--post-heading-scale, 1));
+  line-height: 1.2;
+}
+
+@media (min-width: 40rem) {
+  .site-title-hero {
+    font-size: calc(2.25rem * var(--post-heading-scale, 1));
+  }
+}
+
+.site-body {
+  font-family: var(--post-body-font, var(--font-sans));
+  font-size: var(--post-body-size, 1rem);
+  line-height: var(--post-body-leading, 1.8);
+  letter-spacing: var(--post-body-tracking, 0em);
 }
 
 @utility prose {

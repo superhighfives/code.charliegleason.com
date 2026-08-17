@@ -1,4 +1,3 @@
-import { lazy, Suspense, useState } from "react";
 import { data, Link, useLoaderData } from "react-router";
 import EditOnGitHub from "~/components/edit-on-github";
 import { KudosButton } from "~/components/kudos-button";
@@ -7,7 +6,6 @@ import Metalinks from "~/components/metalinks";
 import { components } from "~/components/utils/components";
 import metatags from "~/components/utils/metatags";
 import VideoMasthead from "~/components/video-masthead";
-import { MAX_WIDTH_CLASS } from "~/config/constants";
 import { customMdxParse } from "~/mdx/custom-mdx-parser";
 import { useMdxAttributes, useMdxComponent } from "~/mdx/mdx-hooks";
 import { getKudosCookie, getKudosCount } from "~/utils/kudos.server";
@@ -21,13 +19,6 @@ import {
 } from "~/utils/video-index";
 import { loadMdxRuntime } from "../mdx/mdx-runtime";
 import type { Route } from "./+types/post";
-
-const TypographyPlayground = import.meta.env.DEV
-  ? lazy(async () => {
-      const module = await import("~/components/typography-playground");
-      return { default: module.TypographyPlayground };
-    })
-  : null;
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
   const { content, frontmatter } = await loadMdxRuntime(request.url);
@@ -161,8 +152,6 @@ export function shouldRevalidate() {
 }
 
 export default function Post() {
-  const [typographyTarget, setTypographyTarget] =
-    useState<HTMLDivElement | null>(null);
   const {
     kudosTotal,
     kudosYou,
@@ -177,15 +166,7 @@ export default function Post() {
   const { metadata } = processArticleData({ frontmatter });
 
   return (
-    <div
-      ref={setTypographyTarget}
-      className="post-typography grid gap-y-4 relative"
-    >
-      {TypographyPlayground && typographyTarget ? (
-        <Suspense fallback={null}>
-          <TypographyPlayground target={typographyTarget} />
-        </Suspense>
-      ) : null}
+    <div className="post-typography grid gap-y-4 relative">
       {slug && video !== undefined && nextVideo !== undefined && visual && (
         <VideoMasthead
           slug={slug}
@@ -195,14 +176,14 @@ export default function Post() {
         />
       )}
       <div
-        className={`flex flex-wrap gap-y-2 ${MAX_WIDTH_CLASS}`}
+        className="flex flex-wrap gap-y-2 post-width-outer"
         style={{ viewTransitionName: "post-breadcrumb" }}
       >
         <Link
           to="/"
           viewTransition
           prefetch="intent"
-          className="font-mono font-semibold group link-primary focus-ring-primary pr-2"
+          className="font-mono post-mono font-semibold group link-primary focus-ring-primary pr-2"
         >
           ❯ cd ~/code
           <span className="hidden sm:inline">.</span>
@@ -223,7 +204,7 @@ export default function Post() {
       {isOldArticle ? (
         <p
           style={{ viewTransitionName: "post-warning" }}
-          className={`font-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 ${MAX_WIDTH_CLASS}`}
+          className="font-mono post-mono rounded-md overflow-hidden border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 px-4 py-3 post-width-outer"
         >
           This has not been updated in the last three months, so this
           information miiiiiight be out of date. Here be dragons, etc.

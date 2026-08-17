@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, RefreshCw, Share2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { MAX_WIDTH_CLASS } from "~/config/constants";
 import type { VisualConfig } from "~/mdx/types";
 import { extractModelName } from "~/utils/replicate";
 import {
@@ -55,9 +54,7 @@ export default function VideoMasthead({
   };
 
   return (
-    <div
-      className={`font-mono relative -top-12 -mb-6 flex items-end flex-wrap xs:flex-nowrap gap-4 ${MAX_WIDTH_CLASS}`}
-    >
+    <div className="font-mono relative -top-12 -mb-6 flex items-end flex-wrap xs:flex-nowrap gap-4 post-width-outer">
       <div className="bg-gray-100 dark:bg-gray-900 w-full aspect-square xs:size-72 sm:size-96 shrink-0 relative overflow-hidden shadow-lg rounded-lg -rotate-1">
         <AnimatePresence mode="popLayout">
           <motion.video

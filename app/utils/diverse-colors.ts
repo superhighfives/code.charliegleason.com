@@ -6,7 +6,7 @@ import { randomVideoIndex } from "~/utils/video-index";
  * instead of every post independently landing on a similar hue.
  *
  * The background colour of a card is locked to its visual index (the same index
- * drives the image), so we can't recolour a card freely — we can only choose
+ * drives the image), so we can't recolour a card freely—we can only choose
  * which of the post's pre-generated palette entries to show. This biases that
  * choice: posts are processed in a random order and each one softly favours the
  * palette entry whose background is most different from the cards already

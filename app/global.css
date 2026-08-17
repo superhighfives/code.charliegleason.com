@@ -204,6 +204,12 @@ body {
 /* Syntax highlighting */
 /*************************************************************/
 
+/* Highlighted blocks take the same step down as every other mono run, so a
+   fenced block sits at the weight of the prose around it. */
+.shiki {
+  font-size: calc(1em * var(--post-mono-ratio, 0.925));
+}
+
 .shiki,
 .shiki span {
   color: var(--shiki-light) !important;
@@ -380,6 +386,9 @@ html.dark .shiki span {
   --post-body-tracking: 0em;
   --post-measure: 740px;
   --post-heading-scale: 1;
+  /* Geist Mono reads larger than the body sans at a matched size, so every
+     mono run on the page steps down by this much. */
+  --post-mono-ratio: 0.925;
 }
 
 .post-typography {
@@ -397,10 +406,16 @@ html.dark .shiki span {
 }
 
 /* Mono chrome — metadata, callouts, breadcrumb — tracks the reading size so the
-   two faces stay in proportion when the body size changes. Geist Mono reads
-   larger than the body sans at a matched size, hence the step down. */
+   two faces stay in proportion when the body size changes. */
 @utility post-mono {
-  font-size: calc(var(--post-body-size, 1rem) * 0.8125);
+  font-size: calc(var(--post-body-size, 1rem) * var(--post-mono-ratio, 0.925));
+}
+
+/* Mono set inline in running text — code spans and prose links. Sized in `em`
+   so it steps down from whatever it sits in, headings included, rather than
+   from the body size. */
+@utility post-mono-inline {
+  font-size: calc(1em * var(--post-mono-ratio, 0.925));
 }
 
 /* Base prose setup with content width constraints */
@@ -437,7 +452,7 @@ html.dark .shiki span {
 
 /* Link styling with decorations and focus states */
 @utility post-links {
-  @apply prose-a:font-mono;
+  @apply prose-a:font-mono prose-a:post-mono-inline;
   @apply prose-a:text-indigo-600 dark:prose-a:text-indigo-300;
   @apply prose-a:underline prose-a:hover:underline;
   @apply prose-a:decoration-indigo-200 dark:prose-a:decoration-indigo-900;
@@ -460,9 +475,10 @@ html.dark .shiki span {
 }
 
 /*************************************************************/
-/* Homepage typography — same variables as posts, but the */
-/* heading scale stays at 1 so the cards don't outshout the */
-/* post pages */
+/* Homepage headings — same variables as posts, but the heading */
+/* scale stays at 1 so the cards don't outshout the post pages. */
+/* Copy on the index stays mono; only the headings use the */
+/* display face. */
 /*************************************************************/
 
 .site-title {
@@ -481,13 +497,6 @@ html.dark .shiki span {
   .site-title-hero {
     font-size: calc(2.25rem * var(--post-heading-scale, 1));
   }
-}
-
-.site-body {
-  font-family: var(--post-body-font, var(--font-sans));
-  font-size: var(--post-body-size, 1rem);
-  line-height: var(--post-body-leading, 1.8);
-  letter-spacing: var(--post-body-tracking, 0em);
 }
 
 @utility prose {

@@ -21,7 +21,7 @@ export function About() {
         <h2 className="site-title border-b border-indigo-500 pb-2 font-semibold">
           Hello, I'm Charlie.
         </h2>
-        <p className="site-body text-gray-600 dark:text-gray-400">
+        <p className="leading-relaxed text-gray-600 dark:text-gray-400">
           I'm a designer, developer, creative coder, and sometimes musician. I
           write about design and development.{" "}
           <Link

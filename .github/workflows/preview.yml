@@ -145,7 +145,7 @@ jobs:
           body-includes: '<!-- cloudflare-preview -->'
 
       - name: Create or update preview comment
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
@@ -178,7 +178,7 @@ jobs:
           body-includes: '<!-- cloudflare-preview -->'
 
       - name: Post skip comment
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}

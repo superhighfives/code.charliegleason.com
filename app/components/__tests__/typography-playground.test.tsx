@@ -70,21 +70,30 @@ describe("TypographyPlayground", () => {
   });
 
   it("falls back to defaults when local storage is unavailable", async () => {
-    vi.spyOn(window.localStorage, "getItem").mockImplementation(() => {
-      throw new DOMException("Blocked", "SecurityError");
-    });
-    vi.spyOn(window.localStorage, "setItem").mockImplementation(() => {
-      throw new DOMException("Blocked", "SecurityError");
-    });
+    const getItemSpy = vi
+      .spyOn(window.localStorage, "getItem")
+      .mockImplementation(() => {
+        throw new DOMException("Blocked", "SecurityError");
+      });
+    const setItemSpy = vi
+      .spyOn(window.localStorage, "setItem")
+      .mockImplementation(() => {
+        throw new DOMException("Blocked", "SecurityError");
+      });
 
-    expect(() =>
-      render(<TypographyPlayground target={target} />),
-    ).not.toThrow();
-    await waitFor(() => {
-      expect(target.style.getPropertyValue("--post-body-size")).toBe(
-        `${DEFAULT_TYPOGRAPHY_SETTINGS.bodySize}px`,
-      );
-    });
+    try {
+      expect(() =>
+        render(<TypographyPlayground target={target} />),
+      ).not.toThrow();
+      await waitFor(() => {
+        expect(target.style.getPropertyValue("--post-body-size")).toBe(
+          `${DEFAULT_TYPOGRAPHY_SETTINGS.bodySize}px`,
+        );
+      });
+    } finally {
+      getItemSpy.mockRestore();
+      setItemSpy.mockRestore();
+    }
   });
 
   it("loads selected Google fonts once", async () => {

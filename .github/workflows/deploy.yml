@@ -29,7 +29,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Restore upload cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: .upload-cache.json
           key: r2-upload-cache-production-${{ github.sha }}
@@ -87,7 +87,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Restore upload cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: .upload-cache.json
           key: r2-upload-cache-staging-${{ github.sha }}

@@ -66,7 +66,8 @@ export default function tags(attributes?: PostFrontmatter, index?: number) {
       : []),
     {
       property: "og:type",
-      content: "website",
+      // Discord only plays og:video inline when the page is typed as a video
+      content: metaVideo ? "video.other" : "website",
     },
   ];
 }

@@ -133,6 +133,10 @@ describe("tags utility", () => {
       property: "og:video:height",
       content: "640",
     });
+    expect(result).toContainEqual({
+      property: "og:type",
+      content: "video.other",
+    });
   });
 
   it("should not emit og:video without an index", () => {

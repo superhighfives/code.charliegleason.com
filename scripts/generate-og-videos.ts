@@ -99,6 +99,7 @@ async function main() {
 
   const posts = await getPosts();
   let generated = 0;
+  let failed = 0;
 
   for (const post of posts) {
     const postDir = join(OUTPUT_DIR, post.slug);
@@ -137,6 +138,7 @@ async function main() {
         generated++;
       } catch (error) {
         console.error(`   ❌ ${index}.mp4:`, error);
+        failed++;
       } finally {
         await rm(cardPath, { force: true });
       }
@@ -144,6 +146,10 @@ async function main() {
   }
 
   console.log(`\n✨ Generated ${generated} social card videos`);
+  if (failed > 0) {
+    console.error(`❌ ${failed} failed`);
+    process.exitCode = 1;
+  }
 }
 
 main();

@@ -115,11 +115,11 @@ describe("tags utility", () => {
     // User-facing index 5 maps to internal video index 4
     expect(result).toContainEqual({
       property: "og:video",
-      content: "http://localhost:8080/posts/visual-post/4.mp4",
+      content: "http://localhost:8080/posts/visual-post/og/4.mp4",
     });
     expect(result).toContainEqual({
       property: "og:video:secure_url",
-      content: "http://localhost:8080/posts/visual-post/4.mp4",
+      content: "http://localhost:8080/posts/visual-post/og/4.mp4",
     });
     expect(result).toContainEqual({
       property: "og:video:type",
@@ -127,15 +127,40 @@ describe("tags utility", () => {
     });
     expect(result).toContainEqual({
       property: "og:video:width",
-      content: "640",
+      content: "1200",
     });
     expect(result).toContainEqual({
       property: "og:video:height",
-      content: "640",
+      content: "630",
     });
     expect(result).toContainEqual({
       property: "og:type",
       content: "video.other",
+    });
+  });
+
+  it("should use the given origin for image and video URLs", () => {
+    const result = metatags(
+      {
+        title: "Visual Post",
+        slug: "visual-post",
+        visual: {
+          prompt: "A beautiful sunset",
+          image: { url: "", version: "1.0.0" },
+          video: { url: "", version: "1.0.0" },
+        },
+      },
+      2,
+      "https://staging.example.com",
+    );
+
+    expect(result).toContainEqual({
+      property: "og:image",
+      content: "https://staging.example.com/visual-post/2.png",
+    });
+    expect(result).toContainEqual({
+      property: "og:video",
+      content: "https://staging.example.com/posts/visual-post/og/1.mp4",
     });
   });
 

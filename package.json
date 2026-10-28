@@ -99,6 +99,7 @@
     "generate:images": "tsx scripts/generate-images.ts",
     "generate:videos": "tsx scripts/generate-videos.ts",
     "generate:colors": "tsx scripts/generate-colors.ts",
+    "generate:og-videos": "tsx scripts/generate-og-videos.ts",
     "validate:images": "tsx scripts/validate-images.ts",
     "delete:invalid-images": "tsx scripts/delete-invalid-images.ts",
     "upload:assets:production": "./scripts/upload-assets.sh",

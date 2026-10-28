@@ -174,6 +174,15 @@ links:                         # Optional related links
 4. Stores color pairs in frontmatter
 5. Used for theme-aware visual display
 
+### Social Card Videos (`pnpm generate:og-videos`)
+
+**Process:**
+1. Fetches each rendered og:image card from a running production build (`pnpm preview`; the dev server serves `.png` as static files)
+2. Composites the visual loop over the card's right half with an 80px fade into the background
+3. Saves 1200x630 30fps H.264 with faststart to `/public/posts/{slug}/og/{index}.mp4`
+
+Served as `og:video` alongside `og:image`; pages with a video use `og:type=video.other`, which Discord needs to play it inline.
+
 ### Asset Upload
 
 **Script:** `scripts/upload-assets.sh`
@@ -399,8 +408,9 @@ pnpm check        # Full check (types + build + dry-run)
 4. Generate visuals: `pnpm generate:images`
 5. Generate videos: `pnpm generate:videos`
 6. Extract colors: `pnpm generate:colors`
-7. Test locally: `pnpm dev`
-8. Deploy: `pnpm deploy`
+7. Generate social card videos: `pnpm preview`, then `pnpm generate:og-videos` in another terminal
+8. Test locally: `pnpm dev`
+9. Deploy: `pnpm deploy`
 
 ### Adding a New Component
 
@@ -582,6 +592,7 @@ pnpm lint:fix               # Fix style issues
 pnpm generate:images        # Generate images
 pnpm generate:videos        # Generate videos
 pnpm generate:colors        # Extract colors
+pnpm generate:og-videos     # Animate social cards for og:video (needs pnpm preview running)
 pnpm validate:images        # Validate images
 pnpm delete:invalid-images  # Remove invalid
 

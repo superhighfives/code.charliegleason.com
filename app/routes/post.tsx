@@ -117,6 +117,7 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
     randomVideo,
     nextVideo,
     isOldArticle,
+    origin: new URL(request.url).origin,
   };
 
   // If we used the cookie, delete it so next refresh is random
@@ -134,13 +135,14 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data) return metatags();
-  const { attributes, randomVideo } = data;
+  const { attributes, randomVideo, origin } = data;
   // Use the loader's chosen visual (URL param > cookie > random) so og:image
   // and og:video always point at the same visual.
   // Convert internal index back to user-facing for meta tags
   return metatags(
     attributes,
     randomVideo !== undefined ? randomVideo + 1 : undefined,
+    origin,
   );
 }
 

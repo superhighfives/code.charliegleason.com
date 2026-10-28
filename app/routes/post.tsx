@@ -132,17 +132,15 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
   return data(responseData);
 }
 
-export function meta({ data, params }: Route.MetaArgs) {
+export function meta({ data }: Route.MetaArgs) {
   if (!data) return metatags();
-  const { attributes } = data;
-  // The index param is optional - only present when navigating from shared links
-  const imageParam =
-    "index" in params ? (params.index as string | undefined) : undefined;
-  const parsedIndex = parseImageIndex(imageParam ?? null);
+  const { attributes, randomVideo } = data;
+  // Use the loader's chosen visual (URL param > cookie > random) so og:image
+  // and og:video always point at the same visual.
   // Convert internal index back to user-facing for meta tags
   return metatags(
     attributes,
-    parsedIndex !== null ? parsedIndex + 1 : undefined,
+    randomVideo !== undefined ? randomVideo + 1 : undefined,
   );
 }
 

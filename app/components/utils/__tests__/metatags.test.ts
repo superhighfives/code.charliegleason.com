@@ -94,6 +94,100 @@ describe("tags utility", () => {
     });
   });
 
+  it("should emit og:video matching the og:image index", () => {
+    const result = metatags(
+      {
+        title: "Visual Post",
+        slug: "visual-post",
+        visual: {
+          prompt: "A beautiful sunset",
+          image: { url: "", version: "1.0.0" },
+          video: { url: "", version: "1.0.0" },
+        },
+      },
+      5,
+    );
+
+    expect(result).toContainEqual({
+      property: "og:image",
+      content: "http://localhost:8080/visual-post/5.png",
+    });
+    // User-facing index 5 maps to internal video index 4
+    expect(result).toContainEqual({
+      property: "og:video",
+      content: "http://localhost:8080/posts/visual-post/og/4.mp4",
+    });
+    expect(result).toContainEqual({
+      property: "og:video:secure_url",
+      content: "http://localhost:8080/posts/visual-post/og/4.mp4",
+    });
+    expect(result).toContainEqual({
+      property: "og:video:type",
+      content: "video/mp4",
+    });
+    expect(result).toContainEqual({
+      property: "og:video:width",
+      content: "1200",
+    });
+    expect(result).toContainEqual({
+      property: "og:video:height",
+      content: "630",
+    });
+    expect(result).toContainEqual({
+      property: "og:type",
+      content: "video.other",
+    });
+  });
+
+  it("should use the given origin for image and video URLs", () => {
+    const result = metatags(
+      {
+        title: "Visual Post",
+        slug: "visual-post",
+        visual: {
+          prompt: "A beautiful sunset",
+          image: { url: "", version: "1.0.0" },
+          video: { url: "", version: "1.0.0" },
+        },
+      },
+      2,
+      "https://staging.example.com",
+    );
+
+    expect(result).toContainEqual({
+      property: "og:image",
+      content: "https://staging.example.com/visual-post/2.png",
+    });
+    expect(result).toContainEqual({
+      property: "og:video",
+      content: "https://staging.example.com/posts/visual-post/og/1.mp4",
+    });
+  });
+
+  it("should not emit og:video without an index", () => {
+    const result = metatags({
+      title: "Visual Post",
+      slug: "visual-post",
+      visual: {
+        prompt: "A beautiful sunset",
+        image: { url: "", version: "1.0.0" },
+        video: { url: "", version: "1.0.0" },
+      },
+    });
+
+    expect(
+      result.find((tag) => "property" in tag && tag.property === "og:video"),
+    ).toBeUndefined();
+  });
+
+  it("should not emit og:video when the post has no visual", () => {
+    const result = metatags({ title: "Regular Post", slug: "regular-post" }, 3);
+
+    expect(
+      result.find((tag) => "property" in tag && tag.property === "og:video"),
+    ).toBeUndefined();
+  });
+
   it("should use production URL in production (PROD=true)", () => {
     // Skip this test as import.meta.env.PROD cannot be reliably mocked in Vitest
     // The actual production behavior is tested manually

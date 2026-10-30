@@ -191,7 +191,7 @@ export default function Post() {
           <span className="hidden sm:inline">.com</span>
         </Link>
         <span className="text-gray-300 dark:text-gray-700 max-sm:pr-4">/</span>
-        <h1 className="post-title font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 w-full">
+        <h1 className="post-title text-pretty font-semibold text-gray-900 dark:text-gray-100 sm:pl-4 w-full">
           {title}
         </h1>
       </div>

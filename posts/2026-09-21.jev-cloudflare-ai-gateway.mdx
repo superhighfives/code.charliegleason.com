@@ -1,0 +1,339 @@
+---
+slug: jev-cloudflare-ai-gateway
+title: Using Jev on Cloudflare with AI Gateway
+description: >-
+  Build a small Hono API that uses Jev to turn support messages into typed,
+  probabilistic decisions through Cloudflare AI Gateway.
+tags:
+  - cloudflare
+  - ai
+  - hono
+  - typescript
+visual:
+  prompt: A sorting machine routing colorful messages into three neat channels
+  image:
+    url: 'https://replicate.com/jakedahn/flux-latentpop'
+    version: >-
+      jakedahn/flux-latentpop:c5e4432e01d30a523f9ebf1af1ad9f7ce82adc6709ec3061a817d53ff3bb06cc
+    guidance: 'solid background, t-shirt design, LTNP style'
+  video:
+    url: 'https://replicate.com/bytedance/seedance-1-pro-fast'
+    version: bytedance/seedance-1-pro-fast
+  colors:
+    - text: '#302040'
+      background: '#ebe779'
+    - text: '#303030'
+      background: '#fc704f'
+    - text: '#403040'
+      background: '#6eb8b2'
+    - text: '#403040'
+      background: '#fac831'
+    - text: '#203040'
+      background: '#fc8445'
+    - text: '#403040'
+      background: '#51c5ae'
+    - text: '#302020'
+      background: '#78cab4'
+    - text: '#303040'
+      background: '#f9f9ef'
+    - text: '#202030'
+      background: '#fd8e34'
+links:
+  Jev: 'https://developers.cloudflare.com/ai/models/typesafe/jev/'
+  AI Gateway bindings: 'https://developers.cloudflare.com/ai-gateway/usage/worker-binding-methods/'
+  Hono: 'https://hono.dev/docs/getting-started/cloudflare-workers'
+  TypeSafe primitives: 'https://docs.typesafe.ai/primitives.md'
+---
+
+Most AI examples start with a prompt and end with a paragraph. That works when you want prose, but it is awkward when your application needs to make a decision.
+
+[Jev](https://developers.cloudflare.com/ai/models/typesafe/jev/) is built for the second case. You give it some state and a set of typed questions. It gives you probabilities, choices, and scores that regular code can act on. There is no generated explanation to parse and no JSON buried in a Markdown fence.
+
+In this post, we'll build a small support-triage API with [Hono](https://hono.dev/). It will classify a message, judge whether it is urgent, and score the customer's frustration in one call. The request will run on Cloudflare Workers through an AI binding and [AI Gateway](https://developers.cloudflare.com/ai-gateway/).
+
+## How Jev is different
+
+Jev is a structured evaluation model, not a chat model. It supports three question types:
+
+- `noul` asks whether something is true and returns a probability from `0` to `1`.
+- `choice` selects one item from a fixed set and returns the full probability distribution plus a confidence value.
+- `score` places something on an ordered scale and returns a weighted position, probabilities, and confidence.
+
+The distinction matters. A `noul` result of `0.5` means yes and no are about equally likely. It does not mean "medium." If you need a spectrum such as calm, frustrated, and angry, use a `score` instead.
+
+Jev can answer several independent questions about the same state in one request. That makes it a good fit for routing, moderation, ranking, and other places where you want a narrow judgment rather than generated text.
+
+## Create the Hono app
+
+Start with Hono's Cloudflare Workers template:
+
+```bash command
+npm create hono@latest jev-support-api
+```
+
+Choose the `cloudflare-workers` template, then install the project:
+
+```bash command
+cd jev-support-api
+npm install
+```
+
+The template includes Hono, Wrangler, and a Worker entry point at `src/index.ts`.
+
+## Add the bindings
+
+Add an AI binding and a variable for the gateway name to `wrangler.jsonc`:
+
+```json
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jev-support-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-21",
+  "ai": {
+    "binding": "AI"
+  },
+  "vars": {
+    "AI_GATEWAY_ID": "default"
+  }
+}
+```
+
+The `AI` binding gives the Worker access to models through `env.AI`. The `AI_GATEWAY_ID` variable keeps the gateway name out of the application code. Using `default` creates the account's default gateway on the first authenticated request, or you can replace it with the name of an existing gateway.
+
+Jev is a third-party model in Cloudflare's model catalog, so calls made through the AI binding use AI Gateway and Unified Billing. You do not need a separate TypeSafe API key in the Worker.
+
+Generate TypeScript definitions for the bindings:
+
+```bash command
+npm run cf-typegen
+```
+
+This creates `worker-configuration.d.ts`, including the `Ai` type used below. Run the command again whenever you change the bindings in `wrangler.jsonc`.
+
+## Build the evaluation route
+
+Replace `src/index.ts` with this:
+
+```ts
+import { Hono } from 'hono'
+
+type Bindings = {
+  AI: Ai
+  AI_GATEWAY_ID: string
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
+
+app.post('/evaluate', async (c) => {
+  const body: unknown = await c.req.json()
+
+  if (
+    typeof body !== 'object' ||
+    body === null ||
+    !('message' in body) ||
+    typeof body.message !== 'string' ||
+    !body.message.trim()
+  ) {
+    return c.json({ error: 'message is required' }, 400)
+  }
+
+  const message = body.message
+
+  const response = await c.env.AI.run(
+    'typesafe/jev',
+    {
+      state: {
+        message,
+      },
+      questions: {
+        department: {
+          type: 'choice',
+          instructions: 'Which team should handle `message`?',
+          criteria: {
+            billing: 'Payments, invoices, subscriptions, or refunds',
+            technical: 'Bugs, outages, login problems, or integrations',
+            sales: 'Pricing, upgrades, or evaluating the product',
+            other: 'The request does not fit another department',
+          },
+        },
+        is_urgent: {
+          type: 'noul',
+          instructions: 'Does `message` require prompt attention?',
+          criteria: {
+            true: 'The message describes active harm, blocked work, or a deadline',
+            false: 'The request can wait for the normal support queue',
+          },
+        },
+        frustration: {
+          type: 'score',
+          instructions: 'How frustrated does the customer appear in `message`?',
+          criteria: [
+            'Calm and neutral',
+            'Concerned but civil',
+            'Very angry or using strong language',
+          ],
+        },
+      },
+    },
+    {
+      gateway: {
+        id: c.env.AI_GATEWAY_ID,
+      },
+    },
+  )
+
+  return c.json({
+    ...response,
+    gatewayLogId: c.env.AI.aiGatewayLogId,
+  })
+})
+
+export default app
+```
+
+The Hono generic describes the Worker's bindings, so `c.env.AI` and `c.env.AI_GATEWAY_ID` are typed. The third argument to `AI.run()` sends the model call through the selected gateway.
+
+The route asks three questions against one shared `state`. Each question is independent: the department answer does not influence urgency or frustration. If one judgment needs the result of another, make a second request after the first one returns.
+
+The binding wraps the Jev response in an AI Gateway result. The model output is under `result`, while `state` reports whether the request completed and `gatewayMetadata` describes how the gateway handled it.
+
+The route also adds `aiGatewayLogId`. When AI Gateway collects a log, this nullable ID lets you correlate the application request with it. It can be `null` when logging is disabled or no log is stored.
+
+## Try it locally
+
+Start Wrangler:
+
+```bash command
+npm run dev
+```
+
+Workers AI requests still reach Cloudflare during local development, so Wrangler may ask you to sign in and the model call can incur usage charges.
+
+Send a support message to the endpoint:
+
+```bash command
+curl http://localhost:8787/evaluate \
+  --header 'Content-Type: application/json' \
+  --data '{"message":"Help! Our payouts have failed for three days and we cannot pay our sellers."}'
+```
+
+The exact probabilities can vary, but the response has this shape:
+
+```json
+{
+  "state": "Completed",
+  "result": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "department": {
+        "type": "choice",
+        "choice": "billing",
+        "confidence": 0.96,
+        "probabilities": {
+          "billing": 0.97,
+          "technical": 0.03,
+          "sales": 0,
+          "other": 0
+        }
+      },
+      "is_urgent": {
+        "type": "noul",
+        "noul": 0.97
+      },
+      "frustration": {
+        "type": "score",
+        "score": 1.38,
+        "confidence": 0.43,
+        "legend": {
+          "0": "Calm and neutral",
+          "1": "Concerned but civil",
+          "2": "Very angry or using strong language"
+        },
+        "probabilities": {
+          "0": 0,
+          "1": 0.62,
+          "2": 0.38
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 493,
+      "output_tokens": 80
+    }
+  },
+  "gatewayMetadata": {
+    "keySource": "Unified"
+  },
+  "gatewayLogId": null
+}
+```
+
+The useful part is not only the selected department. Your code can see the alternatives and how certain the model was about them.
+
+## Put the policy in code
+
+Model output is evidence, not the final policy. The binding exposes third-party model results as a broad type, so validate `response.result` before using it. Once validated, a small function can turn the answers into application policy:
+
+```ts
+type DepartmentAnswer = {
+  type: 'choice'
+  choice: string
+  confidence: number
+}
+
+type UrgencyAnswer = {
+  type: 'noul'
+  noul: number
+}
+
+function chooseQueue(
+  department: DepartmentAnswer,
+  urgency: UrgencyAnswer,
+) {
+  if (department.confidence < 0.7) {
+    return 'manual-review'
+  }
+
+  return urgency.noul > 0.8
+    ? `${department.choice}-priority`
+    : department.choice
+}
+```
+
+The numbers here are examples, not universal defaults. Test thresholds against representative messages and choose them based on the cost of a wrong decision. A billing ticket sent to the wrong queue is inconvenient. An automated security action based on a weak classification is a different level of risk.
+
+## Ask better questions
+
+Jev works best when each question asks for one focused judgment. A few rules help:
+
+- Put the full question in `instructions`. Question IDs such as `is_urgent` are response keys, not hidden prompts.
+- Describe each `choice` option so the boundaries are clear, and add `other` when the list may be incomplete.
+- Give `score` levels concrete descriptions instead of labels such as low, medium, and high.
+- Point to structured fields by name, such as `` `message` `` or `` `order.charges` ``.
+- Keep arithmetic, counting, and date comparisons in code.
+- Send only the state needed for the judgment. More context can add distraction rather than accuracy.
+
+Jev 1.13 can also read adversarial instructions inside user-controlled state. Precise criteria help, but they do not turn untrusted text into trusted input. Test hostile and ambiguous examples before using a result for anything consequential.
+
+Confidence needs similar care. For a `choice` or `score`, confidence summarizes how concentrated the returned probability distribution is. It is not an independent probability that the answer is correct. A high-confidence answer can still be wrong.
+
+## AI Gateway logging
+
+AI Gateway gives you observability around the request without changing the Jev input. From the dashboard you can inspect model calls, token usage, latency, and errors. The gateway options also support caching, custom metadata, and log collection controls.
+
+Be deliberate about what you log. AI Gateway can store request and response payloads, and support messages often contain personal or sensitive information. Review the gateway's logging settings before sending production traffic. TypeSafe states that it does not train Jev on customer requests or responses, but that is separate from how your Cloudflare gateway stores logs.
+
+## Deploy it
+
+When the local request works, deploy the Worker:
+
+```bash command
+npm run deploy
+```
+
+This example leaves `/evaluate` public to keep the route focused on Jev. A public endpoint can spend your AI Gateway credits, so add authentication, rate limits, and a request-size limit before using it in production.
+
+You now have a small typed decision API running on Cloudflare. Hono handles HTTP, the binding provides authenticated model access, AI Gateway handles billing and observability, and Jev handles the fuzzy part: turning language into probabilities your code can use.
+
+That separation is the interesting bit. The model makes judgments. Your application still makes decisions.

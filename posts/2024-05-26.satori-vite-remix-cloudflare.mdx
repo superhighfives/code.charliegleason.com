@@ -41,6 +41,9 @@ links:
   vite-plugin-wasm-module-workers: 'https://github.com/superhighfives/vite-plugin-wasm-module-workers'
 ---
 
+> [!NOTE]
+> **Update, November 2026:** You probably don't need this anymore. Cloudflare's official [Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/) imports `.wasm` files as a `WebAssembly.Module` out of the box, and Satori's bring-your-own-yoga build is now `satori/standalone`. Import the `.wasm` files in your Worker entry, pass them to `initResvg` and `initSatori`, and you're set. I've archived [vite-plugin-wasm-module-workers](https://github.com/superhighfives/vite-plugin-wasm-module-workers).
+
 On Friday night I decided to add [Satori](https://github.com/vercel/satori) to [code.charliegleason.com](https://github.com/superhighfives/code.charliegleason.com/) to automatically generate `og:image`'s for each post.
 
 I'm hosting the site on Cloudflare Pages, which makes it super fast at the edge™. I installed the [Satori WASM requirements](https://github.com/vercel/satori?tab=readme-ov-file#runtime-and-wasm), added [Resvg](https://github.com/RazrFalcon/resvg) to save it as a PNG, and then assumed the pose of a man awaiting success.

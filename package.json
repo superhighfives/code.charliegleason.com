@@ -18,7 +18,7 @@
     "dotenv": "^17.2.3",
     "fast-png": "^8.0.0",
     "framer-motion": "^13.0.0-alpha.0",
-    "glob": "^11.0.3",
+    "glob": "^13.0.6",
     "gray-matter": "^4.0.3",
     "isbot": "5.1.36",
     "lucide-react": "^0.544.0",
